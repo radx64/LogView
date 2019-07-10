@@ -4,6 +4,8 @@
 #include <QMainWindow>
 #include <QDropEvent>
 #include <QDrag>
+#include <QHBoxLayout>
+#include <QListWidget>
 
 class QTextEdit;
 class QTabWidget;
@@ -24,9 +26,10 @@ private slots:
     void on_actionLoad_from_file_triggered();
     void grepCurrentView();
     void bookmarkCurrentLine();
+    void closeFileTab(const int index);
 
 private:
-    void spawnEditorWithContent(QString& name, QString& content);
+    void spawnViewerWithContent(QString& name, QStringList& content);
 
     void dropEvent(QDropEvent* event);
     void dragEnterEvent(QDragEnterEvent* event);
@@ -35,15 +38,16 @@ private:
     std::vector<QTabWidget*> spawnedTabs_;
 };
 
-
+/* This Viewer class is only a POC to be replaced later by something more usefull*/
 class Viewer : public QWidget
 {
 public:
     Viewer(QWidget* parent);
+    QTextEdit* text_;
 
 protected:
     QWidget* parent_;
-    QTextEdit* text_;
+
 };
 
 class TabCompositeViewer : public Viewer
@@ -51,14 +55,30 @@ class TabCompositeViewer : public Viewer
     Q_OBJECT
 public:
     TabCompositeViewer(QWidget* parent);
-    void grep();
+    void grep(QString pattern);
+
+    QStringList lines_;
+    QTabWidget* tabs_;
 
 public slots:
     void closeTab(const int);
 
 protected:
-    Viewer* viewer_;
-    QTabWidget* tabs_;
+
 };
+
+class ViewerWidget: public QWidget
+{
+public:
+    ViewerWidget(QWidget* parent);
+
+    TabCompositeViewer* logViewer_;
+protected:
+    QWidget* parent_;
+    QHBoxLayout* layout_;
+    QListWidget* bookmarks_;
+};
+
+
 
 #endif // MAINWINDOW_H
