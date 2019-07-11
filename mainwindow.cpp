@@ -12,73 +12,9 @@
 #include "QInputDialog"
 #include "QDebug"
 
-Viewer::Viewer(QWidget* parent) : parent_(parent)
-{
-    text_ = new QTextEdit();
-    text_->setReadOnly(true);
-    text_->setText("Viewer");
-    text_->setFontFamily("Courier New");
-    text_->setFontPointSize(10);
-}
-
-TabCompositeViewer::TabCompositeViewer(QWidget* parent) : Viewer(parent)
-{
-    tabs_ = new QTabWidget();
-    tabs_->addTab(text_,"Base");
-    tabs_->setTabsClosable(true);
-    //Remove close button from "Base" tab;
-    tabs_->tabBar()->setTabButton(0, QTabBar::LeftSide, 0);
-    tabs_->tabBar()->setTabButton(0, QTabBar::RightSide, 0);
-
-    connect(tabs_, SIGNAL(tabCloseRequested(int)), this, SLOT(closeTab(int)));
-    tabs_->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
-    QGridLayout* layout = new QGridLayout();
-    layout->addWidget(tabs_);
-    this->setLayout(layout);
-}
-
-void TabCompositeViewer::grep(QString pattern)
-{
-    TabCompositeViewer* viewer = new TabCompositeViewer(this);
-    tabs_->addTab(viewer, pattern);
-
-    QRegularExpression exp = QRegularExpression(pattern);
-    qDebug() << exp.pattern();
-    qDebug() << lines_;
-    QStringList filtered_results;
-
-    for(auto line : this->lines_)
-    {
-        QRegularExpressionMatch match = exp.match(line);
-        if (match.hasMatch()) filtered_results.append(line);
-    }
-
-    viewer->text_->setText(filtered_results.join(""));
-    viewer->lines_ = filtered_results;
-}
-
-void TabCompositeViewer::closeTab(const int index)
-{
-    QWidget* tabContents = tabs_->widget(index);
-    tabs_->removeTab(index);
-    if (tabContents != nullptr) delete(tabContents);
-}
-
-ViewerWidget::ViewerWidget(QWidget* parent) : parent_(parent)
-{
-    layout_ = new QHBoxLayout();
-    bookmarks_ = new QListWidget();
-    bookmarks_->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding));
-    logViewer_ = new TabCompositeViewer(this);
-    logViewer_->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
-    layout_->addWidget(bookmarks_);
-    layout_->addWidget(logViewer_);
-    this->setLayout(layout_);
-
-    /* PoC mockup */
-    bookmarks_->addItems(QStringList{"bookmark A","bookmark B"});
-    /* */
-}
+#include "Viewer.hpp"
+#include "ViewerWidget.hpp"
+#include "TabCompositeViewer.hpp"
 
 void MainWindow::closeFileTab(const int index)
 {
