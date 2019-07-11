@@ -26,6 +26,10 @@ TabCompositeViewer::TabCompositeViewer(QWidget* parent) : Viewer(parent)
     tabs_ = new QTabWidget();
     tabs_->addTab(text_,"Base");
     tabs_->setTabsClosable(true);
+    //Remove close button from "Base" tab;
+    tabs_->tabBar()->setTabButton(0, QTabBar::LeftSide, 0);
+    tabs_->tabBar()->setTabButton(0, QTabBar::RightSide, 0);
+
     connect(tabs_, SIGNAL(tabCloseRequested(int)), this, SLOT(closeTab(int)));
     tabs_->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
     QGridLayout* layout = new QGridLayout();
@@ -36,7 +40,6 @@ TabCompositeViewer::TabCompositeViewer(QWidget* parent) : Viewer(parent)
 void TabCompositeViewer::grep(QString pattern)
 {
     TabCompositeViewer* viewer = new TabCompositeViewer(this);
-    viewer->text_->setText("grepping...");
     tabs_->addTab(viewer, pattern);
 
     QRegularExpression exp = QRegularExpression(pattern);
@@ -187,8 +190,6 @@ void MainWindow::grepCurrentView()
      * This is totally experimental approach with recursive components search
      * It works but I hate it due those dynamic casts
      * Need to change approach to create model of greps and then render it recursively
-     *
-     *
      */
 
     const int tab_index = ui->fileView->currentIndex();
