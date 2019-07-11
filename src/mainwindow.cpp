@@ -89,20 +89,7 @@ void MainWindow::spawnViewerWithContent(const Logfile& log)
     QTabWidget* fileTabWidget = ui->fileView;
     ViewerWidget* viewer = new ViewerWidget(fileTabWidget);
     fileTabWidget ->addTab(viewer, log.getFileName());
-
-    //TODO: Change lines_ will be changed to some log model
-    //  then this will be done on single invocation
-    //  setText renders it via renderer but there is no acceess for that
-    //  so for grep purposes it is held also as QStringList
-    //  What a shame ;(
-
     Lines content = log.getLines();
-    QString joined_text;
-    for (const auto& line : content)
-    {
-        joined_text.append(line.text);
-    }
-
     viewer->logViewer_->setContent(content);
 }
 

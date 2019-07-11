@@ -56,7 +56,7 @@ QString linesToQString(const Lines& lines)
     QString result;
     for (const auto& line : lines)
     {
-        result.append(line.text);
+        result.append(QString::number(line.number).rightJustified(5,' ') + " | " + line.text);
     }
     return result;
 }
