@@ -2,8 +2,9 @@
 
 #include <QTextEdit>
 
-Viewer::Viewer(QWidget* parent) : parent_(parent)
+Viewer::Viewer(QWidget* parent)
 {
+    setParent(parent);
     text_ = new QTextEdit();
     text_->setReadOnly(true);
     text_->setText("Viewer");

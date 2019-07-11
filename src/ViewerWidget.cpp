@@ -9,8 +9,10 @@
 
 #include "TabCompositeViewer.hpp"
 
-ViewerWidget::ViewerWidget(QWidget* parent) : parent_(parent)
+ViewerWidget::ViewerWidget(QWidget* parent)
 {
+    setParent(parent);
+
     layout_ = new QHBoxLayout();
     bookmarks_ = new QListView();
     bookmarks_->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding));

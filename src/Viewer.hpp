@@ -11,10 +11,6 @@ class Viewer : public QWidget
 public:
     Viewer(QWidget* parent);
     QTextEdit* text_;
-
-protected:
-    QWidget* parent_;
-
 };
 
 #endif // VIEWER_HPP

@@ -45,6 +45,8 @@ MainWindow::MainWindow(QWidget* parent) :
 
     connect(bookmark, SIGNAL(triggered()), this, SLOT(bookmarkCurrentLine()));
     this->addAction(bookmark);
+
+    statusBar()->showMessage(tr("Use load from file menu or drop files in this window to begin."));
 }
 
 void MainWindow::dropEvent(QDropEvent* event)
@@ -171,4 +173,9 @@ void MainWindow::on_actionLoad_from_file_triggered()
         lines.append(file.readLine());
     }
     spawnViewerWithContent(fileName.split("/").last(), lines);
+}
+
+void MainWindow::on_exit_app_triggered()
+{
+    QApplication::exit();
 }

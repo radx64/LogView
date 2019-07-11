@@ -25,20 +25,20 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++17
 
 SOURCES += \
-        main.cpp \
-        mainwindow.cpp \
-        Viewer.cpp \
-        TabCompositeViewer.cpp \
-        ViewerWidget.cpp
+        src/main.cpp \
+        src/mainwindow.cpp \
+        src/Viewer.cpp \
+        src/TabCompositeViewer.cpp \
+        src/ViewerWidget.cpp
 
 HEADERS += \
-        mainwindow.h \
-        Viewer.hpp \
-        TabCompositeViewer.hpp \
-        ViewerWidget.hpp
+        src/mainwindow.h \
+        src/Viewer.hpp \
+        src/TabCompositeViewer.hpp \
+        src/ViewerWidget.hpp
 
 FORMS += \
-        mainwindow.ui
+        src/mainwindow.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

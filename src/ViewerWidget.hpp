@@ -14,7 +14,6 @@ public:
     TabCompositeViewer* logViewer_;
 
 protected:
-    QWidget* parent_;
     QHBoxLayout* layout_;
     QListView* bookmarks_;
 };

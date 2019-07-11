@@ -22,6 +22,21 @@
      <layout class="QGridLayout" name="gridLayout">
       <item row="0" column="0">
        <widget class="QTabWidget" name="fileView">
+        <property name="cursor">
+         <cursorShape>ArrowCursor</cursorShape>
+        </property>
+        <property name="accessibleName">
+         <string/>
+        </property>
+        <property name="accessibleDescription">
+         <string/>
+        </property>
+        <property name="autoFillBackground">
+         <bool>true</bool>
+        </property>
+        <property name="tabShape">
+         <enum>QTabWidget::Rounded</enum>
+        </property>
         <property name="currentIndex">
          <number>-1</number>
         </property>
@@ -45,6 +60,8 @@
      <string>File</string>
     </property>
     <addaction name="actionLoad_from_file"/>
+    <addaction name="separator"/>
+    <addaction name="exit_app"/>
    </widget>
    <addaction name="menuTest"/>
   </widget>
@@ -60,6 +77,11 @@
   <action name="actionLoad_from_file">
    <property name="text">
     <string>Load...</string>
+   </property>
+  </action>
+  <action name="exit_app">
+   <property name="text">
+    <string>Exit</string>
    </property>
   </action>
  </widget>

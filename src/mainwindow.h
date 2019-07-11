@@ -30,6 +30,8 @@ private slots:
     void bookmarkCurrentLine();
     void closeFileTab(const int index);
 
+    void on_exit_app_triggered();
+
 private:
     void spawnViewerWithContent(QString& name, QStringList& content);
 
