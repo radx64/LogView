@@ -26,10 +26,16 @@ CONFIG += c++17
 
 SOURCES += \
         main.cpp \
-        mainwindow.cpp
+        mainwindow.cpp \
+        Viewer.cpp \
+        TabCompositeViewer.cpp \
+        ViewerWidget.cpp
 
 HEADERS += \
-        mainwindow.h
+        mainwindow.h \
+        Viewer.hpp \
+        TabCompositeViewer.hpp \
+        ViewerWidget.hpp
 
 FORMS += \
         mainwindow.ui

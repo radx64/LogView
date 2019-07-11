@@ -4,7 +4,7 @@
 #include <QWidget>
 
 class QHBoxLayout;
-class QListWidget;
+class QListView;
 class TabCompositeViewer;
 
 class ViewerWidget: public QWidget
@@ -16,7 +16,7 @@ public:
 protected:
     QWidget* parent_;
     QHBoxLayout* layout_;
-    QListWidget* bookmarks_;
+    QListView* bookmarks_;
 };
 
 #endif // VIEWER_WIDGET_HPP
