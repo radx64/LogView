@@ -12,6 +12,7 @@
 #include "QInputDialog"
 #include "QDebug"
 
+#include "Logfile.hpp"
 #include "Viewer.hpp"
 #include "ViewerWidget.hpp"
 #include "TabCompositeViewer.hpp"
@@ -53,9 +54,7 @@ void MainWindow::dropEvent(QDropEvent* event)
 {
     qDebug() << "Something was dropped here";
     event->acceptProposedAction();
-
     const QMimeData* mimeData = event->mimeData();
-
     if (!mimeData->hasUrls())
     {
         qDebug() << "Non URL mime data type";
@@ -67,20 +66,10 @@ void MainWindow::dropEvent(QDropEvent* event)
     // extract the local paths of the files
     for (int i = 0; i < urlList.size(); ++i)
     {
-      QString filename = urlList.at(i).toLocalFile();
-      //qDebug( )<< ("Loading: " + filename.toStdString());
-      QFile file(filename);
-      if (!file.open(QIODevice::ReadOnly)) {
-          QMessageBox::information(this, tr("Unable to open file"), file.errorString());
-          return;
-      }
-
-      QStringList lines;
-      while(!file.atEnd())
-      {
-          lines.append(file.readLine());
-      }
-      spawnViewerWithContent(filename.split("/").last(), lines);
+        QString filename = urlList.at(i).toLocalFile();
+        Logfile log;
+        log.load(filename);
+        spawnViewerWithContent(log);
     }
 }
 
@@ -95,19 +84,26 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::spawnViewerWithContent(QString& name, QStringList& content)
+void MainWindow::spawnViewerWithContent(const Logfile& log)
 {
     QTabWidget* fileTabWidget = ui->fileView;
     ViewerWidget* viewer = new ViewerWidget(fileTabWidget);
-    fileTabWidget ->addTab(viewer, name);
+    fileTabWidget ->addTab(viewer, log.getFileName());
 
     //TODO: Change lines_ will be changed to some log model
     //  then this will be done on single invocation
     //  setText renders it via renderer but there is no acceess for that
     //  so for grep purposes it is held also as QStringList
     //  What a shame ;(
-    viewer->logViewer_->text_->setText(content.join(""));
-    viewer->logViewer_->lines_ = content;
+
+    Lines content = log.getLines();
+    QString joined_text;
+    for (const auto& line : content)
+    {
+        joined_text.append(line.text);
+    }
+
+    viewer->logViewer_->setContent(content);
 }
 
 TabCompositeViewer* travel_down_via_tabs(TabCompositeViewer* start_point)
@@ -155,24 +151,16 @@ void MainWindow::bookmarkCurrentLine()
 
 void MainWindow::on_actionLoad_from_file_triggered()
 {
-    QString fileName = QFileDialog::getOpenFileName(this,
+    QString filename = QFileDialog::getOpenFileName(this,
         tr("Open log file"), "",
         tr("TextFiles (*.txt);;All Files (*)"));
-    if (fileName.isEmpty())
+    if (filename.isEmpty())
         return;
 
-    QFile file(fileName);
-    if (!file.open(QIODevice::ReadOnly)) {
-        QMessageBox::information(this, tr("Unable to open file"), file.errorString());
-            return;
-    }
+    Logfile log;
+    log.load(filename);
 
-    QStringList lines;
-    while(!file.atEnd())
-    {
-        lines.append(file.readLine());
-    }
-    spawnViewerWithContent(fileName.split("/").last(), lines);
+    spawnViewerWithContent(log);
 }
 
 void MainWindow::on_exit_app_triggered()

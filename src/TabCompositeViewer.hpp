@@ -5,6 +5,8 @@
 
 #include <QStringList>
 
+#include "Logfile.hpp"
+
 class QWidget;
 class QTabWidget;
 
@@ -14,8 +16,9 @@ class TabCompositeViewer : public Viewer
 public:
     TabCompositeViewer(QWidget* parent);
     void grep(QString pattern);
+    void setContent(const Lines& lines);
 
-    QStringList lines_;
+    Lines lines_;
     QTabWidget* tabs_;
 
 public slots:

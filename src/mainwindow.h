@@ -10,6 +10,7 @@
 #include "Viewer.hpp"
 #include "TabCompositeViewer.hpp"
 
+class Logfile;
 class QTextEdit;
 class QTabWidget;
 
@@ -33,7 +34,7 @@ private slots:
     void on_exit_app_triggered();
 
 private:
-    void spawnViewerWithContent(QString& name, QStringList& content);
+    void spawnViewerWithContent(const Logfile& log);
 
     void dropEvent(QDropEvent* event);
     void dragEnterEvent(QDragEnterEvent* event);

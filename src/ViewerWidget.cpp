@@ -19,12 +19,14 @@ ViewerWidget::ViewerWidget(QWidget* parent)
     logViewer_ = new TabCompositeViewer(this);
     logViewer_->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
 
-    QSplitter* splitter = new QSplitter();
+    QSplitter* splitter = new QSplitter(Qt::Horizontal);
     splitter->addWidget(bookmarks_);
     splitter->addWidget(logViewer_);
+    splitter->setSizes({200,1000});
 
     layout_->addWidget(splitter);
     this->setLayout(layout_);
+
 
     /* PoC mockup */
     QStandardItemModel* iStandardModel = new QStandardItemModel(this);

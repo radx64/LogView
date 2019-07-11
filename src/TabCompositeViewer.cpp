@@ -13,14 +13,16 @@
 #include "QTabBar"
 #include "QRegularExpression"
 
+#include "Logfile.hpp"
+
 TabCompositeViewer::TabCompositeViewer(QWidget* parent) : Viewer(parent)
 {
     tabs_ = new QTabWidget();
     tabs_->addTab(text_,"Base");
     tabs_->setTabsClosable(true);
     //Remove close button from "Base" tab;
-    tabs_->tabBar()->setTabButton(0, QTabBar::LeftSide, 0);
-    tabs_->tabBar()->setTabButton(0, QTabBar::RightSide, 0);
+    tabs_->tabBar()->setTabButton(0, QTabBar::LeftSide, nullptr);
+    tabs_->tabBar()->setTabButton(0, QTabBar::RightSide, nullptr);
 
     connect(tabs_, SIGNAL(tabCloseRequested(int)), this, SLOT(closeTab(int)));
     tabs_->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
@@ -35,18 +37,34 @@ void TabCompositeViewer::grep(QString pattern)
     tabs_->addTab(viewer, pattern);
 
     QRegularExpression exp(pattern);
-    qDebug() << exp.pattern();
-    qDebug() << lines_;
-    QStringList filtered_results;
-
-    for(auto line : this->lines_)
+    Lines filtered_results;
+    for(auto line : lines_)
     {
-        QRegularExpressionMatch match = exp.match(line);
-        if (match.hasMatch()) filtered_results.append(line);
+        QRegularExpressionMatch match = exp.match(line.text);
+        if (match.hasMatch())
+        {
+            filtered_results.append({line.number, line.text});
+            qDebug() << line.number << " " <<line.text;
+        }
     }
 
-    viewer->text_->setText(filtered_results.join(""));
-    viewer->lines_ = filtered_results;
+    viewer->setContent(filtered_results);
+}
+
+QString linesToQString(const Lines& lines)
+{
+    QString result;
+    for (const auto& line : lines)
+    {
+        result.append(line.text);
+    }
+    return result;
+}
+
+void TabCompositeViewer::setContent(const Lines& lines)
+{
+    lines_ = lines;
+    text_->setText(linesToQString(lines_));
 }
 
 void TabCompositeViewer::closeTab(const int index)
