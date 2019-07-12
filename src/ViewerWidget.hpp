@@ -3,19 +3,22 @@
 
 #include <QWidget>
 
+class BookmarksModel;
 class QHBoxLayout;
 class QListView;
 class TabCompositeViewer;
+
 
 class ViewerWidget: public QWidget
 {
 public:
     ViewerWidget(QWidget* parent);
     TabCompositeViewer* logViewer_;
+    QListView* bookmarks_widget_;
+    BookmarksModel* bookmarks_model_;
 
 protected:
     QHBoxLayout* layout_;
-    QListView* bookmarks_;
 };
 
 #endif // VIEWER_WIDGET_HPP

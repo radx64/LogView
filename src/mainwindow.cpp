@@ -1,17 +1,20 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include "QLabel"
-#include "QLayout"
-#include "QTabWidget"
-#include "QFileDialog"
-#include "QMessageBox"
-#include "QTextEdit"
-#include "QAction"
-#include "QMimeData"
-#include "QInputDialog"
-#include "QDebug"
+// TODO: cleanup this includes after some mockups creation and proper class segregation
+#include <QLabel>
+#include <QLayout>
+#include <QTabWidget>
+#include <QFileDialog>
+#include <QMessageBox>
+#include <QTextEdit>
+#include <QAction>
+#include <QMimeData>
+#include <QInputDialog>
+#include <QDebug>
+#include <QStandardItemModel>
 
+#include "Bookmark.hpp"
 #include "Logfile.hpp"
 #include "Viewer.hpp"
 #include "ViewerWidget.hpp"
@@ -93,7 +96,7 @@ void MainWindow::spawnViewerWithContent(const Logfile& log)
     viewer->logViewer_->setContent(content);
 }
 
-TabCompositeViewer* travel_down_via_tabs(TabCompositeViewer* start_point)
+TabCompositeViewer* find_deepest_active_tab(TabCompositeViewer* start_point)
 {
     if (start_point == nullptr) return start_point;
     const int tab_grep_index = start_point->tabs_->currentIndex();
@@ -101,8 +104,17 @@ TabCompositeViewer* travel_down_via_tabs(TabCompositeViewer* start_point)
     QWidget* active_tab = start_point->tabs_->widget(tab_grep_index);
     TabCompositeViewer* active_tab_casted = dynamic_cast<TabCompositeViewer*>(active_tab);
     if (active_tab_casted == nullptr) return start_point;
-    TabCompositeViewer* result = travel_down_via_tabs(active_tab_casted);
+    TabCompositeViewer* result = find_deepest_active_tab(active_tab_casted);
     return result ? result : start_point;
+}
+
+ViewerWidget* MainWindow::get_active_viewer_widget()
+{
+    const int tab_index = ui->fileView->currentIndex();
+    qDebug() << "File tab index:" <<tab_index;
+    ViewerWidget* viewerWidget = dynamic_cast<ViewerWidget*>(ui->fileView->widget(tab_index));
+    if (!viewerWidget) throw std::string("Could not find active ViewerWidget");
+    return viewerWidget;
 }
 
 void MainWindow::grepCurrentView()
@@ -113,27 +125,39 @@ void MainWindow::grepCurrentView()
      * Need to change approach to create model of greps and then render it recursively
      */
 
-    const int tab_index = ui->fileView->currentIndex();
-    qDebug() << "File tab index:" <<tab_index;
-
-    ViewerWidget* viewerWidget = dynamic_cast<ViewerWidget*>(ui->fileView->widget(tab_index));
-    qDebug() << viewerWidget;
-    if (viewerWidget == nullptr) return;
-
-    QWidget* deepest_tab = travel_down_via_tabs(viewerWidget->logViewer_);
+    ViewerWidget* viewerWidget = get_active_viewer_widget();
+    QWidget* deepest_tab = find_deepest_active_tab(viewerWidget->logViewer_);
     TabCompositeViewer* deepest_tab_casted = dynamic_cast<TabCompositeViewer*>(deepest_tab);
 
+    // Simple QInputDialog will be extended later for something more fancy
     bool ok = false;
-    QString input_grep = QInputDialog::getText(this, tr("Enter grep pattern.."),
-        tr("Grep:"), QLineEdit::Normal, "", &ok);
+    QString input_grep = QInputDialog::getText(this, tr("Grepping..."),
+        tr("grep:"), QLineEdit::Normal, "", &ok);
 
-    if (deepest_tab_casted != nullptr && ok) deepest_tab_casted->grep(input_grep);
-
+    if (deepest_tab_casted && ok) deepest_tab_casted->grep(input_grep);
 }
 
 void MainWindow::bookmarkCurrentLine()
 {
     qDebug() << "Would normally bookmark current line";
+
+    ViewerWidget* viewerWidget = get_active_viewer_widget();
+    QWidget* deepest_tab = find_deepest_active_tab(viewerWidget->logViewer_);
+    TabCompositeViewer* deepest_tab_casted = dynamic_cast<TabCompositeViewer*>(deepest_tab);
+
+    // Simple QInputDialog will be extended later for something more fancy
+    bool ok = false;
+    QString bookmark_name = QInputDialog::getText(this, tr("Bookmark creation"),
+        tr("Name:"), QLineEdit::Normal, "", &ok);
+
+    if (!deepest_tab_casted || !ok) return;
+
+    // TODO: This line index is a line of a current view (not whole logfile)
+    // This need to be transpsed base on Log class
+    int current_line_index = deepest_tab_casted->text_->textCursor().blockNumber() + 1;
+
+    qDebug() << "Adding bookmark at line" << current_line_index;
+    viewerWidget->bookmarks_model_->add_bookmark({(uint32_t) current_line_index, bookmark_name});
 }
 
 void MainWindow::on_actionLoad_from_file_triggered()

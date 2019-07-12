@@ -7,6 +7,7 @@
 #include <QStandardItemModel>
 #include <QSplitter>
 
+#include "Bookmark.hpp"
 #include "TabCompositeViewer.hpp"
 
 ViewerWidget::ViewerWidget(QWidget* parent)
@@ -14,33 +15,32 @@ ViewerWidget::ViewerWidget(QWidget* parent)
     setParent(parent);
 
     layout_ = new QHBoxLayout();
-    bookmarks_ = new QListView();
-    bookmarks_->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding));
+    bookmarks_widget_ = new QListView();
+    bookmarks_widget_->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding));
     logViewer_ = new TabCompositeViewer(this);
     logViewer_->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
 
     QSplitter* splitter = new QSplitter(Qt::Horizontal);
-    splitter->addWidget(bookmarks_);
+    splitter->addWidget(bookmarks_widget_);
     splitter->addWidget(logViewer_);
     splitter->setSizes({200,1000});
 
     layout_->addWidget(splitter);
     this->setLayout(layout_);
 
-
     /* PoC mockup */
-    QStandardItemModel* iStandardModel = new QStandardItemModel(this);
-    QList<QStandardItem*>* items = new QList<QStandardItem*> ();
-    QStandardItem* item = new QStandardItem();
-    item->setText("Bookmark A");
-    item->setIcon(this->style()->standardIcon(QStyle::SP_DialogOpenButton));
-    items->append(item);
+    bookmarks_model_ = new BookmarksModel(this);
+//    QList<QStandardItem*>* items = new QList<QStandardItem*>();
+//    QStandardItem* item = new QStandardItem();
+//    item->setText("Bookmark A");
+//    item->setIcon(this->style()->standardIcon(QStyle::SP_DialogOpenButton));
+//    items->append(item);
 
-    item = new QStandardItem();
-    item->setText("Bookmark B");
-    item->setIcon(this->style()->standardIcon(QStyle::SP_DialogCloseButton));
-    items->append(item);
-
-    iStandardModel->appendColumn(*items);
-    bookmarks_->setModel(iStandardModel);
+//    item = new QStandardItem();
+//    item->setText("Bookmark B");
+//    item->setIcon(this->style()->standardIcon(QStyle::SP_DialogCloseButton));
+//    items->append(item);
+//    bookmarks_model_->appendColumn(*items);
+    /* PoC mockup */
+    bookmarks_widget_->setModel(bookmarks_model_);
 }
