@@ -25,6 +25,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++17
 
 SOURCES += \
+        src/Bookmark.cpp \
         src/main.cpp \
         src/mainwindow.cpp \
         src/Viewer.cpp \
@@ -32,6 +33,7 @@ SOURCES += \
         src/ViewerWidget.cpp
 
 HEADERS += \
+        src/Bookmark.hpp \
         src/mainwindow.h \
         src/Viewer.hpp \
         src/TabCompositeViewer.hpp \
