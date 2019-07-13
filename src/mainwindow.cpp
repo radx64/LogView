@@ -69,9 +69,8 @@ void MainWindow::dropEvent(QDropEvent* event)
     // extract the local paths of the files
     for (int i = 0; i < urlList.size(); ++i)
     {
-        QString filename = urlList.at(i).toLocalFile();
         Logfile log;
-        log.load(filename);
+        log.load(urlList.at(i).toLocalFile());
         spawnViewerWithContent(log);
     }
 }
@@ -151,13 +150,11 @@ void MainWindow::bookmarkCurrentLine()
         tr("Name:"), QLineEdit::Normal, "", &ok);
 
     if (!deepest_tab_casted || !ok) return;
+    int current_line_index = deepest_tab_casted->text_->textCursor().blockNumber();
+    uint32_t absolute_line_index = deepest_tab_casted->lines_[current_line_index].number;
 
-    // TODO: This line index is a line of a current view (not whole logfile)
-    // This need to be transpsed base on Log class
-    int current_line_index = deepest_tab_casted->text_->textCursor().blockNumber() + 1;
-
-    qDebug() << "Adding bookmark at line" << current_line_index;
-    viewerWidget->bookmarks_model_->add_bookmark({(uint32_t) current_line_index, bookmark_name});
+    qDebug() << "Adding bookmark at line" << absolute_line_index;
+    viewerWidget->bookmarks_model_->add_bookmark({absolute_line_index, bookmark_name});
 }
 
 void MainWindow::on_actionLoad_from_file_triggered()
