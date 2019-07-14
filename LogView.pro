@@ -26,6 +26,7 @@ CONFIG += c++17
 
 SOURCES += \
         src/Bookmark.cpp \
+        src/BookmarksModel.cpp \
         src/main.cpp \
         src/mainwindow.cpp \
         src/Viewer.cpp \
@@ -34,6 +35,8 @@ SOURCES += \
 
 HEADERS += \
         src/Bookmark.hpp \
+        src/BookmarksModel.hpp \
+        src/Logfile.hpp \
         src/mainwindow.h \
         src/Viewer.hpp \
         src/TabCompositeViewer.hpp \
@@ -46,3 +49,6 @@ FORMS += \
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+RESOURCES += \
+    icons.qrc
