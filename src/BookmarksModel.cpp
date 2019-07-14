@@ -27,9 +27,9 @@ QVariant BookmarksModel::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
-void BookmarksModel::add_bookmark(const Bookmark& bookmark)
+void BookmarksModel::add_bookmark(const uint32_t& line, const QPixmap& icon, const QString& text)
 {
-    bookmarks_.append(bookmark);
+    bookmarks_.append(Bookmark{line, text, icon});
     QModelIndex firstElement = createIndex(0,0);
     QModelIndex lastElement = createIndex(0,0);
     emit dataChanged(firstElement, lastElement, {Qt::DisplayRole});

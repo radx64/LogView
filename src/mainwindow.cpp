@@ -155,7 +155,9 @@ void MainWindow::bookmarkCurrentLine()
     uint32_t absolute_line_index = deepest_tab_casted->lines_[current_line_index].number;
 
     qDebug() << "Adding bookmark at line" << absolute_line_index;
-    viewerWidget->bookmarks_model_->add_bookmark({absolute_line_index, bookmark_name});
+    viewerWidget->bookmarks_model_->add_bookmark(absolute_line_index,
+        QPixmap(":/icon/Dialog-Apply.png"),
+        bookmark_name);
 }
 
 void MainWindow::on_actionLoad_from_file_triggered()
