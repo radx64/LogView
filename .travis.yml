@@ -22,7 +22,9 @@ before_script:
   - sudo apt-get update -qq
 
 script: 
+  - gcc --version
+  - g++ --verison
   - mkdir build
   - cd build
-  - qmake -d -d -d ../LogView.pro
-  - make
+  - qmake ../LogView.pro
+  - make VERBOSE=1
