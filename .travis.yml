@@ -33,4 +33,4 @@ script:
   - mkdir build
   - cd build
   - qmake ../LogView.pro
-  - make VERBOSE=1
+  - make
