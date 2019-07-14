@@ -7,7 +7,7 @@
 #include <QStandardItemModel>
 #include <QSplitter>
 
-#include "Bookmark.hpp"
+#include "BookmarksModel.hpp"
 #include "TabCompositeViewer.hpp"
 
 ViewerWidget::ViewerWidget(QWidget* parent)

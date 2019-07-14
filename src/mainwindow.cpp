@@ -15,6 +15,7 @@
 #include <QStandardItemModel>
 
 #include "Bookmark.hpp"
+#include "BookmarksModel.hpp"
 #include "Logfile.hpp"
 #include "Viewer.hpp"
 #include "ViewerWidget.hpp"
