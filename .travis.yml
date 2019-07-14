@@ -24,5 +24,5 @@ before_script:
 script: 
   - mkdir build
   - cd build
-  - qmake ../LogView.pro
+  - qmake -d -d -d ../LogView.pro
   - make
