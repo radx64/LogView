@@ -8,6 +8,7 @@ addons:
       - ubuntu-toolchain-r-test
     packages:
       - g++-6
+      - gcc-6
       - clang
       - cmake
       - qt5-default
@@ -18,7 +19,8 @@ before_install:
   - echo $LANG
   - echo $LC_ALL
   - export CXX="g++-6" CC="gcc-6";
-
+  - sudo apt-get update -qq
+  
 script: 
   - mkdir build
   - cd build
