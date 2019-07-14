@@ -1,0 +1,26 @@
+anguage: cpp
+sudo: true
+compiler: gcc
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++
+      - clang
+      - cmake
+      - qt5-default
+      - qt5-qmake
+      - make
+
+before_install:
+  - echo $LANG
+  - echo $LC_ALL
+  - export CXX="g++-5" CC="gcc-5";
+
+script: 
+  - mkdir build
+  - cd build
+  - qmake ../LogView.pro
+  - make
