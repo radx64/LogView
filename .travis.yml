@@ -1,4 +1,4 @@
-anguage: cpp
+language: cpp
 sudo: true
 compiler: gcc
 
@@ -20,7 +20,7 @@ before_install:
   - echo $LC_ALL
   - export CXX="g++-6" CC="gcc-6";
   - sudo apt-get update -qq
-  
+
 script: 
   - mkdir build
   - cd build
