@@ -17,6 +17,7 @@ addons:
 before_install:
   - echo $LANG
   - echo $LC_ALL
+  - export CXX="g++-6" CC="gcc-6";
 
 script: 
   - mkdir build
