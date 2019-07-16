@@ -1,5 +1,5 @@
 #include "MainWindow.hpp"
-#include "ui_mainwindow.h"
+#include "ui_MainWindow.h"
 
 // TODO: cleanup this includes after some mockups creation and proper class segregation
 #include <QLabel>
