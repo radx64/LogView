@@ -36,6 +36,7 @@ private slots:
     void on_exit_app_triggered();
 
 private:
+    void connect_signals();
     void spawnViewerWithContent(const Logfile& log);
     ViewerWidget* get_active_viewer_widget();
     void dropEvent(QDropEvent* event);

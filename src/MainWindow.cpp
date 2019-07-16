@@ -1,4 +1,4 @@
-#include "mainwindow.h"
+#include "MainWindow.hpp"
 #include "ui_mainwindow.h"
 
 // TODO: cleanup this includes after some mockups creation and proper class segregation
@@ -28,6 +28,22 @@ void MainWindow::closeFileTab(const int index)
     tabWidget->removeTab(index);
     if (tabContents != nullptr) delete(tabContents);
 }
+void MainWindow::connect_signals()
+{
+    connect(ui->fileView, &QTabWidget::tabCloseRequested, this, &MainWindow::closeFileTab);
+
+    QAction *grep = new QAction(this);
+    grep->setShortcut(Qt::Key_G | Qt::CTRL);
+
+    connect(grep, &QAction::triggered, this, &MainWindow::grepCurrentView);
+    this->addAction(grep);
+
+    QAction *bookmark = new QAction(this);
+    bookmark->setShortcut(Qt::Key_B | Qt::CTRL);
+
+    connect(bookmark, &QAction::triggered, this, &MainWindow::bookmarkCurrentLine);
+    this->addAction(bookmark);
+}
 
 MainWindow::MainWindow(QWidget* parent) :
     QMainWindow(parent),
@@ -35,23 +51,9 @@ MainWindow::MainWindow(QWidget* parent) :
 {
     setAcceptDrops(true);
     ui->setupUi(this);
-
     ui->fileView->setTabsClosable(true);
-    connect(ui->fileView, SIGNAL(tabCloseRequested(int)), this, SLOT(closeFileTab(int)));
-
-    QAction *grep = new QAction(this);
-    grep->setShortcut(Qt::Key_G | Qt::CTRL);
-
-    connect(grep, SIGNAL(triggered()), this, SLOT(grepCurrentView()));
-    this->addAction(grep);
-
-    QAction *bookmark = new QAction(this);
-    bookmark->setShortcut(Qt::Key_B | Qt::CTRL);
-
-    connect(bookmark, SIGNAL(triggered()), this, SLOT(bookmarkCurrentLine()));
-    this->addAction(bookmark);
-
     statusBar()->showMessage(tr("Use load from file menu or drop files in this window to begin."));
+    connect_signals();
 }
 
 void MainWindow::dropEvent(QDropEvent* event)
@@ -66,13 +68,9 @@ void MainWindow::dropEvent(QDropEvent* event)
     }
 
     QList<QUrl> urlList = mimeData->urls();
-
-    // extract the local paths of the files
-    for (int i = 0; i < urlList.size(); ++i)
+    for (const auto& fileList : urlList)
     {
-        Logfile log;
-        log.load(urlList.at(i).toLocalFile());
-        spawnViewerWithContent(log);
+        spawnViewerWithContent(Logfile(fileList.toLocalFile()));
     }
 }
 
@@ -151,12 +149,12 @@ void MainWindow::bookmarkCurrentLine()
         tr("Name:"), QLineEdit::Normal, "", &ok);
 
     if (!deepest_tab_casted || !ok) return;
-    int current_line_index = deepest_tab_casted->text_->textCursor().blockNumber();
+    int current_line_index = deepest_tab_casted->text_ ->textCursor().blockNumber();
     uint32_t absolute_line_index = deepest_tab_casted->lines_[current_line_index].number;
 
     qDebug() << "Adding bookmark at line" << absolute_line_index;
     viewerWidget->bookmarks_model_->add_bookmark(absolute_line_index,
-        QPixmap(":/icon/Dialog-Apply.png"),
+        QPixmap(":/icon/Gnome-Bookmark-New-32.png"),
         bookmark_name);
 }
 
@@ -168,10 +166,7 @@ void MainWindow::on_actionLoad_from_file_triggered()
     if (filename.isEmpty())
         return;
 
-    Logfile log;
-    log.load(filename);
-
-    spawnViewerWithContent(log);
+    spawnViewerWithContent(Logfile(filename));
 }
 
 void MainWindow::on_exit_app_triggered()

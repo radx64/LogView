@@ -27,8 +27,8 @@ CONFIG += c++17
 SOURCES += \
         src/Bookmark.cpp \
         src/BookmarksModel.cpp \
+        src/MainWindow.cpp \
         src/main.cpp \
-        src/mainwindow.cpp \
         src/Viewer.cpp \
         src/TabCompositeViewer.cpp \
         src/ViewerWidget.cpp
@@ -37,13 +37,13 @@ HEADERS += \
         src/Bookmark.hpp \
         src/BookmarksModel.hpp \
         src/Logfile.hpp \
-        src/mainwindow.h \
+        src/MainWindow.hpp \
         src/Viewer.hpp \
         src/TabCompositeViewer.hpp \
         src/ViewerWidget.hpp
 
 FORMS += \
-        src/mainwindow.ui
+    src/MainWindow.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

@@ -19,6 +19,9 @@ public:
 
 protected:
     QHBoxLayout* layout_;
+
+private slots:
+    void bookmarksItemDoubleClicked(const QModelIndex& idx);
 };
 
 #endif // VIEWER_WIDGET_HPP

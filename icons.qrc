@@ -2,5 +2,6 @@
 <RCC version="1.0">
 <qresource prefix="/icon">
     <file alias="Dialog-Apply.png">img/Dialog-Apply-32.png</file>
+    <file alias="Gnome-Bookmark-New-32.png">img/Gnome-Bookmark-New-32.png</file>
 </qresource>
 </RCC>

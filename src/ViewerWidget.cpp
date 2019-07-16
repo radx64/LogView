@@ -6,6 +6,7 @@
 #include <QIcon>
 #include <QStandardItemModel>
 #include <QSplitter>
+#include <QDebug>
 
 #include "BookmarksModel.hpp"
 #include "TabCompositeViewer.hpp"
@@ -27,20 +28,12 @@ ViewerWidget::ViewerWidget(QWidget* parent)
 
     layout_->addWidget(splitter);
     this->setLayout(layout_);
-
-    /* PoC mockup */
     bookmarks_model_ = new BookmarksModel(this);
-//    QList<QStandardItem*>* items = new QList<QStandardItem*>();
-//    QStandardItem* item = new QStandardItem();
-//    item->setText("Bookmark A");
-//    item->setIcon(this->style()->standardIcon(QStyle::SP_DialogOpenButton));
-//    items->append(item);
-
-//    item = new QStandardItem();
-//    item->setText("Bookmark B");
-//    item->setIcon(this->style()->standardIcon(QStyle::SP_DialogCloseButton));
-//    items->append(item);
-//    bookmarks_model_->appendColumn(*items);
-    /* PoC mockup */
     bookmarks_widget_->setModel(bookmarks_model_);
+    connect(bookmarks_widget_, &QListView::doubleClicked, this, &ViewerWidget::bookmarksItemDoubleClicked);
+}
+
+void ViewerWidget::bookmarksItemDoubleClicked(const QModelIndex& idx)
+{
+    qDebug() << "Doubleclicked item index: " << idx.row();
 }

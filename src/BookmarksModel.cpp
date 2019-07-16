@@ -21,7 +21,7 @@ QVariant BookmarksModel::data(const QModelIndex &index, int role) const
                + " : "+ bookmarks_[index.row()].bookmark_text);
     else if (role == Qt::DecorationRole)
     {
-        return QPixmap(":/icon/Dialog-Apply.png");;
+        return bookmarks_[index.row()].icon;
     }
 
     return QVariant();
