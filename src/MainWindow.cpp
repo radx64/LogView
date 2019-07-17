@@ -98,6 +98,7 @@ TabCompositeViewer* find_deepest_active_tab(TabCompositeViewer* start_point)
 ViewerWidget* MainWindow::get_active_viewer_widget()
 {
     const int tab_index = ui->fileView->currentIndex();
+    if(tab_index == -1) return nullptr;
     qDebug() << "File tab index:" <<tab_index;
     ViewerWidget* viewerWidget = dynamic_cast<ViewerWidget*>(ui->fileView->widget(tab_index));
     if (!viewerWidget) throw std::string("Could not find active ViewerWidget");
@@ -113,6 +114,8 @@ void MainWindow::grepCurrentView()
      */
 
     ViewerWidget* viewerWidget = get_active_viewer_widget();
+    if (!viewerWidget) return; // can display here some message
+
     QWidget* deepest_tab = find_deepest_active_tab(viewerWidget->logViewer_);
     TabCompositeViewer* deepest_tab_casted = dynamic_cast<TabCompositeViewer*>(deepest_tab);
 
@@ -126,12 +129,10 @@ void MainWindow::grepCurrentView()
 
 void MainWindow::bookmarkCurrentLine()
 {
-    qDebug() << "Would normally bookmark current line";
-
     ViewerWidget* viewerWidget = get_active_viewer_widget();
+    if (!viewerWidget) return; // can display here some message
     QWidget* deepest_tab = find_deepest_active_tab(viewerWidget->logViewer_);
     TabCompositeViewer* deepest_tab_casted = dynamic_cast<TabCompositeViewer*>(deepest_tab);
-
 
     if (!deepest_tab_casted) return;
     int current_line_index = deepest_tab_casted->text_ ->textCursor().blockNumber();
