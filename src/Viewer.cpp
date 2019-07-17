@@ -1,13 +1,9 @@
 #include "Viewer.hpp"
-
-#include <QTextEdit>
+#include "TextRenderer.hpp"
 
 Viewer::Viewer(QWidget* parent)
 {
     setParent(parent);
-    text_ = new QTextEdit();
+    text_ = new TextRenderer(parent);
     text_->setReadOnly(true);
-    text_->setText("Viewer");
-    text_->setFontFamily("Courier New");
-    text_->setFontPointSize(10);
 }

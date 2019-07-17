@@ -1,7 +1,9 @@
 #include "BookmarksModel.hpp"
 
+#include <algorithm>
 #include <QDebug>
 #include <QPixmap>
+
 
 BookmarksModel::BookmarksModel(QObject *parent)
 {
@@ -30,6 +32,8 @@ QVariant BookmarksModel::data(const QModelIndex &index, int role) const
 void BookmarksModel::add_bookmark(const uint32_t& line, const QPixmap& icon, const QString& text)
 {
     bookmarks_.append(Bookmark{line, text, icon});
+    std::sort(bookmarks_.begin(), bookmarks_.end());
+
     QModelIndex firstElement = createIndex(0,0);
     QModelIndex lastElement = createIndex(0,0);
     emit dataChanged(firstElement, lastElement, {Qt::DisplayRole});

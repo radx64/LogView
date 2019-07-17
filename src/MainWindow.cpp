@@ -20,6 +20,7 @@
 #include "Viewer.hpp"
 #include "ViewerWidget.hpp"
 #include "TabCompositeViewer.hpp"
+#include "TextRenderer.hpp"
 
 void MainWindow::closeFileTab(const int index)
 {
@@ -31,18 +32,6 @@ void MainWindow::closeFileTab(const int index)
 void MainWindow::connect_signals()
 {
     connect(ui->fileView, &QTabWidget::tabCloseRequested, this, &MainWindow::closeFileTab);
-
-    QAction *grep = new QAction(this);
-    grep->setShortcut(Qt::Key_G | Qt::CTRL);
-
-    connect(grep, &QAction::triggered, this, &MainWindow::grepCurrentView);
-    this->addAction(grep);
-
-    QAction *bookmark = new QAction(this);
-    bookmark->setShortcut(Qt::Key_B | Qt::CTRL);
-
-    connect(bookmark, &QAction::triggered, this, &MainWindow::bookmarkCurrentLine);
-    this->addAction(bookmark);
 }
 
 MainWindow::MainWindow(QWidget* parent) :
@@ -89,7 +78,7 @@ void MainWindow::spawnViewerWithContent(const Logfile& log)
 {
     QTabWidget* fileTabWidget = ui->fileView;
     ViewerWidget* viewer = new ViewerWidget(fileTabWidget);
-    fileTabWidget ->addTab(viewer, log.getFileName());
+    fileTabWidget ->addTab(viewer, log.getFileName().split(QRegularExpression("[\\/]")).last());
     Lines content = log.getLines();
     viewer->logViewer_->setContent(content);
 }
@@ -143,15 +132,17 @@ void MainWindow::bookmarkCurrentLine()
     QWidget* deepest_tab = find_deepest_active_tab(viewerWidget->logViewer_);
     TabCompositeViewer* deepest_tab_casted = dynamic_cast<TabCompositeViewer*>(deepest_tab);
 
-    // Simple QInputDialog will be extended later for something more fancy
-    bool ok = false;
-    QString bookmark_name = QInputDialog::getText(this, tr("Bookmark creation"),
-        tr("Name:"), QLineEdit::Normal, "", &ok);
 
-    if (!deepest_tab_casted || !ok) return;
+    if (!deepest_tab_casted) return;
     int current_line_index = deepest_tab_casted->text_ ->textCursor().blockNumber();
     uint32_t absolute_line_index = deepest_tab_casted->lines_[current_line_index].number;
 
+    // Simple QInputDialog will be extended later for something more fancy
+    bool ok = false;
+    QString bookmark_name = QInputDialog::getText(this, tr("Bookmark creation"),
+        tr("Name:"), QLineEdit::Normal, deepest_tab_casted->lines_[current_line_index].text, &ok);
+
+    if (!ok) return;
     qDebug() << "Adding bookmark at line" << absolute_line_index;
     viewerWidget->bookmarks_model_->add_bookmark(absolute_line_index,
         QPixmap(":/icon/Gnome-Bookmark-New-32.png"),
@@ -167,6 +158,15 @@ void MainWindow::on_actionLoad_from_file_triggered()
         return;
 
     spawnViewerWithContent(Logfile(filename));
+}
+
+void MainWindow::on_actionGrep_current_view_triggered()
+{
+    grepCurrentView();
+}
+void MainWindow::on_actionBookmark_current_line_triggered()
+{
+    bookmarkCurrentLine();
 }
 
 void MainWindow::on_exit_app_triggered()

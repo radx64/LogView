@@ -3,14 +3,12 @@
 
 #include <QWidget>
 
-class QTextEdit;
-
-/* This Viewer class is only a POC to be replaced later by something more usefull*/
+class TextRenderer;
 class Viewer : public QWidget
 {
 public:
     Viewer(QWidget* parent);
-    QTextEdit* text_;
+    TextRenderer* text_;
 };
 
 #endif // VIEWER_HPP

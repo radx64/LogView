@@ -63,7 +63,21 @@
     <addaction name="separator"/>
     <addaction name="exit_app"/>
    </widget>
+   <widget class="QMenu" name="menuFind">
+    <property name="title">
+     <string>Edit</string>
+    </property>
+    <addaction name="actionGrep_current_view"/>
+    <addaction name="actionBookmark_current_line"/>
+   </widget>
+   <widget class="QMenu" name="menuAbout">
+    <property name="title">
+     <string>About</string>
+    </property>
+   </widget>
    <addaction name="menuTest"/>
+   <addaction name="menuFind"/>
+   <addaction name="menuAbout"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -84,8 +98,30 @@
     <string>Exit</string>
    </property>
   </action>
+  <action name="actionGrep_current_view">
+   <property name="text">
+    <string>Grep current view</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+G</string>
+   </property>
+  </action>
+  <action name="actionBookmark_current_line">
+   <property name="icon">
+    <iconset resource="../icons.qrc">
+     <normaloff>:/icon/Gnome-Bookmark-New-32.png</normaloff>:/icon/Gnome-Bookmark-New-32.png</iconset>
+   </property>
+   <property name="text">
+    <string>Bookmark current line</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+B</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <resources>
+  <include location="../icons.qrc"/>
+ </resources>
  <connections/>
 </ui>

@@ -14,6 +14,7 @@
 #include "QRegularExpression"
 
 #include "Logfile.hpp"
+#include "TextRenderer.hpp"
 
 TabCompositeViewer::TabCompositeViewer(QWidget* parent) : Viewer(parent)
 {
@@ -24,7 +25,7 @@ TabCompositeViewer::TabCompositeViewer(QWidget* parent) : Viewer(parent)
     tabs_->tabBar()->setTabButton(0, QTabBar::LeftSide, nullptr);
     tabs_->tabBar()->setTabButton(0, QTabBar::RightSide, nullptr);
 
-    connect(tabs_, SIGNAL(tabCloseRequested(int)), this, SLOT(closeTab(int)));
+    connect(tabs_, &QTabWidget::tabCloseRequested, this, &TabCompositeViewer::closeTab);
     tabs_->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
     QGridLayout* layout = new QGridLayout();
     layout->addWidget(tabs_);
@@ -56,7 +57,7 @@ QString linesToQString(const Lines& lines)
     QString result;
     for (const auto& line : lines)
     {
-        result.append(QString::number(line.number).rightJustified(5,' ') + " | " + line.text);
+        result.append(line.text);
     }
     return result;
 }
@@ -64,7 +65,7 @@ QString linesToQString(const Lines& lines)
 void TabCompositeViewer::setContent(const Lines& lines)
 {
     lines_ = lines;
-    text_->setText(linesToQString(lines_));
+    text_->setPlainText(linesToQString(lines_));
 }
 
 void TabCompositeViewer::closeTab(const int index)

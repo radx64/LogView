@@ -27,19 +27,23 @@ CONFIG += c++17
 SOURCES += \
         src/Bookmark.cpp \
         src/BookmarksModel.cpp \
+        src/LineNumberArea.cpp \
         src/MainWindow.cpp \
         src/main.cpp \
         src/Viewer.cpp \
         src/TabCompositeViewer.cpp \
+        src/TextRenderer.cpp \
         src/ViewerWidget.cpp
 
 HEADERS += \
         src/Bookmark.hpp \
         src/BookmarksModel.hpp \
         src/Logfile.hpp \
+        src/LineNumberArea.hpp \
         src/MainWindow.hpp \
         src/Viewer.hpp \
         src/TabCompositeViewer.hpp \
+        src/TextRenderer.hpp \
         src/ViewerWidget.hpp
 
 FORMS += \
