@@ -10,7 +10,7 @@ addons:
     packages:
       - cmake
       - make
-      - qt5-base
+      - qt5
       - qttools5-dev
       - qt5-qmake
 
