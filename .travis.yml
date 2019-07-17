@@ -8,4 +8,4 @@ install:
   - ci/create_docker_image.sh    
 
 script: 
-  - docker run ---security-opt seccomp:unconfined -v ${PWD}:/root/logview logview:1 /root/logview/ci/build_app.sh 
+  - docker run --security-opt seccomp:unconfined -v ${PWD}:/root/logview logview:1 /root/logview/ci/build_app.sh 
