@@ -1,6 +1,7 @@
 language: cpp
 sudo: true
 compiler: gcc
+dist: xenial
 
 addons:
   apt:
@@ -10,6 +11,8 @@ addons:
       - cmake
       - make
       - qt5-default
+      - qtbase5-dev
+      - qttools5-dev
       - qt5-qmake
 
 before_script:
