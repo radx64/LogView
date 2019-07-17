@@ -5,7 +5,7 @@ services:
   - docker
 
 install:
-  - cd/create_docker_image.sh    
+  - ci/create_docker_image.sh    
 
 script: 
   - docker run -v ${PWD}:/root/logview logview:1 /root/logview/ci/build_app.sh 
