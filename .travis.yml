@@ -1,36 +1,11 @@
-language: cpp
-sudo: true
-compiler: gcc
+language: minimal
 dist: xenial
 
-addons:
-  apt:
-    sources:
-      - ubuntu-toolchain-r-test
-    packages:
-      - cmake
-      - make
-      - qt5base
-      - qttools5-dev
-      - qt5-qmake
+services:
+  - docker
 
-before_script:
-  - sudo apt-get install -y gcc-6 g++-6 
-  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-6 10
-  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-6 10
-  - sudo update-alternatives --install /usr/bin/cc cc /usr/bin/gcc 20
-  - sudo update-alternatives --set cc /usr/bin/gcc
-  - sudo update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++ 20
-  - sudo update-alternatives --set c++ /usr/bin/g++
-  - sudo update-alternatives --config gcc
-  - sudo update-alternatives --config g++
-  - echo $LANG
-  - echo $LC_ALL
-  - export CXX="g++-6" CC="gcc-6"
-  - sudo apt-get update -qq
+install:
+  - ci/create_docker_image.sh    
 
 script: 
-  - mkdir build
-  - cd build
-  - qmake ../LogView.pro
-  - make
+  - docker run --security-opt seccomp:unconfined -v ${PWD}:/root/logview logview:1 /root/logview/ci/build_app.sh 
