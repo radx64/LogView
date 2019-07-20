@@ -1,6 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <memory>
+
 #include <QMainWindow>
 #include <QDropEvent>
 #include <QDrag>
@@ -9,7 +11,6 @@
 
 #include "Viewer.hpp"
 #include "TabCompositeViewer.hpp"
-
 
 class Logfile;
 class QTextEdit;
@@ -39,7 +40,7 @@ private:
     void bookmarkCurrentLine();
     void connect_signals();
     void grepCurrentView();
-    void spawnViewerWithContent(const Logfile& log);
+    void spawnViewerWithContent(std::unique_ptr<Logfile> log);
     ViewerWidget* get_active_viewer_widget();
     void dropEvent(QDropEvent* event);
     void dragEnterEvent(QDragEnterEvent* event);

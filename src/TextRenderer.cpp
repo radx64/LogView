@@ -8,7 +8,19 @@
 
 #include "LineNumberArea.hpp"
 
-TextRenderer::TextRenderer(QWidget* parent) : QPlainTextEdit(parent)
+QString linesToQString(const Lines& lines)
+{
+    QString result;
+    for (const auto& line : lines)
+    {
+        result.append(line.text);
+    }
+    return result;
+}
+
+
+TextRenderer::TextRenderer(QWidget* parent, const Lines content)
+    : QPlainTextEdit(parent), content_(content)
 {
     lineNumberArea = new LineNumberArea(this);
 
@@ -19,6 +31,7 @@ TextRenderer::TextRenderer(QWidget* parent) : QPlainTextEdit(parent)
     updateLineNumberAreaWidth(0);
     highlightCurrentLine();
     setFont(QFont(QString("Courier New")));
+    setPlainText(linesToQString(content));
 }
 
 void TextRenderer::highlightCurrentLine()
@@ -37,7 +50,7 @@ void TextRenderer::highlightCurrentLine()
 int TextRenderer::lineNumberAreaWidth()
 {
     int digits = 1;
-    int max = qMax(1, blockCount());
+    uint32_t max = qMax(1u, content_.last().number);
     while (max >= 10) {
         max /= 10;
         ++digits;
@@ -73,7 +86,6 @@ void TextRenderer::lineNumberAreaPaintEvent(QPaintEvent *event)
     QPainter painter(lineNumberArea);
     painter.fillRect(event->rect(),  QColor(Qt::blue).lighter(180));
     QTextBlock block = firstVisibleBlock();
-    int blockNumber = block.blockNumber();
     int top = static_cast<int>(blockBoundingGeometry(block).translated(contentOffset()).top());
     int bottom = top + static_cast<int>(blockBoundingRect(block).height());
 
@@ -81,7 +93,7 @@ void TextRenderer::lineNumberAreaPaintEvent(QPaintEvent *event)
     {
         if (block.isVisible() && bottom >= event->rect().top())
         {
-            QString number = QString::number(blockNumber + 1);
+            QString number = QString::number(content_.at(block.blockNumber()).number);
             painter.setFont(QFont(QString("Courier New")));
             painter.setPen(Qt::black);
             painter.drawText(0, top, lineNumberArea->width(), fontMetrics().height(),
@@ -91,6 +103,5 @@ void TextRenderer::lineNumberAreaPaintEvent(QPaintEvent *event)
         block = block.next();
         top = bottom;
         bottom = top + static_cast<int>(blockBoundingRect(block).height());
-        ++blockNumber;
     }
 }

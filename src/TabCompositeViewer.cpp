@@ -16,7 +16,8 @@
 #include "Logfile.hpp"
 #include "TextRenderer.hpp"
 
-TabCompositeViewer::TabCompositeViewer(QWidget* parent) : Viewer(parent)
+TabCompositeViewer::TabCompositeViewer(QWidget* parent, const Lines lines)
+    : Viewer(parent, lines)
 {
     tabs_ = new QTabWidget();
     tabs_->addTab(text_,"Base");
@@ -34,9 +35,6 @@ TabCompositeViewer::TabCompositeViewer(QWidget* parent) : Viewer(parent)
 
 void TabCompositeViewer::grep(QString pattern)
 {
-    TabCompositeViewer* viewer = new TabCompositeViewer(this);
-    tabs_->addTab(viewer, pattern);
-
     QRegularExpression exp(pattern);
     Lines filtered_results;
     for(auto line : lines_)
@@ -49,25 +47,9 @@ void TabCompositeViewer::grep(QString pattern)
         }
     }
 
-    viewer->setContent(filtered_results);
+    TabCompositeViewer* viewer = new TabCompositeViewer(this, filtered_results);
+    tabs_->addTab(viewer, pattern);
 }
-
-QString linesToQString(const Lines& lines)
-{
-    QString result;
-    for (const auto& line : lines)
-    {
-        result.append(line.text);
-    }
-    return result;
-}
-
-void TabCompositeViewer::setContent(const Lines& lines)
-{
-    lines_ = lines;
-    text_->setPlainText(linesToQString(lines_));
-}
-
 void TabCompositeViewer::closeTab(const int index)
 {
     QWidget* tabContents = tabs_->widget(index);

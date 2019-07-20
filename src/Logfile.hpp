@@ -16,7 +16,7 @@ using Lines = QVector<Line>;
 class Logfile
 {
 public:
-    Logfile (const QString& filename)
+    Logfile(const QString& filename)
     {
         filename_ = filename;
         lines_.clear();

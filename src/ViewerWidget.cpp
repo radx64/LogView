@@ -11,14 +11,14 @@
 #include "BookmarksModel.hpp"
 #include "TabCompositeViewer.hpp"
 
-ViewerWidget::ViewerWidget(QWidget* parent)
+ViewerWidget::ViewerWidget(QWidget* parent, std::unique_ptr<Logfile> log)
+    : logfile_model_(std::move(log))
 {
     setParent(parent);
-
     layout_ = new QHBoxLayout();
     bookmarks_widget_ = new QListView();
     bookmarks_widget_->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding));
-    logViewer_ = new TabCompositeViewer(this);
+    logViewer_ = new TabCompositeViewer(this, logfile_model_->getLines());
     logViewer_->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
 
     QSplitter* splitter = new QSplitter(Qt::Horizontal);
@@ -31,6 +31,23 @@ ViewerWidget::ViewerWidget(QWidget* parent)
     bookmarks_model_ = new BookmarksModel(this);
     bookmarks_widget_->setModel(bookmarks_model_);
     connect(bookmarks_widget_, &QListView::doubleClicked, this, &ViewerWidget::bookmarksItemDoubleClicked);
+}
+
+TabCompositeViewer* find_deepest_active_tab(TabCompositeViewer* start_point)
+{
+    if (start_point == nullptr) return start_point;
+    const int tab_grep_index = start_point->tabs_->currentIndex();
+    qDebug() << "tab_grep_index:" << tab_grep_index;
+    QWidget* active_tab = start_point->tabs_->widget(tab_grep_index);
+    TabCompositeViewer* active_tab_casted = dynamic_cast<TabCompositeViewer*>(active_tab);
+    if (active_tab_casted == nullptr) return start_point;
+    TabCompositeViewer* result = find_deepest_active_tab(active_tab_casted);
+    return result ? result : start_point;
+}
+
+TabCompositeViewer* ViewerWidget::getDeepestActiveTab()
+{
+    return find_deepest_active_tab(logViewer_);
 }
 
 void ViewerWidget::bookmarksItemDoubleClicked(const QModelIndex& idx)

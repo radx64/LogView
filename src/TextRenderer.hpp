@@ -3,10 +3,12 @@
 
 #include <QPlainTextEdit>
 
+#include "Logfile.hpp"
+
 class TextRenderer : public QPlainTextEdit
 {
 public:
-    TextRenderer(QWidget* parent);
+    TextRenderer(QWidget* parent, const Lines content);
     void lineNumberAreaPaintEvent(QPaintEvent *event);
     int lineNumberAreaWidth();
 
@@ -20,6 +22,7 @@ private slots:
 
 private:
     QWidget *lineNumberArea;
+    const Lines content_;
 };
 
 #endif  // TEXT_RENDERER_HPP

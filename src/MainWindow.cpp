@@ -59,7 +59,7 @@ void MainWindow::dropEvent(QDropEvent* event)
     QList<QUrl> urlList = mimeData->urls();
     for (const auto& fileList : urlList)
     {
-        spawnViewerWithContent(Logfile(fileList.toLocalFile()));
+        spawnViewerWithContent(std::make_unique<Logfile>(fileList.toLocalFile()));
     }
 }
 
@@ -74,25 +74,12 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::spawnViewerWithContent(const Logfile& log)
+void MainWindow::spawnViewerWithContent(std::unique_ptr<Logfile> log)
 {
     QTabWidget* fileTabWidget = ui->fileView;
-    ViewerWidget* viewer = new ViewerWidget(fileTabWidget);
-    fileTabWidget ->addTab(viewer, log.getFileName().split(QRegularExpression("[\\/]")).last());
-    Lines content = log.getLines();
-    viewer->logViewer_->setContent(content);
-}
-
-TabCompositeViewer* find_deepest_active_tab(TabCompositeViewer* start_point)
-{
-    if (start_point == nullptr) return start_point;
-    const int tab_grep_index = start_point->tabs_->currentIndex();
-    qDebug() << "tab_grep_index:" << tab_grep_index;
-    QWidget* active_tab = start_point->tabs_->widget(tab_grep_index);
-    TabCompositeViewer* active_tab_casted = dynamic_cast<TabCompositeViewer*>(active_tab);
-    if (active_tab_casted == nullptr) return start_point;
-    TabCompositeViewer* result = find_deepest_active_tab(active_tab_casted);
-    return result ? result : start_point;
+    QString filename = log->getFileName();
+    ViewerWidget* viewer = new ViewerWidget(fileTabWidget, std::move(log));
+    fileTabWidget ->addTab(viewer, filename.split(QRegularExpression("[\\/]")).last());
 }
 
 ViewerWidget* MainWindow::get_active_viewer_widget()
@@ -116,32 +103,30 @@ void MainWindow::grepCurrentView()
     ViewerWidget* viewerWidget = get_active_viewer_widget();
     if (!viewerWidget) return; // can display here some message
 
-    QWidget* deepest_tab = find_deepest_active_tab(viewerWidget->logViewer_);
-    TabCompositeViewer* deepest_tab_casted = dynamic_cast<TabCompositeViewer*>(deepest_tab);
+    TabCompositeViewer* deepest_tab = viewerWidget->getDeepestActiveTab();
 
     // Simple QInputDialog will be extended later for something more fancy
     bool ok = false;
     QString input_grep = QInputDialog::getText(this, tr("Grepping..."),
         tr("grep:"), QLineEdit::Normal, "", &ok);
 
-    if (deepest_tab_casted && ok) deepest_tab_casted->grep(input_grep);
+    if (deepest_tab && ok) deepest_tab->grep(input_grep);
 }
 
 void MainWindow::bookmarkCurrentLine()
 {
     ViewerWidget* viewerWidget = get_active_viewer_widget();
     if (!viewerWidget) return; // can display here some message
-    QWidget* deepest_tab = find_deepest_active_tab(viewerWidget->logViewer_);
-    TabCompositeViewer* deepest_tab_casted = dynamic_cast<TabCompositeViewer*>(deepest_tab);
+    TabCompositeViewer* deepest_tab = viewerWidget->getDeepestActiveTab();
 
-    if (!deepest_tab_casted) return;
-    int current_line_index = deepest_tab_casted->text_ ->textCursor().blockNumber();
-    uint32_t absolute_line_index = deepest_tab_casted->lines_[current_line_index].number;
+    if (!deepest_tab) return;
+    int current_line_index = deepest_tab->text_ ->textCursor().blockNumber();
+    uint32_t absolute_line_index = deepest_tab->lines_[current_line_index].number;
 
     // Simple QInputDialog will be extended later for something more fancy
     bool ok = false;
     QString bookmark_name = QInputDialog::getText(this, tr("Bookmark creation"),
-        tr("Name:"), QLineEdit::Normal, deepest_tab_casted->lines_[current_line_index].text, &ok);
+        tr("Name:"), QLineEdit::Normal, deepest_tab->lines_[current_line_index].text, &ok);
 
     if (!ok) return;
     qDebug() << "Adding bookmark at line" << absolute_line_index;
@@ -158,7 +143,7 @@ void MainWindow::on_actionLoad_from_file_triggered()
     if (filename.isEmpty())
         return;
 
-    spawnViewerWithContent(Logfile(filename));
+    spawnViewerWithContent(std::make_unique<Logfile>(filename));
 }
 
 void MainWindow::on_actionGrep_current_view_triggered()

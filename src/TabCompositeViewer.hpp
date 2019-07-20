@@ -14,11 +14,10 @@ class TabCompositeViewer : public Viewer
 {
     Q_OBJECT
 public:
-    TabCompositeViewer(QWidget* parent);
+    TabCompositeViewer(QWidget* parent, const Lines lines);
     void grep(QString pattern);
-    void setContent(const Lines& lines);
 
-    Lines lines_;
+//    Lines lines_; // in further improvements I need to hold only grepped lines from log model;
     QTabWidget* tabs_;
 
 public slots:
