@@ -9,7 +9,6 @@
 #include <QHBoxLayout>
 #include <QListWidget>
 
-#include "Viewer.hpp"
 #include "TabCompositeViewer.hpp"
 
 class Logfile;

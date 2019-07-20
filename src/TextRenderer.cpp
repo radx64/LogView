@@ -18,9 +18,10 @@ QString linesToQString(const Lines& lines)
     return result;
 }
 
-
-TextRenderer::TextRenderer(QWidget* parent, const Lines content)
-    : QPlainTextEdit(parent), content_(content)
+TextRenderer::TextRenderer(QWidget* parent,
+    const Lines content,
+    std::unique_ptr<ILineNumberingPolicy> lineRenderingPolicy)
+    : QPlainTextEdit(parent), content_(content), lineRenderingPolicy_(std::move(lineRenderingPolicy))
 {
     lineNumberArea = new LineNumberArea(this);
 
@@ -31,6 +32,7 @@ TextRenderer::TextRenderer(QWidget* parent, const Lines content)
     updateLineNumberAreaWidth(0);
     highlightCurrentLine();
     setFont(QFont(QString("Courier New")));
+    setReadOnly(true);
     setPlainText(linesToQString(content));
 }
 
@@ -38,7 +40,7 @@ void TextRenderer::highlightCurrentLine()
 {
     QList<QTextEdit::ExtraSelection> extraSelections;
     QTextEdit::ExtraSelection selection;
-    QColor lineColor = QColor(Qt::blue).lighter(160);
+    QColor lineColor = QColor(Qt::yellow).lighter(160);
     selection.format.setBackground(lineColor);
     selection.format.setProperty(QTextFormat::FullWidthSelection, true);
     selection.cursor = textCursor();
@@ -84,7 +86,7 @@ void TextRenderer::resizeEvent(QResizeEvent *e)
 void TextRenderer::lineNumberAreaPaintEvent(QPaintEvent *event)
 {
     QPainter painter(lineNumberArea);
-    painter.fillRect(event->rect(),  QColor(Qt::blue).lighter(180));
+    painter.fillRect(event->rect(),  QColor(Qt::gray).lighter(150));
     QTextBlock block = firstVisibleBlock();
     int top = static_cast<int>(blockBoundingGeometry(block).translated(contentOffset()).top());
     int bottom = top + static_cast<int>(blockBoundingRect(block).height());
@@ -93,7 +95,8 @@ void TextRenderer::lineNumberAreaPaintEvent(QPaintEvent *event)
     {
         if (block.isVisible() && bottom >= event->rect().top())
         {
-            QString number = QString::number(content_.at(block.blockNumber()).number);
+            QString number = QString::number(lineRenderingPolicy_->mapLineNumber(
+                static_cast<uint32_t>(block.blockNumber())));
             painter.setFont(QFont(QString("Courier New")));
             painter.setPen(Qt::black);
             painter.drawText(0, top, lineNumberArea->width(), fontMetrics().height(),

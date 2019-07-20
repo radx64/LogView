@@ -15,10 +15,13 @@
 
 #include "Logfile.hpp"
 #include "TextRenderer.hpp"
+#include "LineNumberingBasedOnModelPolicy.hpp"
 
 TabCompositeViewer::TabCompositeViewer(QWidget* parent, const Lines lines)
-    : Viewer(parent, lines)
+    : lines_(lines)
 {
+    std::unique_ptr<ILineNumberingPolicy> lineNumberingPolicy = std::make_unique<LineNumberingBasedOnModelPolicy>(lines_);
+    text_ = new TextRenderer(parent, lines, std::move(lineNumberingPolicy));
     tabs_ = new QTabWidget();
     tabs_->addTab(text_,"Base");
     tabs_->setTabsClosable(true);
