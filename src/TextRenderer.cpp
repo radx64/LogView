@@ -1,5 +1,6 @@
 #include "TextRenderer.hpp"
 
+#include <QDebug>
 #include <QColor>
 #include <QList>
 #include <QPlainTextEdit>
@@ -14,6 +15,7 @@ QString linesToQString(const Lines& lines)
     for (const auto& line : lines)
     {
         result.append(line.text);
+        qDebug() << line.text;
     }
     return result;
 }

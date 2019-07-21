@@ -22,7 +22,7 @@ public:
         lines_.clear();
 
         QFile file(filename);
-        if (!file.open(QIODevice::ReadOnly))
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
         {
             QMessageBox msg;
             msg.setText("Unable to open file" + file.errorString());
@@ -36,7 +36,7 @@ public:
         while(!file.atEnd())
         {
             ++index;
-            lines_.append({index, file.readLine()});
+            lines_.append({index, QString(file.readLine()).trimmed()});
         }
     }
 
