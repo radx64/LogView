@@ -12,11 +12,13 @@
 QString linesToQString(const Lines& lines)
 {
     QString result;
-    for (const auto& line : lines)
+    QVector<Line>::const_iterator line_it = lines.begin();
+    while (line_it != lines.end() - 1)
     {
-        result.append(line.text);
-        qDebug() << line.text;
+        result.append(line_it->text + "\n");
+        line_it++;
     }
+    result.append(line_it->text);
     return result;
 }
 
@@ -35,7 +37,9 @@ TextRenderer::TextRenderer(QWidget* parent,
     highlightCurrentLine();
     setFont(QFont(QString("Courier New")));
     setReadOnly(true);
+    setWordWrapMode(QTextOption::NoWrap);
     setPlainText(linesToQString(content));
+
 }
 
 void TextRenderer::highlightCurrentLine()
