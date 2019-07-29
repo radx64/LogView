@@ -8,7 +8,7 @@ LineNumberingBasedOnModelPolicy::LineNumberingBasedOnModelPolicy(const Lines& li
 
 uint32_t LineNumberingBasedOnModelPolicy::mapLineNumber(const uint32_t lineNumber) const
 {
-    if (lineNumber < lines_.size()) return lines_.at(static_cast<int>(lineNumber)).number;
+    if (lineNumber < static_cast<uint32_t>(lines_.size())) return lines_.at(static_cast<int>(lineNumber)).number;
     else
     {
         qDebug() << "Trying to get lines out of scope!";

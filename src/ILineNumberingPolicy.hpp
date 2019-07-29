@@ -1,5 +1,5 @@
-#ifndef ILINE_NUMBERING_POLICY
-#define ILINE_NUMBERING_POLICY
+#ifndef ILINE_NUMBERING_POLICY_HPP
+#define ILINE_NUMBERING_POLICY_HPP
 
 #include <cstdint>
 
@@ -9,4 +9,4 @@ public:
     virtual uint32_t mapLineNumber(const uint32_t lineNumber) const = 0;
     virtual ~ILineNumberingPolicy() = default;
 };
-#endif // ILINE_NUMBERING_POLICY
+#endif // ILINE_NUMBERING_POLICY_HPP

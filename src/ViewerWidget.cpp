@@ -10,15 +10,22 @@
 
 #include "BookmarksModel.hpp"
 #include "TabCompositeViewer.hpp"
+#include "ProjectModel.hpp"
+#include "GrepNode.hpp"
 
 ViewerWidget::ViewerWidget(QWidget* parent, std::unique_ptr<Logfile> log)
-    : logfile_model_(std::move(log))
 {
+    /* project model should be moved outside */
+    project_model_ = std::make_unique<ProjectModel>();
+    project_model_->filePath_ = log->getFileName();
+    project_model_->grepHierarchy_ = std::make_unique<GrepNode>();
+    project_model_->logfile_model_ = std::move(log);
+
     setParent(parent);
     layout_ = new QHBoxLayout();
     bookmarks_widget_ = new QListView();
     bookmarks_widget_->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding));
-    logViewer_ = new TabCompositeViewer(this, logfile_model_->getLines());
+    logViewer_ = new TabCompositeViewer(this, project_model_->logfile_model_->getLines());
     logViewer_->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
 
     QSplitter* splitter = new QSplitter(Qt::Horizontal);

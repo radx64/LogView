@@ -36,5 +36,6 @@ void BookmarksModel::add_bookmark(const uint32_t& line, const QPixmap& icon, con
 
     QModelIndex firstElement = createIndex(0,0);
     QModelIndex lastElement = createIndex(0,0);
+    // TODO: Emit real change index
     emit dataChanged(firstElement, lastElement, QVector<int>{Qt::DisplayRole});
 }

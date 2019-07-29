@@ -1,6 +1,5 @@
 #include "TextRenderer.hpp"
 
-#include <QDebug>
 #include <QColor>
 #include <QList>
 #include <QPlainTextEdit>
@@ -12,6 +11,8 @@
 QString linesToQString(const Lines& lines)
 {
     QString result;
+    if (lines.isEmpty()) return result;
+
     QVector<Line>::const_iterator line_it = lines.begin();
     while (line_it != lines.end() - 1)
     {
@@ -57,6 +58,8 @@ void TextRenderer::highlightCurrentLine()
 
 int TextRenderer::lineNumberAreaWidth()
 {
+    if (content_.isEmpty()) return 10;
+
     int digits = 1;
     uint32_t max = qMax(1u, content_.last().number);
     while (max >= 10) {
@@ -91,13 +94,15 @@ void TextRenderer::resizeEvent(QResizeEvent *e)
 
 void TextRenderer::lineNumberAreaPaintEvent(QPaintEvent *event)
 {
+    if(content_.isEmpty()) return; //No point rendering anything if there is no content
+
     QPainter painter(lineNumberArea);
     painter.fillRect(event->rect(),  QColor(Qt::gray).lighter(150));
     QTextBlock block = firstVisibleBlock();
     int top = static_cast<int>(blockBoundingGeometry(block).translated(contentOffset()).top());
     int bottom = top + static_cast<int>(blockBoundingRect(block).height());
 
-    while (block.isValid() && top <= event->rect().bottom())
+    while (block.isValid() && top <= event->rect().bottom() && top != bottom)
     {
         if (block.isVisible() && bottom >= event->rect().top())
         {

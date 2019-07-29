@@ -46,7 +46,6 @@ MainWindow::MainWindow(QWidget* parent) :
 
 void MainWindow::dropEvent(QDropEvent* event)
 {
-    qDebug() << "Something was dropped here";
     event->acceptProposedAction();
     const QMimeData* mimeData = event->mimeData();
     if (!mimeData->hasUrls())

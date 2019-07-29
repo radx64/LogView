@@ -6,9 +6,10 @@
 
 class BookmarksModel;
 class QHBoxLayout;
+class Logfile;
+class ProjectModel;
 class QListView;
 class TabCompositeViewer;
-class Logfile;
 class Viewer;
 
 class ViewerWidget: public QWidget
@@ -23,7 +24,7 @@ public:
 protected:
     QHBoxLayout* layout_;
     TabCompositeViewer* logViewer_;
-    std::unique_ptr<Logfile> logfile_model_;
+    std::unique_ptr<ProjectModel> project_model_;
 
 private slots:
     void bookmarksItemDoubleClicked(const QModelIndex& idx);

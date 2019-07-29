@@ -1,5 +1,5 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef MAINWINDOW_HPP
+#define MAINWINDOW_HPP
 
 #include <memory>
 
@@ -47,4 +47,4 @@ private:
     Ui::MainWindow *ui;
 };
 
-#endif // MAINWINDOW_H
+#endif // MAINWINDOW_HPP

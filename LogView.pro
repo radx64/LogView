@@ -38,11 +38,13 @@ SOURCES += \
 HEADERS += \
         src/Bookmark.hpp \
         src/BookmarksModel.hpp \
+        src/GrepNode.hpp \
         src/ILineNumberingPolicy.hpp \
         src/LineNumberingBasedOnModelPolicy.hpp \
         src/Logfile.hpp \
         src/LineNumberArea.hpp \
         src/MainWindow.hpp \
+        src/ProjectModel.hpp \
         src/TabCompositeViewer.hpp \
         src/TextRenderer.hpp \
         src/ViewerWidget.hpp

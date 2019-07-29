@@ -46,7 +46,6 @@ void TabCompositeViewer::grep(QString pattern)
         if (match.hasMatch())
         {
             filtered_results.append({line.number, line.text});
-            qDebug() << line.number << " " <<line.text;
         }
     }
 
