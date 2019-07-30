@@ -11,3 +11,7 @@ ProjectModel::ProjectModel()
     bookmarks_model_ = std::make_unique<BookmarksModel>(nullptr);
 }
 
+BookmarksModel* ProjectModel::getBookmarksModel()
+{
+    return bookmarks_model_.get();
+}

@@ -14,7 +14,7 @@
 class Logfile;
 class QTextEdit;
 class QTabWidget;
-class ViewerWidget;
+class Viewer;
 
 namespace Ui {
 class MainWindow;
@@ -34,13 +34,14 @@ private slots:
     void on_exit_app_triggered();
     void on_actionGrep_current_view_triggered();
     void on_actionBookmark_current_line_triggered();
+    void on_actionAbout_triggered();
 
 private:
     void bookmarkCurrentLine();
     void connect_signals();
     void grepCurrentView();
     void spawnViewerWithContent(std::unique_ptr<Logfile> log);
-    ViewerWidget* get_active_viewer_widget();
+    Viewer* get_active_viewer_widget();
     void dropEvent(QDropEvent* event);
     void dragEnterEvent(QDragEnterEvent* event);
 

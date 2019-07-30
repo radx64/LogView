@@ -30,11 +30,11 @@ SOURCES += \
         src/LineNumberArea.cpp \
         src/LineNumberingBasedOnModelPolicy.cpp \
         src/MainWindow.cpp \
+        src/Viewer.cpp \
         src/main.cpp \
         src/ProjectModel.cpp \
         src/TabCompositeViewer.cpp \
-        src/TextRenderer.cpp \
-        src/ViewerWidget.cpp
+        src/TextRenderer.cpp
 
 HEADERS += \
         src/Bookmark.hpp \
@@ -48,7 +48,7 @@ HEADERS += \
         src/ProjectModel.hpp \
         src/TabCompositeViewer.hpp \
         src/TextRenderer.hpp \
-        src/ViewerWidget.hpp
+        src/Viewer.hpp
 
 FORMS += \
     src/MainWindow.ui
@@ -60,3 +60,5 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 RESOURCES += \
     icons.qrc
+
+RC_FILE = src/app.rc

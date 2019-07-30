@@ -1,4 +1,4 @@
-#include "ViewerWidget.hpp"
+#include "Viewer.hpp"
 
 #include <QHBoxLayout>
 #include <QListView>
@@ -14,12 +14,12 @@
 #include "BookmarksModel.hpp"
 #include "GrepNode.hpp"
 
-ViewerWidget::ViewerWidget(QWidget* parent, std::unique_ptr<Logfile> log)
+Viewer::Viewer(QWidget* parent, std::unique_ptr<Logfile> log)
 {
     /* project model should be moved outside */
     project_model_ = std::make_unique<ProjectModel>();
-    project_model_->filePath_ = log->getFileName();
-    project_model_->grepHierarchy_ = std::make_unique<GrepNode>("ROOT");
+    project_model_->file_path_ = log->getFileName();
+    project_model_->grep_hierarchy_ = std::make_unique<GrepNode>("ROOT");
     project_model_->logfile_model_ = std::move(log);
 
     setParent(parent);
@@ -28,7 +28,7 @@ ViewerWidget::ViewerWidget(QWidget* parent, std::unique_ptr<Logfile> log)
     bookmarks_widget_->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding));
     logViewer_ = new TabCompositeViewer(
         this,
-        project_model_->grepHierarchy_.get(),
+        project_model_->grep_hierarchy_.get(),
         project_model_->logfile_model_->getLines());
     logViewer_->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
 
@@ -40,8 +40,8 @@ ViewerWidget::ViewerWidget(QWidget* parent, std::unique_ptr<Logfile> log)
     layout_->addWidget(splitter);
     this->setLayout(layout_);
 
-    bookmarks_widget_->setModel(project_model_->bookmarks_model_.get());
-    connect(bookmarks_widget_, &QListView::doubleClicked, this, &ViewerWidget::bookmarksItemDoubleClicked);
+    bookmarks_widget_->setModel(project_model_->getBookmarksModel());
+    connect(bookmarks_widget_, &QListView::doubleClicked, this, &Viewer::bookmarksItemDoubleClicked);
 }
 
 TabCompositeViewer* find_deepest_active_tab(TabCompositeViewer* start_point)
@@ -56,12 +56,12 @@ TabCompositeViewer* find_deepest_active_tab(TabCompositeViewer* start_point)
     return result ? result : start_point;
 }
 
-TabCompositeViewer* ViewerWidget::getDeepestActiveTab()
+TabCompositeViewer* Viewer::getDeepestActiveTab()
 {
     return find_deepest_active_tab(logViewer_);
 }
 
-void ViewerWidget::bookmarksItemDoubleClicked(const QModelIndex& idx)
+void Viewer::bookmarksItemDoubleClicked(const QModelIndex& idx)
 {
     qDebug() << "Doubleclicked item index: " << idx.row();
 }

@@ -10,12 +10,11 @@ class Logfile;
 class ProjectModel;
 class QListView;
 class TabCompositeViewer;
-class Viewer;
 
-class ViewerWidget: public QWidget
+class Viewer: public QWidget
 {
 public:
-    ViewerWidget(QWidget* parent, std::unique_ptr<Logfile> log);
+    Viewer(QWidget* parent, std::unique_ptr<Logfile> log);
     TabCompositeViewer* getDeepestActiveTab();
 
     QListView* bookmarks_widget_;

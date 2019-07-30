@@ -13,9 +13,13 @@ class ProjectModel
 public:
     ProjectModel();
 
-    QString filePath_;
-    std::unique_ptr<GrepNode> grepHierarchy_;
+    BookmarksModel* getBookmarksModel();
+
+    QString file_path_;
+    std::unique_ptr<GrepNode> grep_hierarchy_;
     std::unique_ptr<Logfile> logfile_model_;
+
+protected:
     std::unique_ptr<BookmarksModel> bookmarks_model_;
 };
 

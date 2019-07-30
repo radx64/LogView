@@ -52,7 +52,7 @@
      <x>0</x>
      <y>0</y>
      <width>631</width>
-     <height>21</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuTest">
@@ -70,14 +70,18 @@
     <addaction name="actionGrep_current_view"/>
     <addaction name="actionBookmark_current_line"/>
    </widget>
-   <widget class="QMenu" name="menuAbout">
-    <property name="title">
-     <string>About</string>
+   <widget class="QMenu" name="menuHelp">
+    <property name="layoutDirection">
+     <enum>Qt::LeftToRight</enum>
     </property>
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionAbout"/>
    </widget>
    <addaction name="menuTest"/>
    <addaction name="menuFind"/>
-   <addaction name="menuAbout"/>
+   <addaction name="menuHelp"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -89,16 +93,28 @@
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionLoad_from_file">
+   <property name="icon">
+    <iconset resource="../icons.qrc">
+     <normaloff>:/icon/Gnome-Logviewer-32.png</normaloff>:/icon/Gnome-Logviewer-32.png</iconset>
+   </property>
    <property name="text">
     <string>Load...</string>
    </property>
   </action>
   <action name="exit_app">
+   <property name="icon">
+    <iconset resource="../icons.qrc">
+     <normaloff>:/icon/Gnome-System-Log-Out-32.png</normaloff>:/icon/Gnome-System-Log-Out-32.png</iconset>
+   </property>
    <property name="text">
     <string>Exit</string>
    </property>
   </action>
   <action name="actionGrep_current_view">
+   <property name="icon">
+    <iconset resource="../icons.qrc">
+     <normaloff>:/icon/Gnome-Format-Indent-More-32.png</normaloff>:/icon/Gnome-Format-Indent-More-32.png</iconset>
+   </property>
    <property name="text">
     <string>Grep current view</string>
    </property>
@@ -116,6 +132,15 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+B</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="icon">
+    <iconset resource="../icons.qrc">
+     <normaloff>:/icon/Gnome-Dialog-Warning-32.png</normaloff>:/icon/Gnome-Dialog-Warning-32.png</iconset>
+   </property>
+   <property name="text">
+    <string>About</string>
    </property>
   </action>
  </widget>

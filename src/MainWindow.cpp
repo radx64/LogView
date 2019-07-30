@@ -21,7 +21,7 @@
 #include "ProjectModel.hpp"
 #include "TabCompositeViewer.hpp"
 #include "TextRenderer.hpp"
-#include "ViewerWidget.hpp"
+#include "Viewer.hpp"
 
 void MainWindow::closeFileTab(const int index)
 {
@@ -78,16 +78,16 @@ void MainWindow::spawnViewerWithContent(std::unique_ptr<Logfile> log)
 {
     QTabWidget* fileTabWidget = ui->fileView;
     QString filename = log->getFileName();
-    ViewerWidget* viewer = new ViewerWidget(fileTabWidget, std::move(log));
+    Viewer* viewer = new Viewer(fileTabWidget, std::move(log));
     fileTabWidget ->addTab(viewer, filename.split(QRegularExpression("[\\/]")).last());
 }
 
-ViewerWidget* MainWindow::get_active_viewer_widget()
+Viewer* MainWindow::get_active_viewer_widget()
 {
     const int tab_index = ui->fileView->currentIndex();
     if(tab_index == -1) return nullptr;
     qDebug() << "File tab index:" <<tab_index;
-    ViewerWidget* viewerWidget = dynamic_cast<ViewerWidget*>(ui->fileView->widget(tab_index));
+    Viewer* viewerWidget = dynamic_cast<Viewer*>(ui->fileView->widget(tab_index));
     if (!viewerWidget) throw std::string("Could not find active ViewerWidget");
     return viewerWidget;
 }
@@ -100,7 +100,7 @@ void MainWindow::grepCurrentView()
      * Need to change approach to create model of greps and then render it recursively
      */
 
-    ViewerWidget* viewerWidget = get_active_viewer_widget();
+    Viewer* viewerWidget = get_active_viewer_widget();
     if (!viewerWidget) return; // can display here some message
 
     TabCompositeViewer* deepest_tab = viewerWidget->getDeepestActiveTab();
@@ -112,12 +112,12 @@ void MainWindow::grepCurrentView()
 
     if (deepest_tab && ok) deepest_tab->grep(input_grep);
 
-    viewerWidget->project_model_->grepHierarchy_->evaluate(0);
+    viewerWidget->project_model_->grep_hierarchy_->evaluate(0);
 }
 
 void MainWindow::bookmarkCurrentLine()
 {
-    ViewerWidget* viewerWidget = get_active_viewer_widget();
+    Viewer* viewerWidget = get_active_viewer_widget();
     if (!viewerWidget) return; // can display here some message
     TabCompositeViewer* deepest_tab = viewerWidget->getDeepestActiveTab();
 
@@ -132,7 +132,7 @@ void MainWindow::bookmarkCurrentLine()
 
     if (!ok) return;
     qDebug() << "Adding bookmark at line" << absolute_line_index;
-    viewerWidget->project_model_->bookmarks_model_->add_bookmark(absolute_line_index,
+    viewerWidget->project_model_->getBookmarksModel()->add_bookmark(absolute_line_index,
         QPixmap(":/icon/Gnome-Bookmark-New-32.png"),
         bookmark_name);
 }
@@ -160,4 +160,9 @@ void MainWindow::on_actionBookmark_current_line_triggered()
 void MainWindow::on_exit_app_triggered()
 {
     QApplication::exit();
+}
+
+void MainWindow::on_actionAbout_triggered()
+{
+    QMessageBox::about(this, QString("About application"), QString("RadX64 © 2019\nReleased under\nGNU GENERAL PUBLIC LICENSE"));
 }
