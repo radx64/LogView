@@ -19,12 +19,11 @@ public:
     TabCompositeViewer* getDeepestActiveTab();
 
     QListView* bookmarks_widget_;
-    BookmarksModel* bookmarks_model_;
+    std::unique_ptr<ProjectModel> project_model_;
 
 protected:
     QHBoxLayout* layout_;
     TabCompositeViewer* logViewer_;
-    std::unique_ptr<ProjectModel> project_model_;
 
 private slots:
     void bookmarksItemDoubleClicked(const QModelIndex& idx);

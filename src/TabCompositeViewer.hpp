@@ -9,12 +9,13 @@
 class QWidget;
 class QTabWidget;
 class TextRenderer;
+class GrepNode;
 
 class TabCompositeViewer : public QWidget
 {
     Q_OBJECT
 public:
-    TabCompositeViewer(QWidget* parent, const Lines lines);
+    TabCompositeViewer(QWidget* parent, GrepNode* current_grep_node_, const Lines lines);
     void grep(QString pattern);
 
     QTabWidget* tabs_;
@@ -24,6 +25,9 @@ public:
 
 public slots:
     void closeTab(const int);
+
+protected:
+    GrepNode* grep_node_;
 };
 
 #endif // TAB_COMPOSITE_VIEWER_HPP

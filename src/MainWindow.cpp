@@ -17,9 +17,11 @@
 #include "Bookmark.hpp"
 #include "BookmarksModel.hpp"
 #include "Logfile.hpp"
-#include "ViewerWidget.hpp"
+#include "GrepNode.hpp"
+#include "ProjectModel.hpp"
 #include "TabCompositeViewer.hpp"
 #include "TextRenderer.hpp"
+#include "ViewerWidget.hpp"
 
 void MainWindow::closeFileTab(const int index)
 {
@@ -109,6 +111,8 @@ void MainWindow::grepCurrentView()
         tr("grep:"), QLineEdit::Normal, "", &ok);
 
     if (deepest_tab && ok) deepest_tab->grep(input_grep);
+
+    viewerWidget->project_model_->grepHierarchy_->evaluate(0);
 }
 
 void MainWindow::bookmarkCurrentLine()
@@ -128,7 +132,7 @@ void MainWindow::bookmarkCurrentLine()
 
     if (!ok) return;
     qDebug() << "Adding bookmark at line" << absolute_line_index;
-    viewerWidget->bookmarks_model_->add_bookmark(absolute_line_index,
+    viewerWidget->project_model_->bookmarks_model_->add_bookmark(absolute_line_index,
         QPixmap(":/icon/Gnome-Bookmark-New-32.png"),
         bookmark_name);
 }

@@ -5,18 +5,29 @@
 #include <string>
 #include <vector>
 
+#include <QDebug>
+
 class GrepNode
 {
 public:
-    GrepNode() : value_{}
-    {}
+    GrepNode(std::string value) : value_{value}
+    {
+    }
+
+    ~GrepNode()
+    {
+        for (auto child : children_)
+        {
+            delete child;
+        }
+    }
 
     std::string getValue()
     {
         return value_;
     }
 
-    void addChild(std::unique_ptr<GrepNode> node)
+    void addChild(GrepNode* node)
     {
         children_.push_back(std::move(node));
     }
@@ -24,12 +35,29 @@ public:
     std::vector<GrepNode*> getChildren()
     {
         std::vector<GrepNode*> result(children_.size());
-        for (const auto& child : children_) result.push_back(child.get());
+        for (const auto& child : children_) result.push_back(child);
         return result;
     }
 
+    //DEBUG check how tree is beeing created
+    void evaluate(const unsigned char level)
+    {
+        QString result;
+        for (unsigned char i=0; i < level; ++i)
+        {
+            result += " ";
+        }
+        result += QString(value_.c_str());
+        qDebug() << result;
+
+        for (auto& element : children_)
+        {
+            element->evaluate(level+1);
+        }
+    }
+
 protected:
-    std::vector<std::unique_ptr<GrepNode>> children_;
+    std::vector<GrepNode*> children_;
     std::string value_{};
 };
 

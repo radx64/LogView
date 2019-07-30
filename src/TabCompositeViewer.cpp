@@ -16,9 +16,10 @@
 #include "Logfile.hpp"
 #include "TextRenderer.hpp"
 #include "LineNumberingBasedOnModelPolicy.hpp"
+#include "GrepNode.hpp"
 
-TabCompositeViewer::TabCompositeViewer(QWidget* parent, const Lines lines)
-    : lines_(lines)
+TabCompositeViewer::TabCompositeViewer(QWidget* parent, GrepNode* grep_node, const Lines lines)
+    : lines_(lines), grep_node_(grep_node)
 {
     std::unique_ptr<ILineNumberingPolicy> lineNumberingPolicy = std::make_unique<LineNumberingBasedOnModelPolicy>(lines_);
     text_ = new TextRenderer(parent, lines, std::move(lineNumberingPolicy));
@@ -49,8 +50,12 @@ void TabCompositeViewer::grep(QString pattern)
         }
     }
 
-    TabCompositeViewer* viewer = new TabCompositeViewer(this, filtered_results);
+    GrepNode* new_grep_node = new GrepNode(pattern.toStdString());
+    grep_node_->addChild(new_grep_node);
+
+    TabCompositeViewer* viewer = new TabCompositeViewer(this, new_grep_node, filtered_results);
     tabs_->addTab(viewer, pattern);
+
 }
 void TabCompositeViewer::closeTab(const int index)
 {

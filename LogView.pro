@@ -31,6 +31,7 @@ SOURCES += \
         src/LineNumberingBasedOnModelPolicy.cpp \
         src/MainWindow.cpp \
         src/main.cpp \
+        src/ProjectModel.cpp \
         src/TabCompositeViewer.cpp \
         src/TextRenderer.cpp \
         src/ViewerWidget.cpp
