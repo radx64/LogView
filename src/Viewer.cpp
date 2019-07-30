@@ -7,12 +7,14 @@
 #include <QStandardItemModel>
 #include <QSplitter>
 #include <QDebug>
+#include <QTextBlock>
 
 #include "TabCompositeViewer.hpp"
 #include "ProjectModel.hpp"
 #include "GrepNode.hpp"
 #include "BookmarksModel.hpp"
 #include "GrepNode.hpp"
+#include "TextRenderer.hpp"
 
 Viewer::Viewer(QWidget* parent, std::unique_ptr<Logfile> log)
 {
@@ -64,4 +66,25 @@ TabCompositeViewer* Viewer::getDeepestActiveTab()
 void Viewer::bookmarksItemDoubleClicked(const QModelIndex& idx)
 {
     qDebug() << "Doubleclicked item index: " << idx.row();
+
+    Bookmark bookmark = project_model_->getBookmarksModel()->get_bookmark(static_cast<uint32_t>(idx.row()));
+    TabCompositeViewer* text_viewer = find_deepest_active_tab(logViewer_);
+
+    int cursor_offset = 0;
+
+    auto line_it = text_viewer->lines_.begin();
+    while(line_it != text_viewer->lines_.end())
+    {
+        cursor_offset = static_cast<int>(std::distance(text_viewer->lines_.begin(), line_it));
+        if (line_it->number >= bookmark.line_number)
+        {
+            break;
+        }
+       ++line_it;
+    }
+
+    QTextCursor cursor = text_viewer->text_->textCursor();
+    cursor.movePosition(QTextCursor::Start, QTextCursor::MoveAnchor,1);
+    cursor.movePosition(QTextCursor::Down, QTextCursor::MoveAnchor, cursor_offset);
+    text_viewer->text_->setTextCursor(cursor);
 }

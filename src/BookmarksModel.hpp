@@ -14,7 +14,8 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
-    void add_bookmark(const uint32_t& line, const QPixmap& icon, const QString& text);
+    void add_bookmark(const uint32_t line, const QPixmap& icon, const QString& text);
+    Bookmark get_bookmark(uint32_t index);
 
 protected:
     QVector<Bookmark> bookmarks_;

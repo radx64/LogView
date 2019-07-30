@@ -19,8 +19,7 @@ int BookmarksModel::rowCount(const QModelIndex &parent) const
 QVariant BookmarksModel::data(const QModelIndex &index, int role) const
 {
     if (role == Qt::DisplayRole)
-       return QString(QString().number(bookmarks_[index.row()].line_number)
-               + " : "+ bookmarks_[index.row()].bookmark_text);
+       return QString(bookmarks_[index.row()].bookmark_text);
     else if (role == Qt::DecorationRole)
     {
         return bookmarks_[index.row()].icon;
@@ -29,7 +28,7 @@ QVariant BookmarksModel::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
-void BookmarksModel::add_bookmark(const uint32_t& line, const QPixmap& icon, const QString& text)
+void BookmarksModel::add_bookmark(const uint32_t line, const QPixmap& icon, const QString& text)
 {
     bookmarks_.append(Bookmark{line, text, icon});
     std::sort(bookmarks_.begin(), bookmarks_.end());
@@ -38,4 +37,10 @@ void BookmarksModel::add_bookmark(const uint32_t& line, const QPixmap& icon, con
     QModelIndex lastElement = createIndex(0,0);
     // TODO: Emit real change index
     emit dataChanged(firstElement, lastElement, QVector<int>{Qt::DisplayRole});
+}
+
+Bookmark BookmarksModel::get_bookmark(uint32_t index)
+{
+    if (static_cast<int>(index) < bookmarks_.size()) return bookmarks_[static_cast<int>(index)];
+    return Bookmark();
 }
