@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>GrepDialogWindow</class>
+ <widget class="QDialog" name="GrepDialogWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>121</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Grep</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="1" column="0">
+    <layout class="QGridLayout" name="gridLayout_3">
+     <item row="4" column="0">
+      <widget class="QPushButton" name="button">
+       <property name="text">
+        <string>Grep</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <layout class="QGridLayout" name="gridLayout_2">
+       <property name="spacing">
+        <number>1</number>
+       </property>
+       <item row="0" column="0">
+        <widget class="QLabel" name="label">
+         <property name="minimumSize">
+          <size>
+           <width>50</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Pattern</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLineEdit" name="pattern"/>
+       </item>
+      </layout>
+     </item>
+     <item row="1" column="0">
+      <widget class="QCheckBox" name="regex_check">
+       <property name="text">
+        <string>Regex</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QCheckBox" name="case_insensitive_check">
+       <property name="text">
+        <string>Case Insensitive</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>pattern</tabstop>
+  <tabstop>regex_check</tabstop>
+  <tabstop>case_insensitive_check</tabstop>
+  <tabstop>button</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>

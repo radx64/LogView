@@ -37,16 +37,33 @@ TabCompositeViewer::TabCompositeViewer(QWidget* parent, GrepNode* grep_node, con
     this->setLayout(layout);
 }
 
-void TabCompositeViewer::grep(QString pattern)
+QString generateTabName(const QString& base_name, bool is_regex, bool is_case_insensitive)
 {
-    QRegularExpression exp(pattern);
+    if (is_regex) return base_name + " (Rgx)";
+    if (is_case_insensitive) return  base_name + " (In)";
+    return base_name;
+}
+
+void TabCompositeViewer::grep(QString pattern, bool is_regex, bool is_case_insensitive)
+{
     Lines filtered_results;
-    for(auto line : lines_)
+    if (is_regex)
     {
-        QRegularExpressionMatch match = exp.match(line.text);
-        if (match.hasMatch())
+        QRegularExpression exp(pattern);
+        for(auto line : lines_)
         {
-            filtered_results.append({line.number, line.text});
+            QRegularExpressionMatch match = exp.match(line.text);
+            if (match.hasMatch()) filtered_results.append({line.number, line.text});
+        }
+    }
+    else
+    {
+        for(auto line : lines_)
+        {
+            if(line.text.contains(pattern, is_case_insensitive ? Qt::CaseInsensitive : Qt::CaseSensitive))
+            {
+               filtered_results.append({line.number, line.text});
+            }
         }
     }
 
@@ -54,16 +71,16 @@ void TabCompositeViewer::grep(QString pattern)
     grep_node_->addChild(new_grep_node);
 
     TabCompositeViewer* viewer = new TabCompositeViewer(this, new_grep_node, filtered_results);
-    tabs_->addTab(viewer, pattern);
-
+    tabs_->addTab(viewer, generateTabName(pattern, is_regex, is_case_insensitive));
 }
 void TabCompositeViewer::closeTab(const int index)
 {
+    qDebug() << "Closing tab " << index;
     QWidget* tabContents = tabs_->widget(index);
     tabs_->removeTab(index);
     if (tabContents != nullptr) delete(tabContents);
 
-    qDebug() << "I would remove " <<QString().fromStdString(grep_node_->getChildren()[index]->getValue());
-    auto child_to_be_removed = grep_node_->getChildren()[index];
+    //tab with index 0 points is like a parent (Base) so it is skipped in grep hierarchy storage
+    auto child_to_be_removed = grep_node_->getChildren()[index - 1];
     grep_node_->removeChild(child_to_be_removed);
 }

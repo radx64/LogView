@@ -17,6 +17,7 @@
 #include "Bookmark.hpp"
 #include "BookmarksModel.hpp"
 #include "Logfile.hpp"
+#include "GrepDialogWindow.hpp"
 #include "GrepNode.hpp"
 #include "ProjectModel.hpp"
 #include "TabCompositeViewer.hpp"
@@ -105,13 +106,13 @@ void MainWindow::grepCurrentView()
 
     TabCompositeViewer* deepest_tab = viewerWidget->getDeepestActiveTab();
 
-    // Simple QInputDialog will be extended later for something more fancy
-    bool ok = false;
-    QString input_grep = QInputDialog::getText(this, tr("Grepping..."),
-        tr("grep:"), QLineEdit::Normal, "", &ok);
+    GrepDialogWindow grepDialog;
 
-    if (deepest_tab && ok) deepest_tab->grep(input_grep);
+    if (grepDialog.exec() != QDialog::Accepted) return;
+    auto result = grepDialog.getResult();
+    if (deepest_tab) deepest_tab->grep(result.pattern, result.is_regex, result.is_case_insensitive);
 
+    //For debug
     viewerWidget->project_model_->grep_hierarchy_->evaluate(0);
 }
 

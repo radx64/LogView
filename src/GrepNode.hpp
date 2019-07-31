@@ -39,7 +39,8 @@ public:
 
     std::vector<GrepNode*> getChildren()
     {
-        std::vector<GrepNode*> result(children_.size());
+        std::vector<GrepNode*> result;
+        result.reserve(children_.size());
         for (const auto& child : children_) result.push_back(child);
         return result;
     }
