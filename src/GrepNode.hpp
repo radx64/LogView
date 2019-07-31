@@ -16,10 +16,7 @@ public:
 
     ~GrepNode()
     {
-        for (auto child : children_)
-        {
-            delete child;
-        }
+        for (auto child : children_) delete child;
     }
 
     std::string getValue()
@@ -30,6 +27,14 @@ public:
     void addChild(GrepNode* node)
     {
         children_.push_back(std::move(node));
+    }
+
+    void removeChild(GrepNode* node)
+    {
+        auto it = std::find(children_.begin(), children_.end(), node);
+        if (it == children_.end()) return;
+        children_.erase(it);
+        delete node;
     }
 
     std::vector<GrepNode*> getChildren()
@@ -45,7 +50,7 @@ public:
         QString result;
         for (unsigned char i=0; i < level; ++i)
         {
-            result += " ";
+            result += "-";
         }
         result += QString(value_.c_str());
         qDebug() << result;

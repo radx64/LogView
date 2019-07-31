@@ -62,4 +62,8 @@ void TabCompositeViewer::closeTab(const int index)
     QWidget* tabContents = tabs_->widget(index);
     tabs_->removeTab(index);
     if (tabContents != nullptr) delete(tabContents);
+
+    qDebug() << "I would remove " <<QString().fromStdString(grep_node_->getChildren()[index]->getValue());
+    auto child_to_be_removed = grep_node_->getChildren()[index];
+    grep_node_->removeChild(child_to_be_removed);
 }
