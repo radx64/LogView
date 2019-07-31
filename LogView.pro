@@ -27,6 +27,7 @@ CONFIG += c++17
 SOURCES += \
         src/Bookmark.cpp \
         src/BookmarksModel.cpp \
+        src/GrepDialogWindow.cpp \
         src/LineNumberArea.cpp \
         src/LineNumberingBasedOnModelPolicy.cpp \
         src/MainWindow.cpp \
@@ -39,6 +40,7 @@ SOURCES += \
 HEADERS += \
         src/Bookmark.hpp \
         src/BookmarksModel.hpp \
+        src/GrepDialogWindow.hpp \
         src/GrepNode.hpp \
         src/ILineNumberingPolicy.hpp \
         src/LineNumberingBasedOnModelPolicy.hpp \
@@ -51,6 +53,7 @@ HEADERS += \
         src/Viewer.hpp
 
 FORMS += \
+    src/GrepDialogWindow.ui \
     src/MainWindow.ui
 
 # Default rules for deployment.
