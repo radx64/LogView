@@ -48,6 +48,7 @@ HEADERS += \
         src/LineNumberArea.hpp \
         src/MainWindow.hpp \
         src/ProjectModel.hpp \
+        src/Serializable.hpp \
         src/TabCompositeViewer.hpp \
         src/TextRenderer.hpp \
         src/Viewer.hpp

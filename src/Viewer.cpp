@@ -76,7 +76,7 @@ void Viewer::bookmarksItemDoubleClicked(const QModelIndex& idx)
     while(line_it != text_viewer->lines_.end())
     {
         cursor_offset = static_cast<int>(std::distance(text_viewer->lines_.begin(), line_it));
-        if (line_it->number >= bookmark.line_number)
+        if (line_it->number >= bookmark.line_number_)
         {
             break;
         }

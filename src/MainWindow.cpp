@@ -13,6 +13,8 @@
 #include <QInputDialog>
 #include <QDebug>
 #include <QStandardItemModel>
+#include <QJsonDocument>
+#include <QJsonObject>
 
 #include "Bookmark.hpp"
 #include "BookmarksModel.hpp"
@@ -166,4 +168,25 @@ void MainWindow::on_exit_app_triggered()
 void MainWindow::on_actionAbout_triggered()
 {
     QMessageBox::about(this, QString("About application"), QString("RadX64 © 2019\nReleased under\nGNU GENERAL PUBLIC LICENSE"));
+}
+
+void MainWindow::on_actionSave_project_triggered()
+{
+    // DUMMY JSON SERIALIZER TESTS
+
+    Viewer* viewerWidget = get_active_viewer_widget();
+    if (!viewerWidget) return; // can display here some message
+
+    QFile saveFile("save.json");
+    if (!saveFile.open(QIODevice::WriteOnly)) {
+        qWarning("Couldn't open save file.");
+        return;
+    }
+
+    QJsonObject bookmarks;
+    viewerWidget->project_model_->getBookmarksModel()->serialize(bookmarks);
+    QJsonDocument document(bookmarks);
+    qDebug() << document.toJson(QJsonDocument::Indented);
+
+    saveFile.write(document.toJson(QJsonDocument::Indented));
 }

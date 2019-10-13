@@ -61,7 +61,11 @@
     </property>
     <addaction name="actionLoad_from_file"/>
     <addaction name="separator"/>
+    <addaction name="actionLoad_project"/>
+    <addaction name="actionSave_project"/>
     <addaction name="exit_app"/>
+    <addaction name="separator"/>
+    <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuFind">
     <property name="title">
@@ -98,7 +102,7 @@
      <normaloff>:/icon/Gnome-Logviewer-32.png</normaloff>:/icon/Gnome-Logviewer-32.png</iconset>
    </property>
    <property name="text">
-    <string>Load...</string>
+    <string>Load file...</string>
    </property>
   </action>
   <action name="exit_app">
@@ -141,6 +145,20 @@
    </property>
    <property name="text">
     <string>About</string>
+   </property>
+  </action>
+  <action name="actionLoad_project">
+   <property name="text">
+    <string>Load project ...</string>
+   </property>
+  </action>
+  <action name="actionSave_project">
+   <property name="icon">
+    <iconset resource="../icons.qrc">
+     <normaloff>:/icon/Gnome-Dialog-Warning-32.png</normaloff>:/icon/Gnome-Dialog-Warning-32.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save project ...</string>
    </property>
   </action>
  </widget>
