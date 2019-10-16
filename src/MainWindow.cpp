@@ -136,7 +136,7 @@ void MainWindow::bookmarkCurrentLine()
     if (!ok) return;
     qDebug() << "Adding bookmark at line" << absolute_line_index;
     viewerWidget->project_model_->getBookmarksModel()->add_bookmark(absolute_line_index,
-        QPixmap(":/icon/Gnome-Bookmark-New-32.png"),
+        QString(":/icon/Gnome-Bookmark-New-32.png"),
         bookmark_name);
 }
 

@@ -76,7 +76,7 @@ virtual void serialize(QJsonObject &json) const override
         child->serialize(json_child);
         array.append(json_child);
     }
-   json["childs"] = array;
+   json["childern"] = array;
 }
 
 virtual void deserialize(const QJsonObject &json) override

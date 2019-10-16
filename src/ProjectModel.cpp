@@ -18,7 +18,7 @@ BookmarksModel* ProjectModel::getBookmarksModel()
 
 void ProjectModel::serialize(QJsonObject &json) const
 {
-    json["filename"] = QString("TBD");
+    json["filepath"] = file_path_;
     QJsonObject greps;
     grep_hierarchy_->serialize(greps);
     json["greps"] = greps;

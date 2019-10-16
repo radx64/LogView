@@ -23,14 +23,11 @@ QVariant BookmarksModel::data(const QModelIndex &index, int role) const
     if (role == Qt::DisplayRole)
        return QString(bookmarks_[index.row()].text_);
     else if (role == Qt::DecorationRole)
-    {
-        return bookmarks_[index.row()].icon_;
-    }
-
+        return QPixmap(bookmarks_[index.row()].icon_);
     return QVariant();
 }
 
-void BookmarksModel::add_bookmark(const uint32_t line, const QPixmap& icon, const QString& text)
+void BookmarksModel::add_bookmark(const uint32_t line, const QString& icon, const QString& text)
 {
     bookmarks_.append(Bookmark{line, text, icon});
     std::sort(bookmarks_.begin(), bookmarks_.end());
