@@ -43,19 +43,3 @@ Bookmark BookmarksModel::get_bookmark(uint32_t index)
     if (static_cast<int>(index) < bookmarks_.size()) return bookmarks_[static_cast<int>(index)];
     return Bookmark();
 }
-
-void BookmarksModel::serialize(QJsonObject &json) const
-{
-    QJsonArray array;
-    for (const auto& bookmark : bookmarks_)
-    {
-        QJsonObject jsonBookmark;
-        bookmark.serialize(jsonBookmark);
-        array.append(jsonBookmark);
-    }
-    json["bookmarks"] = array;
-}
-void BookmarksModel::deserialize(const QJsonObject &json)
-{
-    (void)json;
-}

@@ -35,7 +35,11 @@ SOURCES += \
         src/main.cpp \
         src/ProjectModel.cpp \
         src/TabCompositeViewer.cpp \
-        src/TextRenderer.cpp
+        src/TextRenderer.cpp \
+        src/serializer/SerializerBookmark.cpp \
+        src/serializer/SerializerBookmarksModel.cpp \
+        src/serializer/SerializerProjectModel.cpp \
+        src/serializer/SerializerGrepNode.cpp
 
 HEADERS += \
         src/Bookmark.hpp \
@@ -48,10 +52,13 @@ HEADERS += \
         src/LineNumberArea.hpp \
         src/MainWindow.hpp \
         src/ProjectModel.hpp \
-        src/Serializable.hpp \
         src/TabCompositeViewer.hpp \
         src/TextRenderer.hpp \
-        src/Viewer.hpp
+        src/Viewer.hpp \
+        src/serializer/SerializerBookmark.hpp \
+        src/serializer/SerializerBookmarksModel.hpp \
+        src/serializer/SerializerProjectModel.hpp \
+        src/serializer/SerializerGrepNode.hpp
 
 FORMS += \
     src/GrepDialogWindow.ui \

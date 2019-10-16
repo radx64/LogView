@@ -25,6 +25,7 @@
 #include "TabCompositeViewer.hpp"
 #include "TextRenderer.hpp"
 #include "Viewer.hpp"
+#include "serializer/SerializerProjectModel.hpp"
 
 void MainWindow::closeFileTab(const int index)
 {
@@ -184,7 +185,7 @@ void MainWindow::on_actionSave_project_triggered()
     }
 
     QJsonObject object;
-    viewerWidget->project_model_->serialize(object);
+    serializer::ProjectModel::serialize(*viewerWidget->project_model_, object);
     QJsonDocument document(object);
     qDebug() << document.toJson(QJsonDocument::Indented);
     saveFile.write(document.toJson(QJsonDocument::Indented));

@@ -5,12 +5,11 @@
 #include <QString>
 
 #include "Bookmark.hpp"
-
-#include "Serializable.hpp"
-
 class QJsonObject;
 
-class BookmarksModel : public QAbstractListModel, Serializable
+namespace serializer { class BookmarksModel; }
+
+class BookmarksModel : public QAbstractListModel
 {
     Q_OBJECT
 public:
@@ -21,10 +20,9 @@ public:
     void add_bookmark(const uint32_t line, const QString& icon, const QString& text);
     Bookmark get_bookmark(uint32_t index);
 
-    virtual void serialize(QJsonObject &json) const override;
-    virtual void deserialize(const QJsonObject &json) override;
-
 protected:
     QVector<Bookmark> bookmarks_;
+
+    friend class serializer::BookmarksModel;
 };
 #endif // BOOKMARKS_MODEL_HPP

@@ -6,14 +6,13 @@
 #include <QString>
 #include <QPixmap>
 
-#include "Serializable.hpp"
+namespace serializer { class Bookmark; }
 
-class Bookmark : public Serializable
+class Bookmark
 {
 public:
     Bookmark() = default;
     Bookmark(const uint32_t &line_number, const QString &text, const QString &icon);
-    virtual ~Bookmark() override = default ;
 
     uint32_t line_number_;
     QString text_;
@@ -21,7 +20,6 @@ public:
 
     bool operator < (const Bookmark& b) const;
 
-    virtual void serialize(QJsonObject &json) const override;
-    virtual void deserialize(const QJsonObject &json) override;
+    friend class serializer::Bookmark;
 };
 #endif // BOOKMARK_HPP

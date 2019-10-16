@@ -9,16 +9,16 @@
 #include <QJsonObject>
 #include <QJsonArray>
 
-#include "Serializable.hpp"
+namespace serializer { class GrepNode; }
 
-class GrepNode : public Serializable
+class GrepNode
 {
 public:
 GrepNode(std::string value) : value_{value}
 {
 }
 
-~GrepNode() override
+~GrepNode()
 {
     for (auto child : children_) delete child;
 }
@@ -66,27 +66,11 @@ void evaluate(const unsigned char level)
     }
 }
 
-virtual void serialize(QJsonObject &json) const override
-{
-    json["pattern"] = QString::fromStdString(value_);
-    QJsonArray array;
-    for (const auto& child : children_)
-    {
-        QJsonObject json_child;
-        child->serialize(json_child);
-        array.append(json_child);
-    }
-   json["childern"] = array;
-}
-
-virtual void deserialize(const QJsonObject &json) override
-{
-    (void)json;
-}
-
 protected:
     std::vector<GrepNode*> children_;
     std::string value_{};
+
+    friend class serializer::GrepNode;
 };
 
 #endif // GREP_NODE_HPP
