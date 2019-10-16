@@ -1,6 +1,5 @@
 #include "Bookmark.hpp"
 
-#include <QJsonArray>
 #include <QJsonObject>
 
 Bookmark::Bookmark(const uint32_t &line_number, const QString &text, const QPixmap &icon)

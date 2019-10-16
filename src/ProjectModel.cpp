@@ -15,3 +15,16 @@ BookmarksModel* ProjectModel::getBookmarksModel()
 {
     return bookmarks_model_.get();
 }
+
+void ProjectModel::serialize(QJsonObject &json) const
+{
+    json["filename"] = QString("TBD");
+    QJsonObject greps;
+    grep_hierarchy_->serialize(greps);
+    json["greps"] = greps;
+    bookmarks_model_->serialize(json);
+}
+void ProjectModel::deserialize(const QJsonObject &json)
+{
+    (void)json;
+}

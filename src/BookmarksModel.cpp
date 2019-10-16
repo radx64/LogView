@@ -60,4 +60,5 @@ void BookmarksModel::serialize(QJsonObject &json) const
 }
 void BookmarksModel::deserialize(const QJsonObject &json)
 {
+    (void)json;
 }

@@ -183,10 +183,9 @@ void MainWindow::on_actionSave_project_triggered()
         return;
     }
 
-    QJsonObject bookmarks;
-    viewerWidget->project_model_->getBookmarksModel()->serialize(bookmarks);
-    QJsonDocument document(bookmarks);
+    QJsonObject object;
+    viewerWidget->project_model_->serialize(object);
+    QJsonDocument document(object);
     qDebug() << document.toJson(QJsonDocument::Indented);
-
     saveFile.write(document.toJson(QJsonDocument::Indented));
 }
