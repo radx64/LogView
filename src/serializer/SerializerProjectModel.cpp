@@ -32,8 +32,6 @@ void ProjectModel::deserialize(::ProjectModel &pm, const QJsonObject &json)
     std::unique_ptr<::BookmarksModel> bm = std::make_unique<::BookmarksModel>();
     serializer::BookmarksModel::deserialize(*bm, json);
     pm.bookmarks_model_ = std::move(bm);
-
-    // bookmarks deserialize
 }
 
 }  // namespace serializer

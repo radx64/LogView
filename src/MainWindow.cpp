@@ -174,7 +174,6 @@ void MainWindow::on_actionAbout_triggered()
 void MainWindow::on_actionSave_project_triggered()
 {
     // DUMMY JSON SERIALIZER TESTS
-
     Viewer* viewerWidget = get_active_viewer_widget();
     if (!viewerWidget) return; // can display here some message
 
@@ -194,7 +193,6 @@ void MainWindow::on_actionSave_project_triggered()
 void MainWindow::on_actionLoad_project_triggered()
 {
     // DUMMY JSON DESERIALIZER TESTS
-
     QFile loadFile("save.json");
     if (!loadFile.open(QIODevice::ReadOnly)) {
         qWarning("Couldn't open save file!");
@@ -205,6 +203,4 @@ void MainWindow::on_actionLoad_project_triggered()
 
     ProjectModel project;
     serializer::ProjectModel::deserialize(project, object);
-
-    qDebug() << project.file_path_;
 }
