@@ -148,6 +148,10 @@
    </property>
   </action>
   <action name="actionLoad_project">
+   <property name="icon">
+    <iconset resource="../icons.qrc">
+     <normaloff>:/icon/Gnome-Dialog-Warning-32.png</normaloff>:/icon/Gnome-Dialog-Warning-32.png</iconset>
+   </property>
    <property name="text">
     <string>Load project ...</string>
    </property>

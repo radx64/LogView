@@ -22,8 +22,14 @@ void BookmarksModel::serialize(const ::BookmarksModel& bmodel, QJsonObject &json
 
 void BookmarksModel::deserialize(::BookmarksModel& bmodel, const QJsonObject &json)
 {
-    (void) bmodel;
-    (void) json;
+    QJsonArray bookmarks = json["bookmarks"].toArray();
+
+    for (const QJsonValue child : bookmarks)
+    {
+        ::Bookmark b;
+        ::serializer::Bookmark::deserialize(b, child.toObject());
+        bmodel.bookmarks_.append(b);
+    }
 }
 
 }  // namespace serializer

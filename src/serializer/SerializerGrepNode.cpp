@@ -23,8 +23,14 @@ void GrepNode::serialize(const ::GrepNode &gp, QJsonObject &json)
 
 void GrepNode::deserialize(::GrepNode &gp, const QJsonObject &json)
 {
-    (void)gp;
-    (void)json;
+    gp.value_ = json["pattern"].toString().toStdString();
+    QJsonArray children = json["childern"].toArray();
+    for (const QJsonValue child : children)
+    {
+        ::GrepNode *c = new ::GrepNode;
+        serializer::GrepNode::deserialize(*c, child.toObject());
+        gp.children_.push_back(c);
+    }
 }
 
 }  // namespace serializer

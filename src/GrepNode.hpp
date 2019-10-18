@@ -14,9 +14,11 @@ namespace serializer { class GrepNode; }
 class GrepNode
 {
 public:
-GrepNode(std::string value) : value_{value}
+explicit GrepNode(std::string value) : value_{value}
 {
 }
+
+GrepNode() = default;
 
 ~GrepNode()
 {

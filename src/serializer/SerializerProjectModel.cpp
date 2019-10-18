@@ -23,8 +23,17 @@ void ProjectModel::serialize(const ::ProjectModel &pm, QJsonObject &json)
 }
 void ProjectModel::deserialize(::ProjectModel &pm, const QJsonObject &json)
 {
-    (void) pm;
-    (void) json;
+    pm.file_path_ = json["filepath"].toString();
+
+    std::unique_ptr<::GrepNode> gn = std::make_unique<::GrepNode>();
+    serializer::GrepNode::deserialize(*gn, json["greps"].toObject());
+    pm.grep_hierarchy_ = std::move(gn);
+
+    std::unique_ptr<::BookmarksModel> bm = std::make_unique<::BookmarksModel>();
+    serializer::BookmarksModel::deserialize(*bm, json);
+    pm.bookmarks_model_ = std::move(bm);
+
+    // bookmarks deserialize
 }
 
 }  // namespace serializer

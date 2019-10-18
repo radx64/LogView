@@ -4,6 +4,8 @@
 
 #include <QJsonObject>
 
+#include <QDebug>
+
 namespace serializer
 {
 
@@ -16,8 +18,9 @@ void Bookmark::serialize(const ::Bookmark& bookmark, QJsonObject &json)
 
 void Bookmark::deserialize(::Bookmark& bookmark, const QJsonObject &json)
 {
-    (void) bookmark;
-    (void) json;
+    bookmark.line_number_ = static_cast<uint32_t>(json["line"].toInt());
+    bookmark.text_ = json["text"].toString();
+    bookmark.icon_ = json["icon"].toString();
 }
 
 }  // namespace serializer

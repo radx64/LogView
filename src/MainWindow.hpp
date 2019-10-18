@@ -38,6 +38,8 @@ private slots:
 
     void on_actionSave_project_triggered();
 
+    void on_actionLoad_project_triggered();
+
 private:
     void bookmarkCurrentLine();
     void connect_signals();

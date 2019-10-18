@@ -180,7 +180,7 @@ void MainWindow::on_actionSave_project_triggered()
 
     QFile saveFile("save.json");
     if (!saveFile.open(QIODevice::WriteOnly)) {
-        qWarning("Couldn't open save file.");
+        qWarning("Couldn't open save file!");
         return;
     }
 
@@ -189,4 +189,22 @@ void MainWindow::on_actionSave_project_triggered()
     QJsonDocument document(object);
     qDebug() << document.toJson(QJsonDocument::Indented);
     saveFile.write(document.toJson(QJsonDocument::Indented));
+}
+
+void MainWindow::on_actionLoad_project_triggered()
+{
+    // DUMMY JSON DESERIALIZER TESTS
+
+    QFile loadFile("save.json");
+    if (!loadFile.open(QIODevice::ReadOnly)) {
+        qWarning("Couldn't open save file!");
+        return;
+    }
+    QJsonDocument document = QJsonDocument::fromJson(loadFile.readAll());
+    QJsonObject object = document.object();
+
+    ProjectModel project;
+    serializer::ProjectModel::deserialize(project, object);
+
+    qDebug() << project.file_path_;
 }
