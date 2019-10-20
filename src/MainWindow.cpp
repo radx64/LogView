@@ -2,31 +2,31 @@
 #include "ui_MainWindow.h"
 
 // TODO: cleanup this includes after some mockups creation and proper class segregation
-#include <QLabel>
-#include <QLayout>
-#include <QTabWidget>
-#include <QFileDialog>
-#include <QMessageBox>
-#include <QTextEdit>
 #include <QAction>
-#include <QMimeData>
-#include <QInputDialog>
 #include <QDebug>
-#include <QStandardItemModel>
+#include <QFileDialog>
+#include <QInputDialog>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QLabel>
+#include <QLayout>
+#include <QMessageBox>
+#include <QMimeData>
+#include <QStandardItemModel>
+#include <QTabWidget>
+#include <QTextEdit>
 
 #include "Bookmark.hpp"
 #include "BookmarksModel.hpp"
-#include "Logfile.hpp"
 #include "GrepDialogWindow.hpp"
 #include "GrepNode.hpp"
+#include "Logfile.hpp"
 #include "ProjectModel.hpp"
 #include "TabCompositeViewer.hpp"
 #include "TextRenderer.hpp"
 #include "Viewer.hpp"
-#include "serializer/SerializerProjectModel.hpp"
 #include "loader/Project.hpp"
+#include "serializer/SerializerProjectModel.hpp"
 
 void MainWindow::closeFileTab(const int index)
 {
@@ -64,7 +64,7 @@ void MainWindow::dropEvent(QDropEvent* event)
     QList<QUrl> urlList = mimeData->urls();
     for (const auto& fileList : urlList)
     {
-        spawnViewerWithContent(std::make_unique<Logfile>(fileList.toLocalFile()));
+        spawnViewerWithContent(fileList.toLocalFile());
     }
 }
 
@@ -79,12 +79,19 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::spawnViewerWithContent(std::unique_ptr<Logfile> log)
+void MainWindow::spawnViewerWithContent(QString file_path)
 {
-    QTabWidget* fileTabWidget = ui->fileView;
-    QString filename = log->getFileName();
-    Viewer* viewer = new Viewer(fileTabWidget, std::move(log));
-    fileTabWidget ->addTab(viewer, filename.split(QRegularExpression("[\\/]")).last());
+//    QTabWidget* fileTabWidget = ui->fileView;
+//    QString filename = log->getFileName();
+//    Viewer* viewer = new Viewer(fileTabWidget, std::move(log));
+//    fileTabWidget ->addTab(viewer, filename.split(QRegularExpression("[\\/]")).last());
+
+    std::unique_ptr<ProjectModel> project = std::make_unique<ProjectModel>();
+    project->logfile_model_ = std::make_unique<Logfile>(file_path);
+    project->grep_hierarchy_ = std::make_unique<GrepNode>("ROOT");
+    project->file_path_ = file_path;
+    loader::Project::load(ui, std::move(project));
+
 }
 
 Viewer* MainWindow::get_active_viewer_widget()
@@ -144,13 +151,13 @@ void MainWindow::bookmarkCurrentLine()
 
 void MainWindow::on_actionLoad_from_file_triggered()
 {
-    QString filename = QFileDialog::getOpenFileName(this,
+    QString file_path = QFileDialog::getOpenFileName(this,
         tr("Open log file"), "",
         tr("TextFiles (*.txt);;All Files (*)"));
-    if (filename.isEmpty())
+    if (file_path.isEmpty())
         return;
 
-    spawnViewerWithContent(std::make_unique<Logfile>(filename));
+    spawnViewerWithContent(file_path);
 }
 
 void MainWindow::on_actionGrep_current_view_triggered()

@@ -9,7 +9,7 @@
 #include "../ProjectModel.hpp"
 #include "../TabCompositeViewer.hpp"
 #include "../Viewer.hpp"
-#include "../ui_MainWindow.h"
+#include "ui_MainWindow.h"
 
 namespace loader
 {
@@ -25,6 +25,7 @@ void Project::load(Ui::MainWindow *ui, std::unique_ptr<::ProjectModel> pm)
 
 void Project::spawnGreppedViews(TabCompositeViewer* parent_tab, const GrepNode* node)
 {
+    if (node == nullptr) return;
     for (GrepNode* child : node->getChildren())
     {
         TabCompositeViewer* spawned_viewer = parent_tab->grep(

@@ -44,7 +44,7 @@ private:
     void bookmarkCurrentLine();
     void connect_signals();
     void grepCurrentView();
-    void spawnViewerWithContent(std::unique_ptr<Logfile> log);
+    void spawnViewerWithContent(QString file_path);
     Viewer* get_active_viewer_widget();
     void dropEvent(QDropEvent* event);
     void dragEnterEvent(QDragEnterEvent* event);
