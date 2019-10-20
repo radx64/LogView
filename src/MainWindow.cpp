@@ -121,8 +121,15 @@ void MainWindow::grepCurrentView()
 
     if (grepDialog.exec() != QDialog::Accepted) return;
     auto result = grepDialog.getResult();
-    if (deepest_tab) deepest_tab->grep(result.pattern, result.is_regex, result.is_case_insensitive);
+    if (deepest_tab)
+    {
+        GrepNode* new_grep_node = new GrepNode(result.pattern.toStdString(),
+                                               result.is_regex,
+                                               result.is_case_insensitive);
 
+        deepest_tab->grep(new_grep_node);
+        deepest_tab->getGrepNode()->addChild(new_grep_node);
+    }
     //For debug
     viewerWidget->project_model_->grep_hierarchy_->evaluate(0);
 }
@@ -211,5 +218,6 @@ void MainWindow::on_actionLoad_project_triggered()
 
     std::unique_ptr<ProjectModel> project = std::make_unique<ProjectModel>();
     serializer::ProjectModel::deserialize(*project, object);
+    qDebug() << project->grep_hierarchy_->getChildren().size();
     loader::Project::load(ui, std::move(project));
 }

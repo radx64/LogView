@@ -14,9 +14,16 @@ namespace serializer { class GrepNode; }
 class GrepNode
 {
 public:
-explicit GrepNode(std::string value) : value_{value}
-{
-}
+GrepNode(
+    std::string value,
+    bool is_regex = false,
+    bool is_case_insensitive = false,
+    bool is_inverted = false)
+: pattern_{value},
+    is_regex_{is_regex},
+    is_case_insensitive_{is_case_insensitive},
+    is_inverted_{is_inverted}
+{}
 
 GrepNode() = default;
 
@@ -25,9 +32,24 @@ GrepNode() = default;
     for (auto child : children_) delete child;
 }
 
-std::string getValue()
+std::string getPattern() const
 {
-    return value_;
+    return pattern_;
+}
+
+bool isRegEx() const
+{
+    return is_regex_;
+}
+
+bool isCaseInsensitive() const
+{
+    return is_case_insensitive_;
+}
+
+bool isInverted() const
+{
+    return is_inverted_;
 }
 
 void addChild(GrepNode* node)
@@ -59,7 +81,7 @@ void evaluate(const unsigned char level)
     {
         result += "-";
     }
-    result += QString(value_.c_str());
+    result += QString(pattern_.c_str());
     qDebug() << result;
 
     for (auto& element : children_)
@@ -70,7 +92,10 @@ void evaluate(const unsigned char level)
 
 protected:
     std::vector<GrepNode*> children_;
-    std::string value_{};
+    std::string pattern_;
+    bool is_regex_;
+    bool is_case_insensitive_;
+    bool is_inverted_;
 
     friend class serializer::GrepNode;
 };

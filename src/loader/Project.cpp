@@ -21,6 +21,7 @@ void Project::load(Ui::MainWindow *ui, std::unique_ptr<::ProjectModel> pm)
     Viewer* viewer = new Viewer(file_tab_widget, std::move(pm));
     file_tab_widget ->addTab(viewer, filename.split(QRegularExpression("[\\/]")).last());
     spawnGreppedViews(viewer->getDeepestActiveTab(), viewer->project_model_->grep_hierarchy_.get());
+    //qDebug() << viewer->project_model_->grep_hierarchy_->getChildren().size();
 }
 
 void Project::spawnGreppedViews(TabCompositeViewer* parent_tab, const GrepNode* node)
@@ -28,8 +29,7 @@ void Project::spawnGreppedViews(TabCompositeViewer* parent_tab, const GrepNode* 
     if (node == nullptr) return;
     for (GrepNode* child : node->getChildren())
     {
-        TabCompositeViewer* spawned_viewer = parent_tab->grep(
-            QString().fromStdString(child->getValue()), false, false); //todo read rest parameters from GrepNode when implemented
+        TabCompositeViewer* spawned_viewer = parent_tab->grep(child); //todo read rest parameters from GrepNode when implemented
         spawnGreppedViews(spawned_viewer, child);
     }
 }

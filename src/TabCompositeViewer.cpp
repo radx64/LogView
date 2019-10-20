@@ -37,17 +37,20 @@ TabCompositeViewer::TabCompositeViewer(QWidget* parent, GrepNode* grep_node, con
     this->setLayout(layout);
 }
 
-QString generateTabName(const QString& base_name, bool is_regex, bool is_case_insensitive)
+QString generateTabName(const GrepNode* grep, const QString base_name)
 {
-    if (is_regex) return base_name + " (Rgx)";
-    if (is_case_insensitive) return  base_name + " (In)";
+    if (grep->isRegEx()) return base_name + " (Rgx)";
+    if (grep->isCaseInsensitive()) return  base_name + " (In)";
     return base_name;
 }
 
-TabCompositeViewer* TabCompositeViewer::grep(QString pattern, bool is_regex, bool is_case_insensitive)
+TabCompositeViewer* TabCompositeViewer::grep(GrepNode* grep)
 {
+    const QString pattern = QString().fromStdString(grep->getPattern());
+
+
     Lines filtered_results;
-    if (is_regex)
+    if (grep->isRegEx())
     {
         QRegularExpression exp(pattern);
         for(auto line : lines_)
@@ -60,18 +63,17 @@ TabCompositeViewer* TabCompositeViewer::grep(QString pattern, bool is_regex, boo
     {
         for(auto line : lines_)
         {
-            if(line.text.contains(pattern, is_case_insensitive ? Qt::CaseInsensitive : Qt::CaseSensitive))
+            if(line.text.contains(pattern, grep->isCaseInsensitive() ? Qt::CaseInsensitive : Qt::CaseSensitive))
             {
                filtered_results.append({line.number, line.text});
             }
         }
     }
 
-    GrepNode* new_grep_node = new GrepNode(pattern.toStdString());
-    grep_node_->addChild(new_grep_node);
+    bool is_inverted = false; //todo add inversion functionality
 
-    TabCompositeViewer* viewer = new TabCompositeViewer(this, new_grep_node, filtered_results);
-    tabs_->addTab(viewer, generateTabName(pattern, is_regex, is_case_insensitive));
+    TabCompositeViewer* viewer = new TabCompositeViewer(this, grep, filtered_results);
+    tabs_->addTab(viewer, generateTabName(grep, pattern));
     return viewer;
 }
 void TabCompositeViewer::closeTab(const int index)
@@ -84,4 +86,9 @@ void TabCompositeViewer::closeTab(const int index)
     //tab with index 0 points is like a parent (Base) so it is skipped in grep hierarchy storage
     auto child_to_be_removed = grep_node_->getChildren()[index - 1];
     grep_node_->removeChild(child_to_be_removed);
+}
+
+GrepNode* TabCompositeViewer::getGrepNode()
+{
+    return grep_node_;
 }

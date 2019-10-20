@@ -16,7 +16,9 @@ class TabCompositeViewer : public QWidget
     Q_OBJECT
 public:
     TabCompositeViewer(QWidget* parent, GrepNode* current_grep_node_, const Lines lines);
-    TabCompositeViewer* grep(QString pattern, bool is_regex, bool is_case_insensitive);
+    TabCompositeViewer* grep(GrepNode* grep);
+
+    GrepNode* getGrepNode();
 
     QTabWidget* tabs_;
     TextRenderer* text_;
