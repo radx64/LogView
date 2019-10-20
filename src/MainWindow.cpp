@@ -26,6 +26,7 @@
 #include "TextRenderer.hpp"
 #include "Viewer.hpp"
 #include "serializer/SerializerProjectModel.hpp"
+#include "loader/Project.hpp"
 
 void MainWindow::closeFileTab(const int index)
 {
@@ -190,16 +191,6 @@ void MainWindow::on_actionSave_project_triggered()
     saveFile.write(document.toJson(QJsonDocument::Indented));
 }
 
-void spawnGreppedViews(TabCompositeViewer* parent_tab, const GrepNode* node)
-{
-    for (GrepNode* child : node->getChildren())
-    {
-        TabCompositeViewer* spawnedViewer = parent_tab->grep(
-            QString().fromStdString(child->getValue()), false, false); //todo read rest parameters from GrepNode when implemented
-        spawnGreppedViews(spawnedViewer, child);
-    }
-}
-
 void MainWindow::on_actionLoad_project_triggered()
 {
     // DUMMY JSON DESERIALIZER TESTS
@@ -213,11 +204,5 @@ void MainWindow::on_actionLoad_project_triggered()
 
     std::unique_ptr<ProjectModel> project = std::make_unique<ProjectModel>();
     serializer::ProjectModel::deserialize(*project, object);
-
-    QTabWidget* fileTabWidget = ui->fileView;
-    QString filename = project->file_path_;
-    Viewer* viewer = new Viewer(fileTabWidget, std::move(project));
-    fileTabWidget ->addTab(viewer, filename.split(QRegularExpression("[\\/]")).last());
-
-    spawnGreppedViews(viewer->getDeepestActiveTab(), viewer->project_model_->grep_hierarchy_.get());
+    loader::Project::load(ui, std::move(project));
 }

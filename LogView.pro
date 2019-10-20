@@ -36,6 +36,7 @@ SOURCES += \
         src/ProjectModel.cpp \
         src/TabCompositeViewer.cpp \
         src/TextRenderer.cpp \
+        src/loader/Project.cpp \
         src/serializer/SerializerBookmark.cpp \
         src/serializer/SerializerBookmarksModel.cpp \
         src/serializer/SerializerProjectModel.cpp \
@@ -55,6 +56,7 @@ HEADERS += \
         src/TabCompositeViewer.hpp \
         src/TextRenderer.hpp \
         src/Viewer.hpp \
+        src/loader/Project.hpp \
         src/serializer/SerializerBookmark.hpp \
         src/serializer/SerializerBookmarksModel.hpp \
         src/serializer/SerializerProjectModel.hpp \

@@ -22,9 +22,7 @@ public:
     std::unique_ptr<Logfile> logfile_model_;
 protected:
     std::unique_ptr<BookmarksModel> bookmarks_model_;
-
     friend class serializer::ProjectModel;
-
 };
 
 #endif // PROJECT_MODEL_HPP
