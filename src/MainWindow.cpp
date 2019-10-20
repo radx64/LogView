@@ -81,17 +81,11 @@ MainWindow::~MainWindow()
 
 void MainWindow::spawnViewerWithContent(QString file_path)
 {
-//    QTabWidget* fileTabWidget = ui->fileView;
-//    QString filename = log->getFileName();
-//    Viewer* viewer = new Viewer(fileTabWidget, std::move(log));
-//    fileTabWidget ->addTab(viewer, filename.split(QRegularExpression("[\\/]")).last());
-
     std::unique_ptr<ProjectModel> project = std::make_unique<ProjectModel>();
     project->logfile_model_ = std::make_unique<Logfile>(file_path);
     project->grep_hierarchy_ = std::make_unique<GrepNode>("ROOT");
     project->file_path_ = file_path;
     loader::Project::load(ui, std::move(project));
-
 }
 
 Viewer* MainWindow::get_active_viewer_widget()
@@ -130,8 +124,6 @@ void MainWindow::grepCurrentView()
         deepest_tab->grep(new_grep_node);
         deepest_tab->getGrepNode()->addChild(new_grep_node);
     }
-    //For debug
-    viewerWidget->project_model_->grep_hierarchy_->evaluate(0);
 }
 
 void MainWindow::bookmarkCurrentLine()

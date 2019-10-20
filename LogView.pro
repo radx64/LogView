@@ -28,6 +28,7 @@ SOURCES += \
         src/Bookmark.cpp \
         src/BookmarksModel.cpp \
         src/GrepDialogWindow.cpp \
+        src/GrepNode.cpp \
         src/LineNumberArea.cpp \
         src/LineNumberingBasedOnModelPolicy.cpp \
         src/MainWindow.cpp \

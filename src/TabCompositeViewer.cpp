@@ -48,7 +48,6 @@ TabCompositeViewer* TabCompositeViewer::grep(GrepNode* grep)
 {
     const QString pattern = QString().fromStdString(grep->getPattern());
 
-
     Lines filtered_results;
     if (grep->isRegEx())
     {
