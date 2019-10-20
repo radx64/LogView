@@ -92,7 +92,6 @@ Viewer* MainWindow::get_active_viewer_widget()
 {
     const int tab_index = ui->fileView->currentIndex();
     if(tab_index == -1) return nullptr;
-    qDebug() << "File tab index:" <<tab_index;
     Viewer* viewerWidget = dynamic_cast<Viewer*>(ui->fileView->widget(tab_index));
     if (!viewerWidget) throw std::string("Could not find active ViewerWidget");
     return viewerWidget;
@@ -142,7 +141,6 @@ void MainWindow::bookmarkCurrentLine()
         tr("Name:"), QLineEdit::Normal, deepest_tab->lines_[current_line_index].text, &ok);
 
     if (!ok) return;
-    qDebug() << "Adding bookmark at line" << absolute_line_index;
     viewerWidget->project_model_->getBookmarksModel()->add_bookmark(absolute_line_index,
         QString(":/icon/Gnome-Bookmark-New-32.png"),
         bookmark_name);
@@ -193,7 +191,6 @@ void MainWindow::on_actionSave_project_triggered()
     QJsonObject object;
     serializer::ProjectModel::serialize(*viewerWidget->project_model_, object);
     QJsonDocument document(object);
-    qDebug() << document.toJson(QJsonDocument::Indented);
     saveFile.write(document.toJson(QJsonDocument::Indented));
 }
 
@@ -210,6 +207,5 @@ void MainWindow::on_actionLoad_project_triggered()
 
     std::unique_ptr<ProjectModel> project = std::make_unique<ProjectModel>();
     serializer::ProjectModel::deserialize(*project, object);
-    qDebug() << project->grep_hierarchy_->getChildren().size();
     loader::Project::load(ui, std::move(project));
 }
