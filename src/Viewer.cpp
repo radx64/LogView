@@ -46,6 +46,33 @@ Viewer::Viewer(QWidget* parent, std::unique_ptr<Logfile> log)
     connect(bookmarks_widget_, &QListView::doubleClicked, this, &Viewer::bookmarksItemDoubleClicked);
 }
 
+Viewer::Viewer(QWidget* parent, std::unique_ptr<ProjectModel> project_model)
+{
+    setParent(parent);
+
+    project_model_ = std::move(project_model);
+
+    layout_ = new QHBoxLayout();
+    bookmarks_widget_ = new QListView();
+    bookmarks_widget_->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding));
+    logViewer_ = new TabCompositeViewer(
+        this,
+        project_model_->grep_hierarchy_.get(),
+        project_model_->logfile_model_->getLines());
+    logViewer_->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
+
+    QSplitter* splitter = new QSplitter(Qt::Horizontal);
+    splitter->addWidget(bookmarks_widget_);
+    splitter->addWidget(logViewer_);
+    splitter->setSizes({200,1000});
+
+    layout_->addWidget(splitter);
+    this->setLayout(layout_);
+
+    bookmarks_widget_->setModel(project_model_->getBookmarksModel());
+    connect(bookmarks_widget_, &QListView::doubleClicked, this, &Viewer::bookmarksItemDoubleClicked);
+}
+
 TabCompositeViewer* find_deepest_active_tab(TabCompositeViewer* start_point)
 {
     if (start_point == nullptr) return start_point;

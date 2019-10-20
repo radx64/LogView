@@ -44,7 +44,7 @@ QString generateTabName(const QString& base_name, bool is_regex, bool is_case_in
     return base_name;
 }
 
-void TabCompositeViewer::grep(QString pattern, bool is_regex, bool is_case_insensitive)
+TabCompositeViewer* TabCompositeViewer::grep(QString pattern, bool is_regex, bool is_case_insensitive)
 {
     Lines filtered_results;
     if (is_regex)
@@ -72,6 +72,7 @@ void TabCompositeViewer::grep(QString pattern, bool is_regex, bool is_case_insen
 
     TabCompositeViewer* viewer = new TabCompositeViewer(this, new_grep_node, filtered_results);
     tabs_->addTab(viewer, generateTabName(pattern, is_regex, is_case_insensitive));
+    return viewer;
 }
 void TabCompositeViewer::closeTab(const int index)
 {

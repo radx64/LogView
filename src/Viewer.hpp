@@ -15,6 +15,7 @@ class Viewer: public QWidget
 {
 public:
     Viewer(QWidget* parent, std::unique_ptr<Logfile> log);
+    Viewer(QWidget* parent, std::unique_ptr<ProjectModel> project_model);
     TabCompositeViewer* getDeepestActiveTab();
 
     QListView* bookmarks_widget_;

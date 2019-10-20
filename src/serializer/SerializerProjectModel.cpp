@@ -2,9 +2,10 @@
 
 #include <QJsonObject>
 
-#include "../ProjectModel.hpp"
 #include "../BookmarksModel.hpp"
 #include "../GrepNode.hpp"
+#include "../Logfile.hpp"
+#include "../ProjectModel.hpp"
 
 #include "SerializerBookmarksModel.hpp"
 #include "SerializerGrepNode.hpp"
@@ -32,6 +33,8 @@ void ProjectModel::deserialize(::ProjectModel &pm, const QJsonObject &json)
     std::unique_ptr<::BookmarksModel> bm = std::make_unique<::BookmarksModel>();
     serializer::BookmarksModel::deserialize(*bm, json);
     pm.bookmarks_model_ = std::move(bm);
+
+    pm.logfile_model_ = std::make_unique<Logfile>(pm.file_path_);
 }
 
 }  // namespace serializer

@@ -43,7 +43,7 @@ void removeChild(GrepNode* node)
     delete node;
 }
 
-std::vector<GrepNode*> getChildren()
+std::vector<GrepNode*> getChildren() const
 {
     std::vector<GrepNode*> result;
     result.reserve(children_.size());

@@ -190,6 +190,16 @@ void MainWindow::on_actionSave_project_triggered()
     saveFile.write(document.toJson(QJsonDocument::Indented));
 }
 
+void spawnGreppedViews(TabCompositeViewer* parent_tab, const GrepNode* node)
+{
+    for (GrepNode* child : node->getChildren())
+    {
+        TabCompositeViewer* spawnedViewer = parent_tab->grep(
+            QString().fromStdString(child->getValue()), false, false); //todo read rest parameters from GrepNode when implemented
+        spawnGreppedViews(spawnedViewer, child);
+    }
+}
+
 void MainWindow::on_actionLoad_project_triggered()
 {
     // DUMMY JSON DESERIALIZER TESTS
@@ -201,6 +211,13 @@ void MainWindow::on_actionLoad_project_triggered()
     QJsonDocument document = QJsonDocument::fromJson(loadFile.readAll());
     QJsonObject object = document.object();
 
-    ProjectModel project;
-    serializer::ProjectModel::deserialize(project, object);
+    std::unique_ptr<ProjectModel> project = std::make_unique<ProjectModel>();
+    serializer::ProjectModel::deserialize(*project, object);
+
+    QTabWidget* fileTabWidget = ui->fileView;
+    QString filename = project->file_path_;
+    Viewer* viewer = new Viewer(fileTabWidget, std::move(project));
+    fileTabWidget ->addTab(viewer, filename.split(QRegularExpression("[\\/]")).last());
+
+    spawnGreppedViews(viewer->getDeepestActiveTab(), viewer->project_model_->grep_hierarchy_.get());
 }
