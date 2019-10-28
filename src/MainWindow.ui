@@ -150,7 +150,7 @@
   <action name="actionLoad_project">
    <property name="icon">
     <iconset resource="../icons.qrc">
-     <normaloff>:/icon/Gnome-Dialog-Warning-32.png</normaloff>:/icon/Gnome-Dialog-Warning-32.png</iconset>
+     <normaloff>:/icon/Gnome-Document-Open-32.png</normaloff>:/icon/Gnome-Document-Open-32.png</iconset>
    </property>
    <property name="text">
     <string>Load project ...</string>
@@ -159,7 +159,7 @@
   <action name="actionSave_project">
    <property name="icon">
     <iconset resource="../icons.qrc">
-     <normaloff>:/icon/Gnome-Dialog-Warning-32.png</normaloff>:/icon/Gnome-Dialog-Warning-32.png</iconset>
+     <normaloff>:/icon/Gnome-Document-Save-As-32.png</normaloff>:/icon/Gnome-Document-Save-As-32.png</iconset>
    </property>
    <property name="text">
     <string>Save project ...</string>

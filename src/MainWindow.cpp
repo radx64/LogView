@@ -179,11 +179,20 @@ void MainWindow::on_actionAbout_triggered()
 
 void MainWindow::on_actionSave_project_triggered()
 {
-    // DUMMY JSON SERIALIZER TESTS
     Viewer* viewerWidget = get_active_viewer_widget();
-    if (!viewerWidget) return; // can display here some message
+    if (!viewerWidget)
+    {
+      QMessageBox::warning(this,"Warning!","Nothing to save.\nLoad file or project first.");
+      return; // can display here some message
+    }
 
-    QFile saveFile("save.json");
+    QString file_path = QFileDialog::getSaveFileName(this,
+        tr("Save project"), "",
+        tr("Project file (*.json)"));
+    if (file_path.isEmpty())
+        return;
+
+    QFile saveFile(file_path);
     if (!saveFile.open(QIODevice::WriteOnly)) {
         qWarning("Couldn't open save file!");
         return;
@@ -197,8 +206,13 @@ void MainWindow::on_actionSave_project_triggered()
 
 void MainWindow::on_actionLoad_project_triggered()
 {
-    // DUMMY JSON DESERIALIZER TESTS
-    QFile loadFile("save.json");
+    QString file_path = QFileDialog::getOpenFileName(this,
+        tr("Open project"), "",
+        tr("Project file (*.json)"));
+    if (file_path.isEmpty())
+        return;
+
+    QFile loadFile(file_path);
     if (!loadFile.open(QIODevice::ReadOnly)) {
         qWarning("Couldn't open save file!");
         return;
