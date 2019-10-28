@@ -118,7 +118,8 @@ void MainWindow::grepCurrentView()
     {
         GrepNode* new_grep_node = new GrepNode(result.pattern.toStdString(),
                                                result.is_regex,
-                                               result.is_case_insensitive);
+                                               result.is_case_insensitive,
+                                               result.is_inverted);
 
         deepest_tab->grep(new_grep_node);
         deepest_tab->getGrepNode()->addChild(new_grep_node);

@@ -20,6 +20,7 @@ public:
         QString pattern;
         bool is_regex;
         bool is_case_insensitive;
+        bool is_inverted;
     };
 
     Result getResult();

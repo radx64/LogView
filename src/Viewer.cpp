@@ -77,7 +77,6 @@ TabCompositeViewer* find_deepest_active_tab(TabCompositeViewer* start_point)
 {
     if (start_point == nullptr) return start_point;
     const int tab_grep_index = start_point->tabs_->currentIndex();
-    qDebug() << "tab_grep_index:" << tab_grep_index;
     QWidget* active_tab = start_point->tabs_->widget(tab_grep_index);
     TabCompositeViewer* active_tab_casted = dynamic_cast<TabCompositeViewer*>(active_tab);
     if (active_tab_casted == nullptr) return start_point;
@@ -92,8 +91,6 @@ TabCompositeViewer* Viewer::getDeepestActiveTab()
 
 void Viewer::bookmarksItemDoubleClicked(const QModelIndex& idx)
 {
-    qDebug() << "Doubleclicked item index: " << idx.row();
-
     Bookmark bookmark = project_model_->getBookmarksModel()->get_bookmark(static_cast<uint32_t>(idx.row()));
     TabCompositeViewer* text_viewer = find_deepest_active_tab(logViewer_);
 

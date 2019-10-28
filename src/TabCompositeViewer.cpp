@@ -39,9 +39,12 @@ TabCompositeViewer::TabCompositeViewer(QWidget* parent, GrepNode* grep_node, con
 
 QString generateTabName(const GrepNode* grep, const QString base_name)
 {
-    if (grep->isRegEx()) return base_name + " (Rgx)";
-    if (grep->isCaseInsensitive()) return  base_name + " (In)";
-    return base_name;
+    QString tabName = base_name + " (";
+    tabName += grep->isRegEx() ? "R" : "r";
+    tabName += grep->isCaseInsensitive() ? "C" : "c";
+    tabName += grep->isInverted() ? "I" : "i";
+    tabName += ")";
+    return tabName;
 }
 
 TabCompositeViewer* TabCompositeViewer::grep(GrepNode* grep)
@@ -55,21 +58,35 @@ TabCompositeViewer* TabCompositeViewer::grep(GrepNode* grep)
         for(auto line : lines_)
         {
             QRegularExpressionMatch match = exp.match(line.text);
-            if (match.hasMatch()) filtered_results.append({line.number, line.text});
+            if (grep->isInverted())
+            {
+                if (!match.hasMatch()) filtered_results.append({line.number, line.text});
+            }
+            else
+            {
+                if (match.hasMatch()) filtered_results.append({line.number, line.text});
+            }
         }
     }
     else
     {
         for(auto line : lines_)
-        {
-            if(line.text.contains(pattern, grep->isCaseInsensitive() ? Qt::CaseInsensitive : Qt::CaseSensitive))
+        {   if (grep->isInverted())
             {
-               filtered_results.append({line.number, line.text});
+                if(!line.text.contains(pattern, grep->isCaseInsensitive() ? Qt::CaseInsensitive : Qt::CaseSensitive))
+                {
+                   filtered_results.append({line.number, line.text});
+                }
+            }
+            else
+            {
+                if(line.text.contains(pattern, grep->isCaseInsensitive() ? Qt::CaseInsensitive : Qt::CaseSensitive))
+                {
+                   filtered_results.append({line.number, line.text});
+                }
             }
         }
     }
-
-    bool is_inverted = false; //todo add inversion functionality
 
     TabCompositeViewer* viewer = new TabCompositeViewer(this, grep, filtered_results);
     tabs_->addTab(viewer, generateTabName(grep, pattern));
@@ -77,7 +94,6 @@ TabCompositeViewer* TabCompositeViewer::grep(GrepNode* grep)
 }
 void TabCompositeViewer::closeTab(const int index)
 {
-    qDebug() << "Closing tab " << index;
     QWidget* tabContents = tabs_->widget(index);
     tabs_->removeTab(index);
     if (tabContents != nullptr) delete(tabContents);

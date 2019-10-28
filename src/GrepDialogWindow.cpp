@@ -22,6 +22,7 @@ GrepDialogWindow::Result GrepDialogWindow::getResult()
     result.pattern = ui->pattern->text();
     result.is_regex = ui->regex_check->isChecked();
     result.is_case_insensitive = ui->case_insensitive_check->isChecked();
+    result.is_inverted = ui->inverted_check->isChecked();
     return result;
 }
 

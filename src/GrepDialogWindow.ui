@@ -16,10 +16,10 @@
   <layout class="QGridLayout" name="gridLayout">
    <item row="1" column="0">
     <layout class="QGridLayout" name="gridLayout_3">
-     <item row="4" column="0">
-      <widget class="QPushButton" name="button">
+     <item row="1" column="0">
+      <widget class="QCheckBox" name="regex_check">
        <property name="text">
-        <string>Grep</string>
+        <string>Regex</string>
        </property>
       </widget>
      </item>
@@ -46,10 +46,10 @@
        </item>
       </layout>
      </item>
-     <item row="1" column="0">
-      <widget class="QCheckBox" name="regex_check">
+     <item row="5" column="0">
+      <widget class="QPushButton" name="button">
        <property name="text">
-        <string>Regex</string>
+        <string>Grep</string>
        </property>
       </widget>
      </item>
@@ -57,6 +57,16 @@
       <widget class="QCheckBox" name="case_insensitive_check">
        <property name="text">
         <string>Case Insensitive</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QCheckBox" name="inverted_check">
+       <property name="focusPolicy">
+        <enum>Qt::StrongFocus</enum>
+       </property>
+       <property name="text">
+        <string>Inverted</string>
        </property>
       </widget>
      </item>
