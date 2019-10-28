@@ -9,7 +9,7 @@
 #include <QHBoxLayout>
 #include <QListWidget>
 
-#include "TabCompositeViewer.hpp"
+#include "ProjectModelManager.hpp"
 
 class Logfile;
 class QTextEdit;
@@ -50,6 +50,8 @@ private:
     void dragEnterEvent(QDragEnterEvent* event);
 
     Ui::MainWindow *ui;
+    ProjectModelManager manager_;
+
 };
 
 #endif // MAINWINDOW_HPP

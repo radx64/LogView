@@ -1,7 +1,6 @@
 #ifndef VIEWER_WIDGET_HPP
 #define VIEWER_WIDGET_HPP
 
-#include <memory>
 #include <QWidget>
 
 class BookmarksModel;
@@ -14,12 +13,11 @@ class TabCompositeViewer;
 class Viewer: public QWidget
 {
 public:
-    Viewer(QWidget* parent, std::unique_ptr<Logfile> log);
-    Viewer(QWidget* parent, std::unique_ptr<ProjectModel> project_model);
+    Viewer(QWidget* parent, ProjectModel* project_model);
     TabCompositeViewer* getDeepestActiveTab();
 
     QListView* bookmarks_widget_;
-    std::unique_ptr<ProjectModel> project_model_;
+    ProjectModel* project_model_; //TODO make this protected
 
 protected:
     QHBoxLayout* layout_;

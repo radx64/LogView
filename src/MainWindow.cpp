@@ -22,6 +22,7 @@
 #include "GrepNode.hpp"
 #include "Logfile.hpp"
 #include "ProjectModel.hpp"
+#include "ProjectModelManager.hpp"
 #include "TabCompositeViewer.hpp"
 #include "TextRenderer.hpp"
 #include "Viewer.hpp"
@@ -81,11 +82,8 @@ MainWindow::~MainWindow()
 
 void MainWindow::spawnViewerWithContent(QString file_path)
 {
-    std::unique_ptr<ProjectModel> project = std::make_unique<ProjectModel>();
-    project->logfile_model_ = std::make_unique<Logfile>(file_path);
-    project->grep_hierarchy_ = std::make_unique<GrepNode>("ROOT");
-    project->file_path_ = file_path;
-    loader::Project::load(ui, std::move(project));
+    ProjectModel* pm = manager_.create(std::make_unique<Logfile>(file_path));
+    loader::Project::load(ui, pm);
 }
 
 Viewer* MainWindow::get_active_viewer_widget()
@@ -220,7 +218,7 @@ void MainWindow::on_actionLoad_project_triggered()
     QJsonDocument document = QJsonDocument::fromJson(loadFile.readAll());
     QJsonObject object = document.object();
 
-    std::unique_ptr<ProjectModel> project = std::make_unique<ProjectModel>();
+    ProjectModel* project = manager_.add(std::make_unique<ProjectModel>());
     serializer::ProjectModel::deserialize(*project, object);
-    loader::Project::load(ui, std::move(project));
+    loader::Project::load(ui, project);
 }

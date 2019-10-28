@@ -14,13 +14,13 @@
 namespace loader
 {
 
-void Project::load(Ui::MainWindow *ui, std::unique_ptr<::ProjectModel> pm)
+void Project::load(Ui::MainWindow *ui, ::ProjectModel* pm)
 {
     QTabWidget* file_tab_widget = ui->fileView;
     QString filename = pm->file_path_;
-    Viewer* viewer = new Viewer(file_tab_widget, std::move(pm));
+    Viewer* viewer = new Viewer(file_tab_widget, pm);
     file_tab_widget ->addTab(viewer, filename.split(QRegularExpression("[\\/]")).last());
-    spawnGreppedViews(viewer->getDeepestActiveTab(), viewer->project_model_->grep_hierarchy_.get());
+    spawnGreppedViews(viewer->getDeepestActiveTab(), pm->grep_hierarchy_.get());
 }
 
 void Project::spawnGreppedViews(TabCompositeViewer* parent_tab, const GrepNode* node)
