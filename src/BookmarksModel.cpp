@@ -23,7 +23,7 @@ QVariant BookmarksModel::data(const QModelIndex &index, int role) const
     if (role == Qt::DisplayRole)
        return QString(bookmarks_[index.row()].text_);
     else if (role == Qt::DecorationRole)
-        return QPixmap(bookmarks_[index.row()].icon_);
+        return QPixmap(bookmarks_[index.row()].icon_).scaled(16,16);
     return QVariant();
 }
 
