@@ -37,8 +37,8 @@ SOURCES += \
         src/ProjectModel.cpp \
         src/TabCompositeViewer.cpp \
         src/TextRenderer.cpp \
-        src/loader/LoaderLogfile.cpp \
         src/loader/Project.cpp \
+        src/loader/LoaderLogfile.cpp \
         src/serializer/SerializerBookmark.cpp \
         src/serializer/SerializerBookmarksModel.cpp \
         src/serializer/SerializerGrepNode.cpp \
@@ -59,8 +59,8 @@ HEADERS += \
         src/TabCompositeViewer.hpp \
         src/TextRenderer.hpp \
         src/Viewer.hpp \
-        src/loader/LoaderLogfile.hpp \
         src/loader/Project.hpp \
+        src/loader/LoaderLogfile.hpp \
         src/serializer/SerializerBookmark.hpp \
         src/serializer/SerializerBookmarksModel.hpp \
         src/serializer/SerializerGrepNode.hpp \
