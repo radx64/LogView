@@ -29,6 +29,7 @@ void ProjectModel::deserialize(::ProjectModel &pm, const QJsonObject &json)
 
     for (const QJsonValue child : logfiles)
     {
+         //filepath should be read inside of Logfile deserialize
          std::unique_ptr<::Logfile> logfile = std::make_unique<::Logfile>(child["filepath"].toString());
          ::serializer::Logfile::deserialize(*logfile.get(), child.toObject());
          pm.logfiles_.push_back(std::move(logfile));

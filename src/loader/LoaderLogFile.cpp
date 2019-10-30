@@ -18,7 +18,6 @@ namespace loader
 
 void Logfile::load(Ui::MainWindow *ui, ::Logfile* lf)
 {
-    qDebug() << "Loading..." << lf->getFileName();
     QTabWidget* file_tab_widget = ui->fileView;
     Viewer* viewer = new Viewer(file_tab_widget, lf);
     file_tab_widget ->addTab(viewer, lf->getFileName().split(QRegularExpression("[\\/]")).last());
