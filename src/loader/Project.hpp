@@ -16,9 +16,6 @@ class Project
 public:
     Project() = delete;
     static void load(Ui::MainWindow *ui, ::ProjectModel* pm);
-
-protected:
-    static void spawnGreppedViews(TabCompositeViewer* parent_tab, const GrepNode* node);
 };
 
 }  // namespace loader

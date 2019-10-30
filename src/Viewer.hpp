@@ -6,18 +6,17 @@
 class BookmarksModel;
 class QHBoxLayout;
 class Logfile;
-class ProjectModel;
 class QListView;
 class TabCompositeViewer;
 
 class Viewer: public QWidget
 {
 public:
-    Viewer(QWidget* parent, ProjectModel* project_model);
+    Viewer(QWidget* parent, Logfile* logfile);
     TabCompositeViewer* getDeepestActiveTab();
 
     QListView* bookmarks_widget_;
-    ProjectModel* project_model_; //TODO make this protected
+    Logfile* logfile_; //TODO make this protected
 
 protected:
     QHBoxLayout* layout_;

@@ -22,11 +22,11 @@
 #include "GrepNode.hpp"
 #include "Logfile.hpp"
 #include "ProjectModel.hpp"
-#include "ProjectModelManager.hpp"
 #include "TabCompositeViewer.hpp"
 #include "TextRenderer.hpp"
 #include "Viewer.hpp"
 #include "loader/Project.hpp"
+#include "loader/LoaderLogFile.hpp"
 #include "serializer/SerializerProjectModel.hpp"
 
 void MainWindow::closeFileTab(const int index)
@@ -82,8 +82,8 @@ MainWindow::~MainWindow()
 
 void MainWindow::spawnViewerWithContent(QString file_path)
 {
-    ProjectModel* pm = manager_.create(std::make_unique<Logfile>(file_path));
-    loader::Project::load(ui, pm);
+   pm_->logfiles_.push_back(std::make_unique<Logfile>(file_path));
+   loader::Logfile::load(ui, pm_->logfiles_.back().get());
 }
 
 Viewer* MainWindow::get_active_viewer_widget()
@@ -140,7 +140,7 @@ void MainWindow::bookmarkCurrentLine()
         tr("Name:"), QLineEdit::Normal, deepest_tab->lines_[current_line_index].text, &ok);
 
     if (!ok) return;
-    viewerWidget->project_model_->getBookmarksModel()->add_bookmark(absolute_line_index,
+    viewerWidget->logfile_->getBookmarksModel()->add_bookmark(absolute_line_index,
         QString(":/icon/Gnome-Bookmark-New-32.png"),
         bookmark_name);
 }
@@ -153,6 +153,8 @@ void MainWindow::on_actionLoad_from_file_triggered()
     if (file_path.isEmpty())
         return;
 
+    //Temporary HACK to spawn empty project!
+    if (pm_ == nullptr) pm_ = new ProjectModel();
     spawnViewerWithContent(file_path);
 }
 
@@ -197,13 +199,22 @@ void MainWindow::on_actionSave_project_triggered()
     }
 
     QJsonObject object;
-    serializer::ProjectModel::serialize(*viewerWidget->project_model_, object);
+    serializer::ProjectModel::serialize(*pm_, object);
     QJsonDocument document(object);
     saveFile.write(document.toJson(QJsonDocument::Indented));
 }
 
 void MainWindow::on_actionLoad_project_triggered()
 {
+    //Temporary HACK to drop old project!
+    if (pm_ != nullptr)
+    {
+        delete pm_;
+        ui->fileView->clear();
+    }
+
+    pm_ = new ProjectModel();
+
     QString file_path = QFileDialog::getOpenFileName(this,
         tr("Open project"), "",
         tr("Project file (*.json)"));
@@ -218,7 +229,6 @@ void MainWindow::on_actionLoad_project_triggered()
     QJsonDocument document = QJsonDocument::fromJson(loadFile.readAll());
     QJsonObject object = document.object();
 
-    ProjectModel* project = manager_.add(std::make_unique<ProjectModel>());
-    serializer::ProjectModel::deserialize(*project, object);
-    loader::Project::load(ui, project);
+    serializer::ProjectModel::deserialize(*pm_, object);
+    loader::Project::load(ui, pm_);
 }

@@ -15,19 +15,20 @@
 #include "BookmarksModel.hpp"
 #include "GrepNode.hpp"
 #include "TextRenderer.hpp"
+#include "Logfile.hpp"
 
-Viewer::Viewer(QWidget* parent, ProjectModel* project_model)
+Viewer::Viewer(QWidget* parent, Logfile* logfile)
 {
     setParent(parent);
-    project_model_ = project_model;
+    logfile_ = logfile;
 
     layout_ = new QHBoxLayout();
     bookmarks_widget_ = new QListView();
     bookmarks_widget_->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding));
     logViewer_ = new TabCompositeViewer(
         this,
-        project_model_->grep_hierarchy_.get(),
-        project_model_->logfile_model_->getLines());
+        logfile_->grep_hierarchy_.get(),
+        logfile_->getLines());
     logViewer_->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
 
     QSplitter* splitter = new QSplitter(Qt::Horizontal);
@@ -38,7 +39,7 @@ Viewer::Viewer(QWidget* parent, ProjectModel* project_model)
     layout_->addWidget(splitter);
     this->setLayout(layout_);
 
-    bookmarks_widget_->setModel(project_model_->getBookmarksModel());
+    bookmarks_widget_->setModel(logfile_->getBookmarksModel());
     connect(bookmarks_widget_, &QListView::doubleClicked, this, &Viewer::bookmarksItemDoubleClicked);
 }
 
@@ -60,7 +61,7 @@ TabCompositeViewer* Viewer::getDeepestActiveTab()
 
 void Viewer::bookmarksItemDoubleClicked(const QModelIndex& idx)
 {
-    Bookmark bookmark = project_model_->getBookmarksModel()->get_bookmark(static_cast<uint32_t>(idx.row()));
+    Bookmark bookmark = logfile_->getBookmarksModel()->get_bookmark(static_cast<uint32_t>(idx.row()));
     TabCompositeViewer* text_viewer = find_deepest_active_tab(logViewer_);
 
     int cursor_offset = 0;

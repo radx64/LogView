@@ -1,40 +1,38 @@
 #include "SerializerProjectModel.hpp"
 
 #include <QJsonObject>
+#include <QJsonArray>
 
-#include "../BookmarksModel.hpp"
-#include "../GrepNode.hpp"
-#include "../Logfile.hpp"
 #include "../ProjectModel.hpp"
-
-#include "SerializerBookmarksModel.hpp"
-#include "SerializerGrepNode.hpp"
+#include "SerializerLogfile.hpp"
+#include "../Logfile.hpp"
 
 namespace serializer
 {
 
 void ProjectModel::serialize(const ::ProjectModel &pm, QJsonObject &json)
 {
-    json["filepath"] = pm.file_path_;
-    QJsonObject greps;
-    GrepNode::serialize(*pm.grep_hierarchy_, greps);
+    QJsonArray array;
 
-    json["greps"] = greps;
-    BookmarksModel::serialize(*pm.bookmarks_model_, json);
+    for (const auto& logfile : pm.logfiles_)
+    {
+        QJsonObject jsonLogfile;
+        Logfile::serialize(*logfile.get(), jsonLogfile);
+        array.append(jsonLogfile);
+    }
+
+    json["logfiles"] = array;
 }
 void ProjectModel::deserialize(::ProjectModel &pm, const QJsonObject &json)
 {
-    pm.file_path_ = json["filepath"].toString();
+    QJsonArray logfiles = json["logfiles"].toArray();
 
-    std::unique_ptr<::GrepNode> gn = std::make_unique<::GrepNode>();
-    serializer::GrepNode::deserialize(*gn, json["greps"].toObject());
-    pm.grep_hierarchy_ = std::move(gn);
-
-    std::unique_ptr<::BookmarksModel> bm = std::make_unique<::BookmarksModel>();
-    serializer::BookmarksModel::deserialize(*bm, json);
-    pm.bookmarks_model_ = std::move(bm);
-
-    pm.logfile_model_ = std::make_unique<Logfile>(pm.file_path_);
+    for (const QJsonValue child : logfiles)
+    {
+         std::unique_ptr<::Logfile> logfile = std::make_unique<::Logfile>(child["filepath"].toString());
+         ::serializer::Logfile::deserialize(*logfile.get(), child.toObject());
+         pm.logfiles_.push_back(std::move(logfile));
+    }
 }
 
 }  // namespace serializer

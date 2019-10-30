@@ -2,27 +2,19 @@
 #define PROJECT_MODEL_HPP
 
 #include <memory>
-#include <QString>
+#include <vector>
 
-class BookmarksModel;
-class GrepNode;
 class Logfile;
 
-namespace serializer { class ProjectModel; }
+namespace serializer { class Logfile; }
 
 class ProjectModel
 {
 public:
-    ProjectModel();
-
-    BookmarksModel* getBookmarksModel();
-
-    QString file_path_;
-    std::unique_ptr<GrepNode> grep_hierarchy_;
-    std::unique_ptr<Logfile> logfile_model_;
+    ProjectModel() = default;
+    std::vector<std::unique_ptr<Logfile>> logfiles_;
 protected:
-    std::unique_ptr<BookmarksModel> bookmarks_model_;
-    friend class serializer::ProjectModel;
+    friend class serializer::Logfile;
 };
 
 #endif // PROJECT_MODEL_HPP

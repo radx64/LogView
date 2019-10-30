@@ -9,12 +9,11 @@
 #include <QHBoxLayout>
 #include <QListWidget>
 
-#include "ProjectModelManager.hpp"
-
 class Logfile;
 class QTextEdit;
 class QTabWidget;
 class Viewer;
+class ProjectModel;
 
 namespace Ui {
 class MainWindow;
@@ -50,8 +49,7 @@ private:
     void dragEnterEvent(QDragEnterEvent* event);
 
     Ui::MainWindow *ui;
-    ProjectModelManager manager_;
-
+    ProjectModel *pm_;
 };
 
 #endif // MAINWINDOW_HPP

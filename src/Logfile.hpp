@@ -1,9 +1,16 @@
 #ifndef LOGFILE_HPP
 #define LOGFILE_HPP
 
+#include <memory>
+
 #include <QFile>
 #include <QMessageBox>
 #include <QVector>
+
+#include "BookmarksModel.hpp"
+#include "GrepNode.hpp"
+
+namespace serializer { class Logfile; }
 
 struct Line
 {
@@ -38,6 +45,9 @@ public:
             ++index;
             lines_.append({index, QString(file.readLine()).trimmed()});
         }
+
+        grep_hierarchy_ = std::make_unique<GrepNode>("ROOT");
+        bookmarks_model_ = std::make_unique<BookmarksModel>(nullptr);
     }
 
     const Lines& getLines() const
@@ -49,9 +59,18 @@ public:
         return filename_;
     }
 
+    BookmarksModel* getBookmarksModel()
+    {
+        return bookmarks_model_.get();
+    }
+
+    std::unique_ptr<GrepNode> grep_hierarchy_;
+    std::unique_ptr<BookmarksModel> bookmarks_model_;
 protected:
     Lines lines_;
     QString filename_;
+
+    friend class serializer::Logfile;
 
 };
 
