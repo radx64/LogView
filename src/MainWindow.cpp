@@ -28,6 +28,7 @@
 #include "loader/Project.hpp"
 #include "loader/LoaderLogFile.hpp"
 #include "serializer/SerializerProjectModel.hpp"
+#include "Version.hpp"
 
 void MainWindow::closeFileTab(const int index)
 {
@@ -50,6 +51,7 @@ MainWindow::MainWindow(QWidget* parent) :
     ui->fileView->setTabsClosable(true);
     statusBar()->showMessage(tr("Use load from file menu or drop files in this window to begin."));
     connect_signals();
+    setWindowTitle("<empty>");
 }
 
 void MainWindow::dropEvent(QDropEvent* event)
@@ -82,8 +84,8 @@ MainWindow::~MainWindow()
 
 void MainWindow::spawnViewerWithContent(QString file_path)
 {
-   pm_->logfiles_.push_back(std::make_unique<Logfile>(file_path));
-   loader::Logfile::load(ui, pm_->logfiles_.back().get());
+   Logfile* lf = pm_->add_to_project(std::make_unique<Logfile>(file_path));
+   loader::Logfile::load(ui, lf);
 }
 
 Viewer* MainWindow::get_active_viewer_widget()
@@ -156,7 +158,7 @@ void MainWindow::on_actionLoad_from_file_triggered()
     //Temporary HACK to spawn empty project!
     if (pm_ == nullptr) pm_ = new ProjectModel();
 
-    QObject::connect(pm_, &ProjectModel::changed, this, &MainWindow::on_project_changed);
+    QObject::connect(pm_, &ProjectModel::changed, this, &MainWindow::project_changed);
     pm_->mocked_change();
     spawnViewerWithContent(file_path);
 }
@@ -238,17 +240,17 @@ void MainWindow::on_actionLoad_project_triggered()
 
     serializer::ProjectModel::deserialize(*pm_, object);
     loader::Project::load(ui, pm_);
-    QObject::connect(pm_, &ProjectModel::changed, this, &MainWindow::on_project_changed);
+    QObject::connect(pm_, &ProjectModel::changed, this, &MainWindow::project_changed);
     pm_->mocked_change();
 }
 
 void MainWindow::setWindowTitle(const QString& title)
 {
-    QMainWindow::setWindowTitle("LogView - " + title);
+    QMainWindow::setWindowTitle("LogView " + QString(APP_VERSION) + " - " + title);
 }
 
-void MainWindow::on_project_changed()
+void MainWindow::project_changed()
 {
-    qDebug() << "signal!!!!";
+    qDebug() << "SIGNALLED";
     setWindowTitle(pm_->projectName_);
 }

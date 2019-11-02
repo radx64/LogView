@@ -13,7 +13,7 @@ namespace loader
 
 void Project::load(Ui::MainWindow *ui, ::ProjectModel* pm)
 {
-    for (const auto& logfile : pm->logfiles_)
+    for (const auto& logfile : pm->get_log_files())
     {
         Logfile::load(ui, logfile.get());
     }

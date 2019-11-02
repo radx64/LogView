@@ -11,7 +11,7 @@ namespace serializer { class BookmarksModel; }
 
 class BookmarksModel : public QAbstractListModel
 {
-    Q_OBJECT
+Q_OBJECT
 public:
     BookmarksModel(QObject *parent = nullptr);
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -24,5 +24,8 @@ protected:
     QVector<Bookmark> bookmarks_;
 
     friend class serializer::BookmarksModel;
+
+signals:
+    void changed();
 };
 #endif // BOOKMARKS_MODEL_HPP

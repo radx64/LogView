@@ -34,8 +34,10 @@ void BookmarksModel::add_bookmark(const uint32_t line, const QString& icon, cons
 
     QModelIndex firstElement = createIndex(0,0);
     QModelIndex lastElement = createIndex(0,0);
-    // TODO: Emit real change index
+    // TODO: Emit real change index for interface update;
     emit dataChanged(firstElement, lastElement, QVector<int>{Qt::DisplayRole});
+    // Emit signal for project tracking. Maybe reuse signal dataChanged later;
+    emit changed();
 }
 
 Bookmark BookmarksModel::get_bookmark(uint32_t index)

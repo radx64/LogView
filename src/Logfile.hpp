@@ -6,6 +6,7 @@
 #include <QFile>
 #include <QMessageBox>
 #include <QVector>
+#include <QObject>
 
 #include "BookmarksModel.hpp"
 #include "GrepNode.hpp"
@@ -20,57 +21,30 @@ struct Line
 
 using Lines = QVector<Line>;
 
-class Logfile
+class Logfile : public QObject
 {
+Q_OBJECT
 public:
-    Logfile(const QString& filename)
-    {
-        filename_ = filename;
-        lines_.clear();
-
-        QFile file(filename);
-        if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-        {
-            QMessageBox msg;
-            msg.setText("Unable to open file" + file.errorString());
-            msg.setStandardButtons(QMessageBox::Ok);
-            msg.setIcon(QMessageBox::Critical);
-            msg.exec();
-            return;
-        }
-
-        uint32_t index{};
-        while(!file.atEnd())
-        {
-            ++index;
-            lines_.append({index, QString(file.readLine()).trimmed()});
-        }
-
-        grep_hierarchy_ = std::make_unique<GrepNode>("ROOT");
-        bookmarks_model_ = std::make_unique<BookmarksModel>(nullptr);
-    }
-
-    const Lines& getLines() const
-    {
-        return lines_;
-    }
-    const QString& getFileName() const
-    {
-        return filename_;
-    }
-
-    BookmarksModel* getBookmarksModel()
-    {
-        return bookmarks_model_.get();
-    }
+    Logfile(const QString& filename);
+    const Lines& getLines() const;
+    const QString& getFileName() const;
+    BookmarksModel* getBookmarksModel();
 
     std::unique_ptr<GrepNode> grep_hierarchy_;
     std::unique_ptr<BookmarksModel> bookmarks_model_;
+
 protected:
     Lines lines_;
     QString filename_;
 
     friend class serializer::Logfile;
+
+protected slots:
+    void grep_hierarchy_changed();
+    void bookmarks_model_changed();
+
+signals:
+    void changed();
 };
 
 #endif // LOGFILE_HPP

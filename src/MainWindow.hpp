@@ -26,7 +26,6 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-
 private slots:
     void on_actionLoad_from_file_triggered();
     void closeFileTab(const int index);
@@ -36,7 +35,7 @@ private slots:
     void on_actionAbout_triggered();
     void on_actionSave_project_triggered();
     void on_actionLoad_project_triggered();
-    void on_project_changed();
+    void project_changed();
 
 private:
     void bookmarkCurrentLine();

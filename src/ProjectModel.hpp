@@ -8,7 +8,7 @@
 
 #include "Logfile.hpp"
 
-namespace serializer { class Logfile; }
+namespace serializer { class ProjectModel; }
 
 class ProjectModel : public QObject
 {
@@ -16,18 +16,22 @@ Q_OBJECT
 public:
     ProjectModel();
     virtual ~ProjectModel() = default;
-    std::vector<std::unique_ptr<Logfile>> logfiles_;
 
     QString projectName_;
-    bool changed_;
 
     void mocked_change();
+    Logfile* add_to_project(std::unique_ptr<Logfile>&& lf);
+    std::vector<std::unique_ptr<Logfile>>& get_log_files();
 
 protected:
-    friend class serializer::Logfile;
+    friend class serializer::ProjectModel;
+    std::vector<std::unique_ptr<Logfile>> logfiles_;
+
+protected slots:
+    void on_logfile_change();
 
 signals:
-    void changed();
+    void changed(); // is emitted whenever project is changed
 };
 
 #endif // PROJECT_MODEL_HPP
