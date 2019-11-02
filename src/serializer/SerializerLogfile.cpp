@@ -32,6 +32,8 @@ void Logfile::deserialize(::Logfile &lf, const QJsonObject &json)
     std::unique_ptr<::BookmarksModel> bm = std::make_unique<::BookmarksModel>();
     serializer::BookmarksModel::deserialize(*bm, json);
     lf.bookmarks_model_ = std::move(bm);
+
+    lf.connect_events();
 }
 
 }  // namespace serializer

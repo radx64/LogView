@@ -156,10 +156,12 @@ void MainWindow::on_actionLoad_from_file_triggered()
         return;
 
     //Temporary HACK to spawn empty project!
-    if (pm_ == nullptr) pm_ = new ProjectModel();
+    if (pm_ == nullptr)
+    {
+        pm_ = new ProjectModel();
+        QObject::connect(pm_, &ProjectModel::changed, this, &MainWindow::project_changed);
+    }
 
-    QObject::connect(pm_, &ProjectModel::changed, this, &MainWindow::project_changed);
-    pm_->mocked_change();
     spawnViewerWithContent(file_path);
 }
 
@@ -204,13 +206,14 @@ void MainWindow::on_actionSave_project_triggered()
     }
 
     pm_->projectName_ = saveFile.fileName();
-    setWindowTitle(pm_->projectName_);
-    pm_->mocked_change();
 
     QJsonObject object;
     serializer::ProjectModel::serialize(*pm_, object);
     QJsonDocument document(object);
     saveFile.write(document.toJson(QJsonDocument::Indented));
+
+    pm_->changed_ = false;
+    refreshWindowTitle();
 }
 
 void MainWindow::on_actionLoad_project_triggered()
@@ -239,9 +242,11 @@ void MainWindow::on_actionLoad_project_triggered()
     QJsonObject object = document.object();
 
     serializer::ProjectModel::deserialize(*pm_, object);
-    loader::Project::load(ui, pm_);
     QObject::connect(pm_, &ProjectModel::changed, this, &MainWindow::project_changed);
-    pm_->mocked_change();
+    loader::Project::load(ui, pm_);
+
+    pm_->changed_ = false;
+    refreshWindowTitle();
 }
 
 void MainWindow::setWindowTitle(const QString& title)
@@ -249,8 +254,13 @@ void MainWindow::setWindowTitle(const QString& title)
     QMainWindow::setWindowTitle("LogView " + QString(APP_VERSION) + " - " + title);
 }
 
+void MainWindow::refreshWindowTitle()
+{
+    setWindowTitle(pm_->projectName_ + QString(pm_->changed_?" *":""));
+}
+
 void MainWindow::project_changed()
 {
     qDebug() << "SIGNALLED";
-    setWindowTitle(pm_->projectName_);
+    refreshWindowTitle();
 }

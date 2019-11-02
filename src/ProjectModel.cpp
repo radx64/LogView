@@ -1,6 +1,8 @@
 #include "ProjectModel.hpp"
+#include <QDebug>
 
-ProjectModel::ProjectModel() : projectName_("<empty>")
+
+ProjectModel::ProjectModel() : projectName_("<empty>"), changed_{false}
 {
 }
 
@@ -12,6 +14,7 @@ Logfile* ProjectModel::add_to_project(std::unique_ptr<Logfile>&& lf)
     QObject::connect(moved_logfile, &Logfile::changed,
                      this, &ProjectModel::on_logfile_change);
 
+    on_logfile_change();
     return moved_logfile;
 }
 
@@ -22,11 +25,6 @@ std::vector<std::unique_ptr<Logfile>>& ProjectModel::get_log_files()
 
 void ProjectModel::on_logfile_change()
 {
-    emit changed();
-}
-
-void ProjectModel::mocked_change()
-{
-    //TODO: This should be detectable by changing project model
+    changed_ = true;
     emit changed();
 }

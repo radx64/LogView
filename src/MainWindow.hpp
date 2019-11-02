@@ -46,6 +46,7 @@ private:
     void dropEvent(QDropEvent* event);
     void dragEnterEvent(QDragEnterEvent* event);
     void setWindowTitle(const QString& title);
+    void refreshWindowTitle();
 
     Ui::MainWindow *ui;
     ProjectModel *pm_;

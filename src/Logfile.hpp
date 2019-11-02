@@ -37,6 +37,8 @@ protected:
     Lines lines_;
     QString filename_;
 
+    void connect_events();
+
     friend class serializer::Logfile;
 
 protected slots:

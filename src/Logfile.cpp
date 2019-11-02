@@ -34,7 +34,11 @@ Logfile::Logfile(const QString& filename)
 
     grep_hierarchy_ = std::make_unique<GrepNode>("ROOT");
     bookmarks_model_ = std::make_unique<BookmarksModel>(nullptr);
+    connect_events();
+}
 
+void Logfile::connect_events()
+{
     QObject::connect(bookmarks_model_.get(), &BookmarksModel::changed,
                      this, &Logfile::bookmarks_model_changed);
 

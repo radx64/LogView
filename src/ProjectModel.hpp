@@ -18,8 +18,8 @@ public:
     virtual ~ProjectModel() = default;
 
     QString projectName_;
+    bool changed_;
 
-    void mocked_change();
     Logfile* add_to_project(std::unique_ptr<Logfile>&& lf);
     std::vector<std::unique_ptr<Logfile>>& get_log_files();
 
