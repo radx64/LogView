@@ -6,6 +6,7 @@
 
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QDebug>
 
 GrepNode::GrepNode(
     std::string value,
@@ -20,7 +21,12 @@ GrepNode::GrepNode(
 
 GrepNode::~GrepNode()
 {
-    for (auto child : children_) delete child;
+    for (auto child : children_)
+    {
+        QObject::disconnect(child, &GrepNode::changed,
+                         this, &GrepNode::child_changed);
+        delete child;
+    }
 }
 
 std::string GrepNode::getPattern() const
@@ -46,6 +52,11 @@ bool GrepNode::isInverted() const
 void GrepNode::addChild(GrepNode* node)
 {
     children_.push_back(std::move(node));
+    auto added_child = children_.back();
+    QObject::connect(added_child, &GrepNode::changed,
+                     this, &GrepNode::child_changed);
+
+    emit changed();
 }
 
 void GrepNode::removeChild(GrepNode* node)
@@ -53,6 +64,8 @@ void GrepNode::removeChild(GrepNode* node)
     auto it = std::find(children_.begin(), children_.end(), node);
     if (it == children_.end()) return;
     children_.erase(it);
+    QObject::disconnect(node, &GrepNode::changed,
+                        this, &GrepNode::child_changed);
     delete node;
 }
 
@@ -62,4 +75,9 @@ std::vector<GrepNode*> GrepNode::getChildren() const
     result.reserve(children_.size());
     for (const auto& child : children_) result.push_back(child);
     return result;
+}
+
+void GrepNode::child_changed()
+{
+  emit changed();
 }

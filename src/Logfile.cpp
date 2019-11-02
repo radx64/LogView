@@ -37,6 +37,9 @@ Logfile::Logfile(const QString& filename)
 
     QObject::connect(bookmarks_model_.get(), &BookmarksModel::changed,
                      this, &Logfile::bookmarks_model_changed);
+
+    QObject::connect(grep_hierarchy_.get(), &GrepNode::changed,
+                     this, &Logfile::grep_hierarchy_changed);
 }
 
 const Lines& Logfile::getLines() const
@@ -55,7 +58,7 @@ BookmarksModel* Logfile::getBookmarksModel()
 
 void Logfile::grep_hierarchy_changed()
 {
-
+    emit changed();
 }
 void Logfile::bookmarks_model_changed()
 {

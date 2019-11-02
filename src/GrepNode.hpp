@@ -5,10 +5,13 @@
 #include <string>
 #include <vector>
 
+#include <QObject>
+
 namespace serializer { class GrepNode; }
 
-class GrepNode
+class GrepNode : public QObject
 {
+Q_OBJECT
 public:
     GrepNode(
         std::string value,
@@ -18,7 +21,7 @@ public:
 
     GrepNode() = default;
 
-    ~GrepNode();
+    virtual ~GrepNode();
 
     std::string getPattern() const;
 
@@ -42,6 +45,12 @@ protected:
     bool is_inverted_;
 
     friend class serializer::GrepNode;
+
+private slots:
+    void child_changed();
+
+signals:
+    void changed();
 };
 
 #endif // GREP_NODE_HPP
