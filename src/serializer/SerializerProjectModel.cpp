@@ -22,10 +22,12 @@ void ProjectModel::serialize(const ::ProjectModel &pm, QJsonObject &json)
     }
 
     json["logfiles"] = array;
+    json["projectName"] = pm.projectName_;
 }
 void ProjectModel::deserialize(::ProjectModel &pm, const QJsonObject &json)
 {
     QJsonArray logfiles = json["logfiles"].toArray();
+    pm.projectName_ = json["projectName"].toString();
 
     for (const QJsonValue child : logfiles)
     {

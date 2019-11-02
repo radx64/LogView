@@ -20,7 +20,9 @@ void Logfile::load(Ui::MainWindow *ui, ::Logfile* lf)
 {
     QTabWidget* file_tab_widget = ui->fileView;
     Viewer* viewer = new Viewer(file_tab_widget, lf);
-    file_tab_widget ->addTab(viewer, lf->getFileName().split(QRegularExpression("[\\/]")).last());
+    int tab_index = file_tab_widget ->addTab(viewer, lf->getFileName().split(QRegularExpression("[\\/]")).last());
+    file_tab_widget ->setTabToolTip(tab_index, lf->getFileName());
+
     spawnViews(viewer->getDeepestActiveTab(), lf->grep_hierarchy_.get());
 }
 

@@ -34,10 +34,9 @@ private slots:
     void on_actionGrep_current_view_triggered();
     void on_actionBookmark_current_line_triggered();
     void on_actionAbout_triggered();
-
     void on_actionSave_project_triggered();
-
     void on_actionLoad_project_triggered();
+    void on_project_changed();
 
 private:
     void bookmarkCurrentLine();
@@ -47,6 +46,7 @@ private:
     Viewer* get_active_viewer_widget();
     void dropEvent(QDropEvent* event);
     void dragEnterEvent(QDragEnterEvent* event);
+    void setWindowTitle(const QString& title);
 
     Ui::MainWindow *ui;
     ProjectModel *pm_;

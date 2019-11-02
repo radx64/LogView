@@ -149,12 +149,15 @@ void MainWindow::on_actionLoad_from_file_triggered()
 {
     QString file_path = QFileDialog::getOpenFileName(this,
         tr("Open log file"), "",
-        tr("TextFiles (*.txt);;All Files (*)"));
+        tr("All Files (*)"));
     if (file_path.isEmpty())
         return;
 
     //Temporary HACK to spawn empty project!
     if (pm_ == nullptr) pm_ = new ProjectModel();
+
+    QObject::connect(pm_, &ProjectModel::changed, this, &MainWindow::on_project_changed);
+    pm_->mocked_change();
     spawnViewerWithContent(file_path);
 }
 
@@ -198,6 +201,10 @@ void MainWindow::on_actionSave_project_triggered()
         return;
     }
 
+    pm_->projectName_ = saveFile.fileName();
+    setWindowTitle(pm_->projectName_);
+    pm_->mocked_change();
+
     QJsonObject object;
     serializer::ProjectModel::serialize(*pm_, object);
     QJsonDocument document(object);
@@ -231,4 +238,17 @@ void MainWindow::on_actionLoad_project_triggered()
 
     serializer::ProjectModel::deserialize(*pm_, object);
     loader::Project::load(ui, pm_);
+    QObject::connect(pm_, &ProjectModel::changed, this, &MainWindow::on_project_changed);
+    pm_->mocked_change();
+}
+
+void MainWindow::setWindowTitle(const QString& title)
+{
+    QMainWindow::setWindowTitle("LogView - " + title);
+}
+
+void MainWindow::on_project_changed()
+{
+    qDebug() << "signal!!!!";
+    setWindowTitle(pm_->projectName_);
 }

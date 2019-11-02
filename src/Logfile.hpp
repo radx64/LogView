@@ -71,7 +71,6 @@ protected:
     QString filename_;
 
     friend class serializer::Logfile;
-
 };
 
 #endif // LOGFILE_HPP
