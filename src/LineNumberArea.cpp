@@ -8,7 +8,7 @@ LineNumberArea::LineNumberArea(TextRenderer* renderer) : QWidget(renderer)
 
 QSize LineNumberArea::sizeHint() const
 {
-    return QSize(textRenderer_->lineNumberAreaWidth(), 0);
+    return {textRenderer_->lineNumberAreaWidth(), 0};
 }
 
 void LineNumberArea::paintEvent(QPaintEvent *event)

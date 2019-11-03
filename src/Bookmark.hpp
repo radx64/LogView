@@ -14,9 +14,9 @@ public:
     Bookmark() = default;
     Bookmark(const uint32_t &line_number, const QString &text, const QString &icon);
 
-    uint32_t line_number_;
-    QString text_;
-    QString icon_;
+    uint32_t line_number_{};
+    QString text_{};
+    QString icon_{};
 
     bool operator < (const Bookmark& b) const;
 

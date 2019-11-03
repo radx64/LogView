@@ -14,10 +14,10 @@ class GrepNode : public QObject
 Q_OBJECT
 public:
     GrepNode(
-        std::string value,
-        bool is_regex = false,
-        bool is_case_insensitive = false,
-        bool is_inverted = false);
+        const std::string& value,
+        const bool& is_regex = false,
+        const bool& is_case_insensitive = false,
+        const bool& is_inverted = false);
 
     GrepNode() = default;
 
@@ -38,11 +38,11 @@ public:
     std::vector<GrepNode*> getChildren() const;
 
 protected:
-    std::vector<GrepNode*> children_;
-    std::string pattern_;
-    bool is_regex_;
-    bool is_case_insensitive_;
-    bool is_inverted_;
+    std::vector<GrepNode*> children_{};
+    std::string pattern_{};
+    bool is_regex_{};
+    bool is_case_insensitive_{};
+    bool is_inverted_{};
 
     friend class serializer::GrepNode;
 

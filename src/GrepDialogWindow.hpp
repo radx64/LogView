@@ -13,23 +13,21 @@ class GrepDialogWindow : public QDialog
 
 public:
     explicit GrepDialogWindow(QWidget *parent = nullptr);
-    ~GrepDialogWindow();
+    ~GrepDialogWindow() override;
 
     struct Result
     {
-        QString pattern;
-        bool is_regex;
-        bool is_case_insensitive;
-        bool is_inverted;
+        QString pattern{};
+        bool is_regex{};
+        bool is_case_insensitive{};
+        bool is_inverted{};
     };
 
     Result getResult();
 
 private slots:
     void on_button_clicked();
-
     void on_regex_check_clicked();
-
     void on_pattern_textEdited(const QString &arg1);
 
 private:

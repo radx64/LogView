@@ -17,7 +17,7 @@ void ProjectModel::serialize(const ::ProjectModel &pm, QJsonObject &json)
     for (const auto& logfile : pm.logfiles_)
     {
         QJsonObject jsonLogfile;
-        Logfile::serialize(*logfile.get(), jsonLogfile);
+        Logfile::serialize(*logfile, jsonLogfile);
         array.append(jsonLogfile);
     }
 
@@ -33,7 +33,7 @@ void ProjectModel::deserialize(::ProjectModel &pm, const QJsonObject &json)
     {
          //filepath should be read inside of Logfile deserialize
          std::unique_ptr<::Logfile> logfile = std::make_unique<::Logfile>(child["filepath"].toString());
-         ::serializer::Logfile::deserialize(*logfile.get(), child.toObject());
+         ::serializer::Logfile::deserialize(*logfile, child.toObject());
          pm.add_to_project(std::move(logfile));
     }
 }

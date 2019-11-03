@@ -181,7 +181,7 @@ void MainWindow::on_exit_app_triggered()
 
 void MainWindow::on_actionAbout_triggered()
 {
-    QMessageBox::about(this, QString("About application"), QString("RadX64 © 2019\nReleased under\nGNU GENERAL PUBLIC LICENSE"));
+    QMessageBox::about(this, QString("About application"), QString("LogView: " + QString(APP_VERSION) +"\nRadX64 © 2019\nReleased under\nGNU GENERAL PUBLIC LICENSE"));
 }
 
 void MainWindow::on_actionSave_project_triggered()

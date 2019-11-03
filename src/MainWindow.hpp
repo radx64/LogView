@@ -48,8 +48,8 @@ private:
     void setWindowTitle(const QString& title);
     void refreshWindowTitle();
 
-    Ui::MainWindow *ui;
-    ProjectModel *pm_;
+    Ui::MainWindow *ui{nullptr};
+    ProjectModel *pm_{nullptr};
 };
 
 #endif // MAINWINDOW_HPP
