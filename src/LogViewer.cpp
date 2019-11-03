@@ -1,4 +1,4 @@
-#include "TabCompositeViewer.hpp"
+#include "LogViewer.hpp"
 
 #include "QLabel"
 #include "QLayout"
@@ -15,13 +15,13 @@
 
 #include "Logfile.hpp"
 #include "TextRenderer.hpp"
-#include "LineNumberingBasedOnModelPolicy.hpp"
+#include "ModelNumberingPolicy.hpp"
 #include "GrepNode.hpp"
 
-TabCompositeViewer::TabCompositeViewer(QWidget* parent, GrepNode* grep_node, const Lines lines)
+LogViewer::LogViewer(QWidget* parent, GrepNode* grep_node, const Lines lines)
     : lines_(lines), grep_node_(grep_node)
 {
-    std::unique_ptr<ILineNumberingPolicy> lineNumberingPolicy = std::make_unique<LineNumberingBasedOnModelPolicy>(lines_);
+    std::unique_ptr<ILineNumberingPolicy> lineNumberingPolicy = std::make_unique<ModelNumberingPolicy>(lines_);
     text_ = new TextRenderer(parent, lines, std::move(lineNumberingPolicy));
     tabs_ = new QTabWidget();
     tabs_->addTab(text_,"Base");
@@ -30,7 +30,7 @@ TabCompositeViewer::TabCompositeViewer(QWidget* parent, GrepNode* grep_node, con
     tabs_->tabBar()->setTabButton(0, QTabBar::LeftSide, nullptr);
     tabs_->tabBar()->setTabButton(0, QTabBar::RightSide, nullptr);
 
-    connect(tabs_, &QTabWidget::tabCloseRequested, this, &TabCompositeViewer::closeTab);
+    connect(tabs_, &QTabWidget::tabCloseRequested, this, &LogViewer::closeTab);
     tabs_->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
     QGridLayout* layout = new QGridLayout();
     layout->addWidget(tabs_);
@@ -47,7 +47,7 @@ QString generateTabName(const GrepNode* grep, const QString base_name)
     return tabName;
 }
 
-TabCompositeViewer* TabCompositeViewer::grep(GrepNode* grep)
+LogViewer* LogViewer::grep(GrepNode* grep)
 {
     const QString pattern = QString().fromStdString(grep->getPattern());
 
@@ -88,11 +88,11 @@ TabCompositeViewer* TabCompositeViewer::grep(GrepNode* grep)
         }
     }
 
-    TabCompositeViewer* viewer = new TabCompositeViewer(this, grep, filtered_results);
+    LogViewer* viewer = new LogViewer(this, grep, filtered_results);
     tabs_->addTab(viewer, generateTabName(grep, pattern));
     return viewer;
 }
-void TabCompositeViewer::closeTab(const int index)
+void LogViewer::closeTab(const int index)
 {
     QWidget* tabContents = tabs_->widget(index);
     tabs_->removeTab(index);
@@ -103,7 +103,7 @@ void TabCompositeViewer::closeTab(const int index)
     grep_node_->removeChild(child_to_be_removed);
 }
 
-GrepNode* TabCompositeViewer::getGrepNode()
+GrepNode* LogViewer::getGrepNode()
 {
     return grep_node_;
 }

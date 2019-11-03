@@ -3,7 +3,7 @@
 
 #include <memory>
 
-class TabCompositeViewer;
+class LogViewer;
 class Logfile;
 class GrepNode;
 namespace Ui { class MainWindow; }
@@ -18,7 +18,7 @@ public:
     static void load(Ui::MainWindow *ui, ::Logfile* pm);
 
 protected:
-    static void spawnViews(TabCompositeViewer* parent_tab, const GrepNode* node);
+    static void spawnViews(LogViewer* parent_tab, const GrepNode* node);
 };
 
 }  // namespace loader

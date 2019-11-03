@@ -3,7 +3,7 @@
 
 #include <memory>
 
-class TabCompositeViewer;
+class LogViewer;
 class ProjectModel;
 class GrepNode;
 namespace Ui { class MainWindow; }

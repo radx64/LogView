@@ -22,9 +22,9 @@
 #include "GrepNode.hpp"
 #include "Logfile.hpp"
 #include "ProjectModel.hpp"
-#include "TabCompositeViewer.hpp"
+#include "LogViewer.hpp"
 #include "TextRenderer.hpp"
-#include "Viewer.hpp"
+#include "ProjectViewer.hpp"
 #include "loader/Project.hpp"
 #include "loader/LoaderLogFile.hpp"
 #include "serializer/SerializerProjectModel.hpp"
@@ -88,11 +88,11 @@ void MainWindow::spawnViewerWithContent(QString file_path)
    loader::Logfile::load(ui, lf);
 }
 
-Viewer* MainWindow::get_active_viewer_widget()
+ProjectViewer* MainWindow::get_active_viewer_widget()
 {
     const int tab_index = ui->fileView->currentIndex();
     if(tab_index == -1) return nullptr;
-    Viewer* viewerWidget = dynamic_cast<Viewer*>(ui->fileView->widget(tab_index));
+    ProjectViewer* viewerWidget = dynamic_cast<ProjectViewer*>(ui->fileView->widget(tab_index));
     if (!viewerWidget) throw std::string("Could not find active ViewerWidget");
     return viewerWidget;
 }
@@ -105,10 +105,10 @@ void MainWindow::grepCurrentView()
      * Need to change approach to create model of greps and then render it recursively
      */
 
-    Viewer* viewerWidget = get_active_viewer_widget();
+    ProjectViewer* viewerWidget = get_active_viewer_widget();
     if (!viewerWidget) return; // can display here some message
 
-    TabCompositeViewer* deepest_tab = viewerWidget->getDeepestActiveTab();
+    LogViewer* deepest_tab = viewerWidget->getDeepestActiveTab();
 
     GrepDialogWindow grepDialog;
 
@@ -128,9 +128,9 @@ void MainWindow::grepCurrentView()
 
 void MainWindow::bookmarkCurrentLine()
 {
-    Viewer* viewerWidget = get_active_viewer_widget();
+    ProjectViewer* viewerWidget = get_active_viewer_widget();
     if (!viewerWidget) return; // can display here some message
-    TabCompositeViewer* deepest_tab = viewerWidget->getDeepestActiveTab();
+    LogViewer* deepest_tab = viewerWidget->getDeepestActiveTab();
 
     if (!deepest_tab) return;
     int current_line_index = deepest_tab->text_ ->textCursor().blockNumber();
@@ -186,7 +186,7 @@ void MainWindow::on_actionAbout_triggered()
 
 void MainWindow::on_actionSave_project_triggered()
 {
-    Viewer* viewerWidget = get_active_viewer_widget();
+    ProjectViewer* viewerWidget = get_active_viewer_widget();
     if (!viewerWidget)
     {
       QMessageBox::warning(this,"Warning!","Nothing to save.\nLoad file or project first.");

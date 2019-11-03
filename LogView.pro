@@ -32,13 +32,13 @@ SOURCES += \
         src/GrepDialogWindow.cpp \
         src/GrepNode.cpp \
         src/LineNumberArea.cpp \
-        src/LineNumberingBasedOnModelPolicy.cpp \
+        src/LogViewer.cpp \
         src/MainWindow.cpp \
-        src/Viewer.cpp \
         src/Logfile.cpp \
+        src/ModelNumberingPolicy.cpp \
+        src/ProjectViewer.cpp \
         src/main.cpp \
         src/ProjectModel.cpp \
-        src/TabCompositeViewer.cpp \
         src/TextRenderer.cpp \
         src/loader/Project.cpp \
         src/loader/LoaderLogFile.cpp \
@@ -54,14 +54,14 @@ HEADERS += \
         src/GrepDialogWindow.hpp \
         src/GrepNode.hpp \
         src/ILineNumberingPolicy.hpp \
-        src/LineNumberingBasedOnModelPolicy.hpp \
+        src/LogViewer.hpp \
         src/Logfile.hpp \
         src/LineNumberArea.hpp \
         src/MainWindow.hpp \
+        src/ModelNumberingPolicy.hpp \
         src/ProjectModel.hpp \
-        src/TabCompositeViewer.hpp \
+        src/ProjectViewer.hpp \
         src/TextRenderer.hpp \
-        src/Viewer.hpp \
         src/loader/Project.hpp \
         src/loader/LoaderLogFile.hpp \
         src/serializer/SerializerBookmark.hpp \

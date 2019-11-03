@@ -12,7 +12,7 @@
 class Logfile;
 class QTextEdit;
 class QTabWidget;
-class Viewer;
+class ProjectViewer;
 class ProjectModel;
 
 namespace Ui {
@@ -42,7 +42,7 @@ private:
     void connect_signals();
     void grepCurrentView();
     void spawnViewerWithContent(QString file_path);
-    Viewer* get_active_viewer_widget();
+    ProjectViewer* get_active_viewer_widget();
     void dropEvent(QDropEvent* event);
     void dragEnterEvent(QDragEnterEvent* event);
     void setWindowTitle(const QString& title);
