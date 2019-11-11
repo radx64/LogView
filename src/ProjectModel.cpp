@@ -28,3 +28,8 @@ void ProjectModel::on_logfile_change()
     changed_ = true;
     emit changed();
 }
+
+bool ProjectModel::is_empty()
+{
+    return logfiles_.empty();
+}

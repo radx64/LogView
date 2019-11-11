@@ -33,6 +33,7 @@ private slots:
     void on_actionGrep_current_view_triggered();
     void on_actionBookmark_current_line_triggered();
     void on_actionAbout_triggered();
+    void on_actionSave_project_as_triggered();
     void on_actionSave_project_triggered();
     void on_actionLoad_project_triggered();
     void project_changed();
@@ -46,7 +47,12 @@ private:
     void dropEvent(QDropEvent* event);
     void dragEnterEvent(QDragEnterEvent* event);
     void setWindowTitle(const QString& title);
+    void updateUi();
+    void updateMenus();
     void refreshWindowTitle();
+    void newProject();
+    void saveProject();
+    void openProject();
 
     Ui::MainWindow *ui{nullptr};
     ProjectModel *pm_{nullptr};

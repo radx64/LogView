@@ -22,6 +22,7 @@ public:
 
     Logfile* add_to_project(std::unique_ptr<Logfile>&& lf);
     std::vector<std::unique_ptr<Logfile>>& get_log_files();
+    bool is_empty();
 
 protected:
     friend class serializer::ProjectModel;

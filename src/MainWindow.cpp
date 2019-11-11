@@ -42,6 +42,14 @@ void MainWindow::connect_signals()
     connect(ui->fileView, &QTabWidget::tabCloseRequested, this, &MainWindow::closeFileTab);
 }
 
+void MainWindow::newProject()
+{
+    if (pm_ != nullptr) delete pm_;
+    pm_ = new ProjectModel();
+    QObject::connect(pm_, &ProjectModel::changed, this, &MainWindow::project_changed);
+    pm_->changed_ = false;
+}
+
 MainWindow::MainWindow(QWidget* parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -51,7 +59,8 @@ MainWindow::MainWindow(QWidget* parent) :
     ui->fileView->setTabsClosable(true);
     statusBar()->showMessage(tr("Use load from file menu or drop files in this window to begin."));
     connect_signals();
-    setWindowTitle("<empty>");
+    newProject();
+    updateUi();
 }
 
 void MainWindow::dropEvent(QDropEvent* event)
@@ -99,13 +108,9 @@ ProjectViewer* MainWindow::get_active_viewer_widget()
 
 void MainWindow::grepCurrentView()
 {
-    /*
-     * This is totally experimental approach with recursive components search
-     * It works but I hate it due those dynamic casts
-     * Need to change approach to create model of greps and then render it recursively
-     */
-
     ProjectViewer* viewerWidget = get_active_viewer_widget();
+    assert(viewerWidget != nullptr);
+
     if (!viewerWidget) return; // can display here some message
 
     LogViewer* deepest_tab = viewerWidget->getDeepestActiveTab();
@@ -181,21 +186,92 @@ void MainWindow::on_exit_app_triggered()
 
 void MainWindow::on_actionAbout_triggered()
 {
-    QMessageBox::about(this, QString("About application"), QString("LogView: " + QString(APP_VERSION) +"\nRadX64 © 2019\nReleased under\nGNU GENERAL PUBLIC LICENSE"));
+    QMessageBox::about(this, QString("About application"),
+        QString("LogView: " + QString(APP_VERSION) +
+            "\nBuild: " + __DATE__ + " " + __TIME__ +
+            "\n\nRadX64 © 2019\nReleased under\nGNU GENERAL PUBLIC LICENSE"));
+}
+
+void MainWindow::on_actionSave_project_as_triggered()
+{
+    if (pm_->is_empty())
+    {
+      QMessageBox::warning(this,"Warning!","Nothing to save.\nLoad file or project first.");
+      return;
+    }
+
+    saveProject();
+    updateUi();
+}
+
+void MainWindow::on_actionLoad_project_triggered()
+{
+    if (pm_->changed_)
+    {
+        QMessageBox msgBox;
+        msgBox.setText("The document has been modified.");
+        msgBox.setInformativeText("Do you want to save changes you made in current project? All changes will be lost if you don't save them.");
+        msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+        msgBox.setDefaultButton(QMessageBox::Save);
+        int ret = msgBox.exec();
+
+        if (ret == QMessageBox::Cancel) return;
+        if (ret == QMessageBox::Save) saveProject();
+    }
+
+    openProject();
+    updateUi();
+}
+
+void MainWindow::setWindowTitle(const QString& title)
+{
+    QMainWindow::setWindowTitle("LogView " + QString(APP_VERSION) + " - " + title);
+}
+
+void MainWindow::refreshWindowTitle()
+{
+    setWindowTitle(pm_->projectName_ + QString(pm_->changed_?" *":""));
+}
+
+void MainWindow::project_changed()
+{
+    updateUi();
 }
 
 void MainWindow::on_actionSave_project_triggered()
 {
-    ProjectViewer* viewerWidget = get_active_viewer_widget();
-    if (!viewerWidget)
-    {
-      QMessageBox::warning(this,"Warning!","Nothing to save.\nLoad file or project first.");
-      return; // can display here some message
+    QFile saveFile(pm_->projectName_);
+    if (!saveFile.open(QIODevice::WriteOnly)) {
+        qWarning("Couldn't open save file!");
+        return;
     }
 
+    QJsonObject object;
+    serializer::ProjectModel::serialize(*pm_, object);
+    QJsonDocument document(object);
+    saveFile.write(document.toJson(QJsonDocument::Indented));
+
+    pm_->changed_ = false;
+    updateUi();
+}
+
+void MainWindow::updateMenus()
+{
+    ui->actionSave_project->setEnabled(pm_->changed_);
+}
+
+void MainWindow::updateUi()
+{
+    refreshWindowTitle();
+    updateMenus();
+}
+
+void MainWindow::saveProject()
+{
     QString file_path = QFileDialog::getSaveFileName(this,
         tr("Save project"), "",
         tr("Project file (*.json)"));
+
     if (file_path.isEmpty())
         return;
 
@@ -213,15 +289,17 @@ void MainWindow::on_actionSave_project_triggered()
     saveFile.write(document.toJson(QJsonDocument::Indented));
 
     pm_->changed_ = false;
-    refreshWindowTitle();
 }
-
-void MainWindow::on_actionLoad_project_triggered()
+void MainWindow::openProject()
 {
     //Temporary HACK to drop old project!
     if (pm_ != nullptr)
     {
         delete pm_;
+        while(ui->fileView->count())
+        {
+            ui->fileView->removeTab(0);
+        }
         ui->fileView->clear();
     }
 
@@ -246,21 +324,4 @@ void MainWindow::on_actionLoad_project_triggered()
     loader::Project::load(ui, pm_);
 
     pm_->changed_ = false;
-    refreshWindowTitle();
-}
-
-void MainWindow::setWindowTitle(const QString& title)
-{
-    QMainWindow::setWindowTitle("LogView " + QString(APP_VERSION) + " - " + title);
-}
-
-void MainWindow::refreshWindowTitle()
-{
-    setWindowTitle(pm_->projectName_ + QString(pm_->changed_?" *":""));
-}
-
-void MainWindow::project_changed()
-{
-    qDebug() << "SIGNALLED";
-    refreshWindowTitle();
 }

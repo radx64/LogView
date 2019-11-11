@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 4.10.1, 2019-11-03T12:49:44. -->
+<!-- Written by QtCreator 4.10.2, 2019-11-10T20:43:24. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -65,7 +65,15 @@
     <value type="QString">C:/Users/Radek/Desktop/git/LogView/LogView.pro</value>
    </valuelist>
    <valuelist type="QVariantList" key="ClangTools.SelectedFiles"/>
-   <valuelist type="QVariantList" key="ClangTools.SuppressedDiagnostics"/>
+   <valuelist type="QVariantList" key="ClangTools.SuppressedDiagnostics">
+    <valuemap type="QVariantMap">
+     <value type="QString" key="ClangTools.SuppressedDiagnosticContext"></value>
+     <value type="QString" key="ClangTools.SuppressedDiagnosticContextKind"></value>
+     <value type="QString" key="ClangTools.SuppressedDiagnosticFilePath">src/BookmarksModel.hpp</value>
+     <value type="QString" key="ClangTools.SuppressedDiagnosticMessage">parameter 'line' is const-qualified in the function declaration; const-qualification of parameters only has an effect in function definitions [readability-avoid-const-params-in-decls]</value>
+     <value type="int" key="ClangTools.SuppressedDiagnosticUniquifier">1</value>
+    </valuemap>
+   </valuelist>
    <value type="bool" key="ClangTools.UseGlobalSettings">true</value>
   </valuemap>
  </data>
