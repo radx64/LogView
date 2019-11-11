@@ -181,6 +181,19 @@ void MainWindow::on_actionBookmark_current_line_triggered()
 
 void MainWindow::on_exit_app_triggered()
 {
+    if (pm_->changed_)
+    {
+        QMessageBox msgBox;
+        msgBox.setText("The document has been modified.");
+        msgBox.setInformativeText("Do you want to save changes you made in current project? All changes will be lost if you don't save them.");
+        msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+        msgBox.setDefaultButton(QMessageBox::Save);
+        int ret = msgBox.exec();
+
+        if (ret == QMessageBox::Cancel) return;
+        if (ret == QMessageBox::Save) saveProject();
+    }   //duplicate code (move it to separate function later)
+
     QApplication::exit();
 }
 
@@ -225,12 +238,15 @@ void MainWindow::on_actionLoad_project_triggered()
 
 void MainWindow::setWindowTitle(const QString& title)
 {
-    QMainWindow::setWindowTitle("LogView " + QString(APP_VERSION) + " - " + title);
+    QMainWindow::setWindowTitle("LogView " + QString(APP_VERSION) +"\t" + title);
 }
 
 void MainWindow::refreshWindowTitle()
 {
-    setWindowTitle(pm_->projectName_ + QString(pm_->changed_?" *":""));
+    setWindowTitle(
+        pm_->projectName_.isEmpty()?"":"  -  "+
+        pm_->projectName_
+        + QString(pm_->changed_?" *":""));
 }
 
 void MainWindow::project_changed()
@@ -240,6 +256,13 @@ void MainWindow::project_changed()
 
 void MainWindow::on_actionSave_project_triggered()
 {
+    qDebug() <<pm_->projectName_;
+    if (pm_->projectName_.isEmpty())
+    {
+        saveProject();
+        return;
+    }
+
     QFile saveFile(pm_->projectName_);
     if (!saveFile.open(QIODevice::WriteOnly)) {
         qWarning("Couldn't open save file!");

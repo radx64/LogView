@@ -2,7 +2,7 @@
 #include <QDebug>
 
 
-ProjectModel::ProjectModel() : projectName_("<empty>"), changed_{false}
+ProjectModel::ProjectModel() : projectName_{""}, changed_{false}
 {
 }
 
