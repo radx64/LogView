@@ -9,5 +9,6 @@
     <file alias="Gnome-Dialog-Warning-32.png">img/Gnome-Dialog-Warning-32.png</file>
     <file alias="Gnome-Document-Open-32.png">img/Gnome-Document-Open-32.png</file>
     <file alias="Gnome-Document-Save-As-32.png">img/Gnome-Document-Save-As-32.png</file>
+    <file alias="Gnome-Document-Save-32.png">img/Gnome-Document-Save-32.png</file>
 </qresource>
 </RCC>

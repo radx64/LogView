@@ -38,6 +38,7 @@ SOURCES += \
         src/ModelNumberingPolicy.cpp \
         src/ProjectViewer.cpp \
         src/main.cpp \
+        src/ProjectManager.cpp \
         src/ProjectModel.cpp \
         src/TextRenderer.cpp \
         src/loader/Project.cpp \
@@ -46,7 +47,7 @@ SOURCES += \
         src/serializer/SerializerBookmarksModel.cpp \
         src/serializer/SerializerGrepNode.cpp \
         src/serializer/SerializerLogfile.cpp \
-        src/serializer/SerializerProjectModel.cpp
+        src/serializer/SerializerProjectModel.cpp \
 
 HEADERS += \
         src/Bookmark.hpp \
@@ -60,6 +61,7 @@ HEADERS += \
         src/MainWindow.hpp \
         src/ModelNumberingPolicy.hpp \
         src/ProjectModel.hpp \
+        src/ProjectUiManager.hpp \
         src/ProjectViewer.hpp \
         src/TextRenderer.hpp \
         src/loader/Project.hpp \

@@ -65,8 +65,8 @@
     <addaction name="actionLoad_project"/>
     <addaction name="actionSave_project"/>
     <addaction name="actionSave_project_as"/>
-    <addaction name="exit_app"/>
     <addaction name="separator"/>
+    <addaction name="exit_app"/>
     <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuFind">
@@ -90,12 +90,26 @@
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
+   <property name="mouseTracking">
+    <bool>true</bool>
+   </property>
+   <property name="windowTitle">
+    <string>Toolbar</string>
+   </property>
+   <property name="autoFillBackground">
+    <bool>false</bool>
+   </property>
    <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
    </attribute>
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionLoad_from_file"/>
+   <addaction name="actionLoad_project"/>
+   <addaction name="separator"/>
+   <addaction name="actionSave_project"/>
+   <addaction name="actionSave_project_as"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionLoad_from_file">
@@ -185,7 +199,7 @@
   <action name="actionSave_project">
    <property name="icon">
     <iconset resource="../icons.qrc">
-     <normaloff>:/icon/Gnome-Document-Save-As-32.png</normaloff>:/icon/Gnome-Document-Save-As-32.png</iconset>
+     <normaloff>:/icon/Gnome-Document-Save-32.png</normaloff>:/icon/Gnome-Document-Save-32.png</iconset>
    </property>
    <property name="text">
     <string>Save project</string>

@@ -9,11 +9,12 @@
 #include <QHBoxLayout>
 #include <QListWidget>
 
+#include "ProjectUiManager.hpp"
+
 class Logfile;
 class QTextEdit;
 class QTabWidget;
 class ProjectViewer;
-class ProjectModel;
 
 namespace Ui {
 class MainWindow;
@@ -36,13 +37,13 @@ private slots:
     void on_actionSave_project_as_triggered();
     void on_actionSave_project_triggered();
     void on_actionLoad_project_triggered();
-    void project_changed();
 
 private:
+    void project_changed();
     void bookmarkCurrentLine();
     void connect_signals();
     void grepCurrentView();
-    void spawnViewerWithContent(QString file_path);
+    void load_log_file(QString file_path);
     ProjectViewer* get_active_viewer_widget();
     void dropEvent(QDropEvent* event);
     void dragEnterEvent(QDragEnterEvent* event);
@@ -55,7 +56,7 @@ private:
     void openProject();
 
     Ui::MainWindow *ui{nullptr};
-    ProjectModel *pm_{nullptr};
+    std::unique_ptr<ProjectUiManager> pm_{};
 };
 
 #endif // MAINWINDOW_HPP

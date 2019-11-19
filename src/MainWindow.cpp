@@ -1,6 +1,8 @@
 #include "MainWindow.hpp"
 #include "ui_MainWindow.h"
 
+#include <memory>
+
 // TODO: cleanup this includes after some mockups creation and proper class segregation
 #include <QAction>
 #include <QDebug>
@@ -26,9 +28,9 @@
 #include "TextRenderer.hpp"
 #include "ProjectViewer.hpp"
 #include "loader/Project.hpp"
-#include "loader/LoaderLogFile.hpp"
 #include "serializer/SerializerProjectModel.hpp"
 #include "Version.hpp"
+#include "ProjectUiManager.hpp"
 
 void MainWindow::closeFileTab(const int index)
 {
@@ -44,10 +46,7 @@ void MainWindow::connect_signals()
 
 void MainWindow::newProject()
 {
-    if (pm_ != nullptr) delete pm_;
-    pm_ = new ProjectModel();
-    QObject::connect(pm_, &ProjectModel::changed, this, &MainWindow::project_changed);
-    pm_->changed_ = false;
+    pm_->create_new();
 }
 
 MainWindow::MainWindow(QWidget* parent) :
@@ -59,6 +58,8 @@ MainWindow::MainWindow(QWidget* parent) :
     ui->fileView->setTabsClosable(true);
     statusBar()->showMessage(tr("Use load from file menu or drop files in this window to begin."));
     connect_signals();
+    pm_ = std::make_unique<ProjectUiManager>(ui);
+    pm_->connect_update_notif([this](){updateUi();});
     newProject();
     updateUi();
 }
@@ -76,7 +77,7 @@ void MainWindow::dropEvent(QDropEvent* event)
     QList<QUrl> urlList = mimeData->urls();
     for (const auto& fileList : urlList)
     {
-        spawnViewerWithContent(fileList.toLocalFile());
+        load_log_file(fileList.toLocalFile());
     }
 }
 
@@ -91,10 +92,9 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::spawnViewerWithContent(QString file_path)
+void MainWindow::load_log_file(QString file_path)
 {
-   Logfile* lf = pm_->add_to_project(std::make_unique<Logfile>(file_path));
-   loader::Logfile::load(ui, lf);
+   pm_->load_log_file(file_path);
 }
 
 ProjectViewer* MainWindow::get_active_viewer_widget()
@@ -160,14 +160,7 @@ void MainWindow::on_actionLoad_from_file_triggered()
     if (file_path.isEmpty())
         return;
 
-    //Temporary HACK to spawn empty project!
-    if (pm_ == nullptr)
-    {
-        pm_ = new ProjectModel();
-        QObject::connect(pm_, &ProjectModel::changed, this, &MainWindow::project_changed);
-    }
-
-    spawnViewerWithContent(file_path);
+    load_log_file(file_path);
 }
 
 void MainWindow::on_actionGrep_current_view_triggered()
@@ -181,7 +174,7 @@ void MainWindow::on_actionBookmark_current_line_triggered()
 
 void MainWindow::on_exit_app_triggered()
 {
-    if (pm_->changed_)
+    if (pm_->has_changed())
     {
         QMessageBox msgBox;
         msgBox.setText("The document has been modified.");
@@ -219,7 +212,7 @@ void MainWindow::on_actionSave_project_as_triggered()
 
 void MainWindow::on_actionLoad_project_triggered()
 {
-    if (pm_->changed_)
+    if (pm_->has_changed())
     {
         QMessageBox msgBox;
         msgBox.setText("The document has been modified.");
@@ -243,10 +236,9 @@ void MainWindow::setWindowTitle(const QString& title)
 
 void MainWindow::refreshWindowTitle()
 {
-    setWindowTitle(
-        pm_->projectName_.isEmpty()?"":"  -  "+
-        pm_->projectName_
-        + QString(pm_->changed_?" *":""));
+    setWindowTitle(pm_->project_name().isEmpty()?"":"  -  " +
+                   pm_->project_name() +
+                   QString(pm_->has_changed()?" *":""));
 }
 
 void MainWindow::project_changed()
@@ -256,31 +248,12 @@ void MainWindow::project_changed()
 
 void MainWindow::on_actionSave_project_triggered()
 {
-    qDebug() <<pm_->projectName_;
-    if (pm_->projectName_.isEmpty())
-    {
-        saveProject();
-        return;
-    }
-
-    QFile saveFile(pm_->projectName_);
-    if (!saveFile.open(QIODevice::WriteOnly)) {
-        qWarning("Couldn't open save file!");
-        return;
-    }
-
-    QJsonObject object;
-    serializer::ProjectModel::serialize(*pm_, object);
-    QJsonDocument document(object);
-    saveFile.write(document.toJson(QJsonDocument::Indented));
-
-    pm_->changed_ = false;
-    updateUi();
+    pm_->save_project();
 }
 
 void MainWindow::updateMenus()
 {
-    ui->actionSave_project->setEnabled(pm_->changed_);
+    ui->actionSave_project->setEnabled(pm_->has_changed());
 }
 
 void MainWindow::updateUi()
@@ -291,60 +264,10 @@ void MainWindow::updateUi()
 
 void MainWindow::saveProject()
 {
-    QString file_path = QFileDialog::getSaveFileName(this,
-        tr("Save project"), "",
-        tr("Project file (*.json)"));
-
-    if (file_path.isEmpty())
-        return;
-
-    QFile saveFile(file_path);
-    if (!saveFile.open(QIODevice::WriteOnly)) {
-        qWarning("Couldn't open save file!");
-        return;
-    }
-
-    pm_->projectName_ = saveFile.fileName();
-
-    QJsonObject object;
-    serializer::ProjectModel::serialize(*pm_, object);
-    QJsonDocument document(object);
-    saveFile.write(document.toJson(QJsonDocument::Indented));
-
-    pm_->changed_ = false;
+    pm_->save_empty_project();
 }
 void MainWindow::openProject()
 {
-    //Temporary HACK to drop old project!
-    if (pm_ != nullptr)
-    {
-        delete pm_;
-        while(ui->fileView->count())
-        {
-            ui->fileView->removeTab(0);
-        }
-        ui->fileView->clear();
-    }
+    pm_->open_project();
 
-    pm_ = new ProjectModel();
-
-    QString file_path = QFileDialog::getOpenFileName(this,
-        tr("Open project"), "",
-        tr("Project file (*.json)"));
-    if (file_path.isEmpty())
-        return;
-
-    QFile loadFile(file_path);
-    if (!loadFile.open(QIODevice::ReadOnly)) {
-        qWarning("Couldn't open save file!");
-        return;
-    }
-    QJsonDocument document = QJsonDocument::fromJson(loadFile.readAll());
-    QJsonObject object = document.object();
-
-    serializer::ProjectModel::deserialize(*pm_, object);
-    QObject::connect(pm_, &ProjectModel::changed, this, &MainWindow::project_changed);
-    loader::Project::load(ui, pm_);
-
-    pm_->changed_ = false;
 }
