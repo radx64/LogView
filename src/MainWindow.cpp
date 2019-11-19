@@ -108,9 +108,8 @@ ProjectViewer* MainWindow::get_active_viewer_widget()
 
 void MainWindow::grepCurrentView()
 {
+    //TODO make grep and bookmark active only when file is loaded
     ProjectViewer* viewerWidget = get_active_viewer_widget();
-    assert(viewerWidget != nullptr);
-
     if (!viewerWidget) return; // can display here some message
 
     LogViewer* deepest_tab = viewerWidget->getDeepestActiveTab();

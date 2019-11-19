@@ -10,7 +10,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = LogView
 TEMPLATE = app
-VERSION = 0.0.2
+VERSION = 0.0.3
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
@@ -36,9 +36,9 @@ SOURCES += \
         src/MainWindow.cpp \
         src/Logfile.cpp \
         src/ModelNumberingPolicy.cpp \
+    src/ProjectUiManager.cpp \
         src/ProjectViewer.cpp \
         src/main.cpp \
-        src/ProjectManager.cpp \
         src/ProjectModel.cpp \
         src/TextRenderer.cpp \
         src/loader/Project.cpp \
