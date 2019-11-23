@@ -1,8 +1,8 @@
 #ifndef BOOKMARKS_MODEL_HPP
 #define BOOKMARKS_MODEL_HPP
 
-#include <QAbstractListModel>
 #include <QString>
+#include <QAbstractListModel>
 
 #include "Bookmark.hpp"
 class QJsonObject;
