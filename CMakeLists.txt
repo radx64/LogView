@@ -9,13 +9,12 @@ add_definitions(-DQT_STATIC)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTOUIC_SEARCH_PATHS src)
+set(CMAKE_AUTOUIC_SEARCH_PATHS . src)
 
-if(CMAKE_VERSION VERSION_LESS "3.7.0")
-    set(CMAKE_INCLUDE_CURRENT_DIR ON)
-endif()
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
+
+find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets)
 
 set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -std=c++17")
 set(SOURCES
@@ -51,28 +50,16 @@ set(RESOURCES icons.qrc)
 
 set(RC_FILE src/app.rc)
 
-include_directories(src)
-
-include_directories(${Qt5Widgets_INCLUDES})
-add_definitions(${Qt5Widgets_DEFINITIONS})
-include_directories(${Qt5Gui_INCLUDES})
-add_definitions(${Qt5Gui_DEFINITIONS})
-include_directories(${Qt5Core_INCLUDES})
-add_definitions(${Qt5Core_DEFINITIONS})
+include_directories(. src)
 
 if(WIN32)
   set(CMAKE_WIN32_EXECUTABLE ON)
 endif()
 
-qt5_wrap_ui(ui_wrap ${FORMS})
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}")
 
-add_executable(LogView ${ui_wrap} ${RESOURCES} ${RC_FILE} ${SOURCES})
+include_directories(${Qt5Widgets_INCLUDE_DIRS} ${QtQml_INCLUDE_DIRS})
+add_definitions(${Qt5Widgets_DEFINITIONS} ${QtQml_DEFINITIONS} ${${Qt5Quick_DEFINITIONS}})
+
+add_executable(LogView ${FORMS} ${RESOURCES} ${RC_FILE} ${SOURCES})
 target_link_libraries(LogView PUBLIC Qt5::Core Qt5::Gui Qt5::Widgets)
-
-# auto copy dlls if on windows
-if(WIN32)
-        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt5::Core> $<TARGET_FILE_DIR:${PROJECT_NAME}>
-                COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt5::Gui> $<TARGET_FILE_DIR:${PROJECT_NAME}>
-                COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt5::Widgets> $<TARGET_FILE_DIR:${PROJECT_NAME}> )
-endif(WIN32)
