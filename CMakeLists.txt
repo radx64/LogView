@@ -1,22 +1,20 @@
 set(projectName "LogView")
-set(version 0.0.3)
+set(version 0)
 
 cmake_minimum_required(VERSION 3.9.0)
 project (${projectName})
-add_definitions(VERSION=${version})
+add_definitions(-DAPP_VERSION="1")
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTOUIC_SEARCH_PATHS .)
+set(CMAKE_AUTOUIC_SEARCH_PATHS src)
 
 if(CMAKE_VERSION VERSION_LESS "3.7.0")
     set(CMAKE_INCLUDE_CURRENT_DIR ON)
 endif()
 
-find_package(Qt5 COMPONENTS Gui REQUIRED)
-find_package(Qt5 COMPONENTS Core REQUIRED)
-find_package(Qt5 COMPONENTS Widgets REQUIRED)
+find_package(Qt5Widgets REQUIRED)
 
 set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -std=c++17")
 set(SOURCES
@@ -54,6 +52,9 @@ set(RC_FILE src/app.rc)
 
 include_directories(src)
 
-add_executable(LogView ${SOURCES} ${FROMS} ${RESOURCES} ${RC_FILE})
-target_link_libraries(LogView Qt5::Gui Qt5::Core Qt5::Widgets)
-#target_link_libraries(LogView)
+include_directories(${Qt5Widgets_INCLUDES})
+add_definitions(${Qt5Widgets_DEFINITIONS})
+
+add_executable(LogView ${FORMS} ${RESOURCES} ${RC_FILE} ${SOURCES})
+qt5_use_modules(LogView Widgets)
+#target_link_libraries(LogView ${Qt5Widgets_LIBRARIES})
