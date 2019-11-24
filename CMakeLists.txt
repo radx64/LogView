@@ -1,10 +1,9 @@
 set(projectName "LogView")
-set(version 0)
+set(version \"0.0.3\")
 
 cmake_minimum_required(VERSION 3.9.0)
 project (${projectName})
-add_definitions(-DAPP_VERSION="1")
-add_definitions(-DQT_STATIC)
+add_definitions(-DAPP_VERSION=${version})
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -13,10 +12,11 @@ set(CMAKE_AUTOUIC_SEARCH_PATHS . src)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-
 find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets)
 
-set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -std=c++17")
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 set(SOURCES
     src/Bookmark.cpp
     src/BookmarksModel.cpp
@@ -61,5 +61,5 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}")
 include_directories(${Qt5Widgets_INCLUDE_DIRS} ${QtQml_INCLUDE_DIRS})
 add_definitions(${Qt5Widgets_DEFINITIONS} ${QtQml_DEFINITIONS} ${${Qt5Quick_DEFINITIONS}})
 
-add_executable(LogView ${FORMS} ${RESOURCES} ${RC_FILE} ${SOURCES})
-target_link_libraries(LogView PUBLIC Qt5::Core Qt5::Gui Qt5::Widgets)
+add_executable(${projectName} ${FORMS} ${RESOURCES} ${RC_FILE} ${SOURCES})
+target_link_libraries(${projectName} PUBLIC Qt5::Core Qt5::Gui Qt5::Widgets)
