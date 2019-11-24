@@ -4,7 +4,6 @@ set(version \"0.0.3\")
 cmake_minimum_required(VERSION 3.9.0)
 project (${projectName})
 add_definitions(-DAPP_VERSION=${version})
-add_definitions(-DQT_STATIC)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
