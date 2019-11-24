@@ -26,6 +26,9 @@ environment:
     platform: mingw
     qt: mingw492_32
 
+before_build:
+  - md build
+
 install:
   - set PATH=C:\Qt\5.5\%qt%\bin;C:\dev\dependencies\vlc-qt\bin;%PATH%
   - set ORIGPATH=%PATH%
