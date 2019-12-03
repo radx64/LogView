@@ -5,7 +5,7 @@
 #include <memory>
 
 class Logfile;
-class LogViewer;
+class FileViewer;
 class ProjectModel;
 class GrepNode;
 namespace Ui { class MainWindow; }
@@ -17,7 +17,7 @@ class Project
 {
 public:
     Project() = delete;
-    static void load(Ui::MainWindow *ui, ::ProjectModel* pm, std::function<void(::Logfile*)> on_wiget_destroy_action);
+    static void load(Ui::MainWindow *ui, ::ProjectModel* pm, std::function<void(::FileViewer*)> connect_slots_to_manager);
 };
 
 }  // namespace loader

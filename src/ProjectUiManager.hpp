@@ -16,6 +16,8 @@
 #include "Logfile.hpp"
 #include "serializer/SerializerProjectModel.hpp"
 
+class FileViewer;
+
 class ProjectUiManager : public QObject
 {
 Q_OBJECT
@@ -33,9 +35,11 @@ public:
 
 private slots:
     void project_changed();
+    void file_viewer_closed(Logfile* lf);
 
 private:
     void on_logfile_wiget_close(Logfile* lf);
+    void ProjectUiManager::connect_logviewer_signal(FileViewer* fileviewer);
     std::unique_ptr<ProjectModel> pm_;
     std::function<void(void)> update_client_notif_;
     Ui::MainWindow* ui_;

@@ -130,7 +130,7 @@ void MainWindow::grepCurrentView()
     }
 }
 
-void MainWindow::bookmarkCurrentLine()
+void MainWindow::bookmark_current_line()
 {
     FileViewer* viewerWidget = get_active_viewer_widget();
     if (!viewerWidget) return; // can display here some message
@@ -168,7 +168,7 @@ void MainWindow::on_actionGrep_current_view_triggered()
 }
 void MainWindow::on_actionBookmark_current_line_triggered()
 {
-    bookmarkCurrentLine();
+    bookmark_current_line();
 }
 
 void MainWindow::on_exit_app_triggered()

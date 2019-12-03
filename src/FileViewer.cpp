@@ -17,8 +17,7 @@
 #include "TextRenderer.hpp"
 #include "Logfile.hpp"
 
-FileViewer::FileViewer(QWidget* parent, Logfile* logfile, const std::function<void()> on_destroy_action)
-: on_destroy_action_(on_destroy_action)
+FileViewer::FileViewer(QWidget* parent, Logfile* logfile)
 {
     setParent(parent);
     logfile_ = logfile;
@@ -48,7 +47,8 @@ FileViewer::FileViewer(QWidget* parent, Logfile* logfile, const std::function<vo
 
 FileViewer::~FileViewer()
 {
-    if(on_destroy_action_) on_destroy_action_();
+    //if(on_destroy_action_) on_destroy_action_();
+    emit destroyed(logfile_);
     qDebug() << "File closed!";
 }
 

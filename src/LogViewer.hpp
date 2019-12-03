@@ -13,7 +13,7 @@ class GrepNode;
 
 class LogViewer : public QWidget
 {
-    Q_OBJECT
+Q_OBJECT
 public:
     LogViewer(QWidget* parent, GrepNode* current_grep_node_, const Lines lines);
     LogViewer* grep(GrepNode* grep);

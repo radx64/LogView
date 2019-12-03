@@ -40,7 +40,7 @@ private slots:
 
 private:
     void project_changed();
-    void bookmarkCurrentLine();
+    void bookmark_current_line();
     void connect_signals();
     void grepCurrentView();
     void load_log_file(QString file_path);

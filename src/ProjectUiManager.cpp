@@ -1,4 +1,7 @@
 #include "ProjectUiManager.hpp"
+
+#include "FileViewer.hpp"
+
 #include <QDebug>
 
 ProjectUiManager::ProjectUiManager(Ui::MainWindow* ui) : ui_(ui)
@@ -16,7 +19,13 @@ void ProjectUiManager::create_new()
 void ProjectUiManager::load_log_file(QString file_path)
 {
     Logfile* lf = pm_->add_to_project(std::make_unique<Logfile>(file_path));
-    loader::Logfile::load(ui_, lf, [&](){this->on_logfile_wiget_close(lf);});
+    loader::Logfile::load(
+        ui_,
+        lf,
+        [&](FileViewer* fileviewer)
+        {
+            connect_logviewer_signal(fileviewer);
+        });
 }
 
 void ProjectUiManager::on_logfile_wiget_close(Logfile* lf)
@@ -84,7 +93,6 @@ void ProjectUiManager::open_project()
 
     pm_ = std::make_unique<ProjectModel>();
 
-    //Todo fix below nullptr
     QString file_path = QFileDialog::getOpenFileName(nullptr,
                                                      tr("Open project"), "",
                                                      tr("Project file (*.json)"));
@@ -101,11 +109,28 @@ void ProjectUiManager::open_project()
 
     serializer::ProjectModel::deserialize(*pm_, object);
     QObject::connect(pm_.get(), &ProjectModel::changed, this, &ProjectUiManager::project_changed);
-    loader::Project::load(ui_, pm_.get(), [&](Logfile* lf){this->on_logfile_wiget_close(lf);});
+    loader::Project::load(
+        ui_,
+        pm_.get(),
+        [&](FileViewer* fileviewer)
+        {
+            connect_logviewer_signal(fileviewer);
+        });
     pm_->changed_ = false;
+}
+
+void ProjectUiManager::connect_logviewer_signal(FileViewer* fileviewer)
+{
+    connect(fileviewer, &FileViewer::destroyed, this, &ProjectUiManager::file_viewer_closed);
 }
 
 void ProjectUiManager::project_changed()
 {
     update_client_notif_();
+}
+
+void ProjectUiManager::file_viewer_closed(Logfile* lf)
+{
+    qDebug() << "Closed viewer: " << lf;
+    pm_->remove_file_from_project(lf);
 }

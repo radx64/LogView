@@ -26,6 +26,7 @@ LogViewer::LogViewer(QWidget* parent, GrepNode* grep_node, const Lines lines)
     tabs_ = new QTabWidget();
     tabs_->addTab(text_,"Base");
     tabs_->setTabsClosable(true);
+
     //Remove close button from "Base" tab;
     tabs_->tabBar()->setTabButton(0, QTabBar::LeftSide, nullptr);
     tabs_->tabBar()->setTabButton(0, QTabBar::RightSide, nullptr);

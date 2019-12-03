@@ -15,16 +15,14 @@ class ProjectModel : public QObject
 Q_OBJECT
 public:
     ProjectModel();
-    virtual ~ProjectModel();
-
-    QString projectName_;
-    bool changed_;
+    virtual ~ProjectModel() = default;
 
     Logfile* add_to_project(std::unique_ptr<Logfile>&& lf);
     std::vector<std::unique_ptr<Logfile>>& get_log_files();
     bool is_empty();
-
     void remove_file_from_project(Logfile* logfile);
+    QString projectName_;
+    bool changed_;
 
 protected:
     friend class serializer::ProjectModel;

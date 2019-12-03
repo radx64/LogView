@@ -13,8 +13,9 @@ class LogViewer;
 
 class FileViewer: public QWidget
 {
+Q_OBJECT
 public:
-    FileViewer(QWidget* parent, Logfile* logfile, const std::function<void()> on_destroy_action = nullptr);
+    FileViewer(QWidget* parent, Logfile* logfile);
     ~FileViewer();
     LogViewer* getDeepestActiveTab();
 
@@ -25,7 +26,9 @@ protected:
     bool eventFilter(QObject *obj, QEvent *event) override;
     QHBoxLayout* layout_;
     LogViewer* logViewer_;
-    const std::function<void()> on_destroy_action_;
+
+signals:
+    void destroyed(Logfile* logfile);
 
 private slots:
     void bookmarksItemDoubleClicked(const QModelIndex& idx);
