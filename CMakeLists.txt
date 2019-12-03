@@ -8,7 +8,7 @@ add_definitions(-DAPP_VERSION=${version})
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTOUIC_SEARCH_PATHS . src)
+set(CMAKE_AUTOUIC_SEARCH_PATHS . src src/ui)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
@@ -42,13 +42,13 @@ set(SOURCES
 )
 
 set(FORMS
-    src/GrepDialogWindow.ui
-    src/MainWindow.ui
+    src/ui/GrepDialogWindow.ui
+    src/ui/MainWindow.ui
 )
 
 set(RESOURCES icons.qrc)
 
-set(RC_FILE src/app.rc)
+set(RC_FILE src/ui/app.rc)
 
 include_directories(. src)
 
