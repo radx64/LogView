@@ -252,7 +252,7 @@ void MainWindow::on_actionSave_project_triggered()
 
 void MainWindow::updateMenus()
 {
-    ui->actionSave_project->setEnabled(pm_->has_changed());
+    ui->actionSave_project->setEnabled(!pm_->project_name().isEmpty() && pm_->has_changed());
 }
 
 void MainWindow::updateUi()
@@ -263,7 +263,7 @@ void MainWindow::updateUi()
 
 void MainWindow::saveProject()
 {
-    pm_->save_empty_project();
+    pm_->save_project();
 }
 void MainWindow::openProject()
 {

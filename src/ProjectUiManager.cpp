@@ -38,46 +38,26 @@ const QString& ProjectUiManager::project_name()
     return pm_->projectName_;
 }
 
-void ProjectUiManager::save_empty_project()
+void ProjectUiManager::save_project()
 {
-    //TODO below nullptr might be bad
-    QString file_path = QFileDialog::getSaveFileName(nullptr,
-                                                     tr("Save project"), "",
-                                                     tr("Project file (*.json)"));
+    QString file_path = project_name();
+
+    if (file_path.isEmpty())
+    {
+        file_path = QFileDialog::getSaveFileName(nullptr,
+            tr("Save project"), "",
+            tr("Project file (*.json)"));
+    }
 
     if (file_path.isEmpty())
         return;
 
-    QFile saveFile(file_path);
-    if (!saveFile.open(QIODevice::WriteOnly)) {
-        qWarning("Couldn't open save file!");
-        return;
-    }
-
-    pm_->projectName_ = saveFile.fileName();
-
-    QJsonObject object;
-    serializer::ProjectModel::serialize(*pm_, object);
-    QJsonDocument document(object);
-    saveFile.write(document.toJson(QJsonDocument::Indented));
-
-    pm_->changed_ = false;
-}
-
-void ProjectUiManager::save_project()
-{
-    if (project_name().isEmpty())
-    {
-        save_empty_project();
-        return;
-    }
-
-    //todo merge below code with save_empty_project
     QFile saveFile(project_name());
     if (!saveFile.open(QIODevice::WriteOnly)) {
         qWarning("Couldn't open save file!");
         return;
     }
+    pm_->projectName_ = saveFile.fileName();
 
     QJsonObject object;
     serializer::ProjectModel::serialize(*pm_, object);
