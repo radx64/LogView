@@ -117,7 +117,7 @@
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionLoad_from_file">
    <property name="icon">
-    <iconset resource="../icons.qrc">
+    <iconset resource="../../icons.qrc">
      <normaloff>:/icon/Gnome-Logviewer-32.png</normaloff>:/icon/Gnome-Logviewer-32.png</iconset>
    </property>
    <property name="text">
@@ -132,7 +132,7 @@
   </action>
   <action name="exit_app">
    <property name="icon">
-    <iconset resource="../icons.qrc">
+    <iconset resource="../../icons.qrc">
      <normaloff>:/icon/Gnome-System-Log-Out-32.png</normaloff>:/icon/Gnome-System-Log-Out-32.png</iconset>
    </property>
    <property name="text">
@@ -144,7 +144,7 @@
   </action>
   <action name="actionGrep_current_view">
    <property name="icon">
-    <iconset resource="../icons.qrc">
+    <iconset resource="../../icons.qrc">
      <normaloff>:/icon/Gnome-Format-Indent-More-32.png</normaloff>:/icon/Gnome-Format-Indent-More-32.png</iconset>
    </property>
    <property name="text">
@@ -156,7 +156,7 @@
   </action>
   <action name="actionBookmark_current_line">
    <property name="icon">
-    <iconset resource="../icons.qrc">
+    <iconset resource="../../icons.qrc">
      <normaloff>:/icon/Gnome-Bookmark-New-32.png</normaloff>:/icon/Gnome-Bookmark-New-32.png</iconset>
    </property>
    <property name="text">
@@ -168,7 +168,7 @@
   </action>
   <action name="actionAbout">
    <property name="icon">
-    <iconset resource="../icons.qrc">
+    <iconset resource="../../icons.qrc">
      <normaloff>:/icon/Gnome-Dialog-Warning-32.png</normaloff>:/icon/Gnome-Dialog-Warning-32.png</iconset>
    </property>
    <property name="text">
@@ -177,7 +177,7 @@
   </action>
   <action name="actionLoad_project">
    <property name="icon">
-    <iconset resource="../icons.qrc">
+    <iconset resource="../../icons.qrc">
      <normaloff>:/icon/Gnome-Document-Open-32.png</normaloff>:/icon/Gnome-Document-Open-32.png</iconset>
    </property>
    <property name="text">
@@ -189,7 +189,7 @@
   </action>
   <action name="actionSave_project_as">
    <property name="icon">
-    <iconset resource="../icons.qrc">
+    <iconset resource="../../icons.qrc">
      <normaloff>:/icon/Gnome-Document-Save-As-32.png</normaloff>:/icon/Gnome-Document-Save-As-32.png</iconset>
    </property>
    <property name="text">
@@ -201,7 +201,7 @@
   </action>
   <action name="actionSave_project">
    <property name="icon">
-    <iconset resource="../icons.qrc">
+    <iconset resource="../../icons.qrc">
      <normaloff>:/icon/Gnome-Document-Save-32.png</normaloff>:/icon/Gnome-Document-Save-32.png</iconset>
    </property>
    <property name="text">
@@ -214,7 +214,7 @@
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
-  <include location="../icons.qrc"/>
+  <include location="../../icons.qrc"/>
  </resources>
  <connections/>
 </ui>

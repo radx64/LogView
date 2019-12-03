@@ -19,6 +19,7 @@ public:
     Logfile* logfile_; //TODO make this protected
 
 protected:
+    bool eventFilter(QObject *obj, QEvent *event) override;
     QHBoxLayout* layout_;
     LogViewer* logViewer_;
 

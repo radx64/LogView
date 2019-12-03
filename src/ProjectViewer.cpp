@@ -39,7 +39,12 @@ ProjectViewer::ProjectViewer(QWidget* parent, Logfile* logfile)
     layout_->addWidget(splitter);
     this->setLayout(layout_);
 
+
+    bookmarks_widget_->viewport()->installEventFilter(this);
+
+
     bookmarks_widget_->setModel(logfile_->getBookmarksModel());
+    bookmarks_widget_->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(bookmarks_widget_, &QListView::doubleClicked, this, &ProjectViewer::bookmarksItemDoubleClicked);
 }
 
@@ -57,6 +62,17 @@ LogViewer* find_deepest_active_tab(LogViewer* start_point)
 LogViewer* ProjectViewer::getDeepestActiveTab()
 {
     return find_deepest_active_tab(logViewer_);
+}
+
+bool ProjectViewer::eventFilter(QObject *obj, QEvent *event)
+{
+    (void) obj;
+    if (event->type() == QEvent::MouseButtonDblClick)
+    {
+        QMouseEvent * mouseEvent = static_cast <QMouseEvent *> (event);
+        if (mouseEvent->button() == Qt::RightButton) return true;
+    }
+    return false;
 }
 
 void ProjectViewer::bookmarksItemDoubleClicked(const QModelIndex& idx)
