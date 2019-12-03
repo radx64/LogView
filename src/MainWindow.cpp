@@ -26,7 +26,7 @@
 #include "ProjectModel.hpp"
 #include "LogViewer.hpp"
 #include "TextRenderer.hpp"
-#include "ProjectViewer.hpp"
+#include "FileViewer.hpp"
 #include "loader/Project.hpp"
 #include "serializer/SerializerProjectModel.hpp"
 #include "Version.hpp"
@@ -97,11 +97,11 @@ void MainWindow::load_log_file(QString file_path)
    pm_->load_log_file(file_path);
 }
 
-ProjectViewer* MainWindow::get_active_viewer_widget()
+FileViewer* MainWindow::get_active_viewer_widget()
 {
     const int tab_index = ui->fileView->currentIndex();
     if(tab_index == -1) return nullptr;
-    ProjectViewer* viewerWidget = dynamic_cast<ProjectViewer*>(ui->fileView->widget(tab_index));
+    FileViewer* viewerWidget = dynamic_cast<FileViewer*>(ui->fileView->widget(tab_index));
     if (!viewerWidget) throw std::string("Could not find active ViewerWidget");
     return viewerWidget;
 }
@@ -109,7 +109,7 @@ ProjectViewer* MainWindow::get_active_viewer_widget()
 void MainWindow::grepCurrentView()
 {
     //TODO make grep and bookmark active only when file is loaded
-    ProjectViewer* viewerWidget = get_active_viewer_widget();
+    FileViewer* viewerWidget = get_active_viewer_widget();
     if (!viewerWidget) return; // can display here some message
 
     LogViewer* deepest_tab = viewerWidget->getDeepestActiveTab();
@@ -132,7 +132,7 @@ void MainWindow::grepCurrentView()
 
 void MainWindow::bookmarkCurrentLine()
 {
-    ProjectViewer* viewerWidget = get_active_viewer_widget();
+    FileViewer* viewerWidget = get_active_viewer_widget();
     if (!viewerWidget) return; // can display here some message
     LogViewer* deepest_tab = viewerWidget->getDeepestActiveTab();
 

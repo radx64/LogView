@@ -14,7 +14,7 @@
 class Logfile;
 class QTextEdit;
 class QTabWidget;
-class ProjectViewer;
+class FileViewer;
 
 namespace Ui {
 class MainWindow;
@@ -44,7 +44,7 @@ private:
     void connect_signals();
     void grepCurrentView();
     void load_log_file(QString file_path);
-    ProjectViewer* get_active_viewer_widget();
+    FileViewer* get_active_viewer_widget();
     void dropEvent(QDropEvent* event);
     void dragEnterEvent(QDragEnterEvent* event);
     void setWindowTitle(const QString& title);
@@ -55,8 +55,8 @@ private:
     void saveProject();
     void openProject();
 
-    Ui::MainWindow *ui{nullptr};
     std::unique_ptr<ProjectUiManager> pm_{};
+    Ui::MainWindow *ui{nullptr};
 };
 
 #endif // MAINWINDOW_HPP

@@ -35,6 +35,7 @@ private slots:
     void project_changed();
 
 private:
+    void on_logfile_wiget_close(Logfile* lf);
     std::unique_ptr<ProjectModel> pm_;
     std::function<void(void)> update_client_notif_;
     Ui::MainWindow* ui_;

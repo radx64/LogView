@@ -1,4 +1,4 @@
-#include "ProjectViewer.hpp"
+#include "FileViewer.hpp"
 
 #include <QHBoxLayout>
 #include <QListView>
@@ -17,7 +17,8 @@
 #include "TextRenderer.hpp"
 #include "Logfile.hpp"
 
-ProjectViewer::ProjectViewer(QWidget* parent, Logfile* logfile)
+FileViewer::FileViewer(QWidget* parent, Logfile* logfile, const std::function<void()> on_destroy_action)
+: on_destroy_action_(on_destroy_action)
 {
     setParent(parent);
     logfile_ = logfile;
@@ -39,13 +40,16 @@ ProjectViewer::ProjectViewer(QWidget* parent, Logfile* logfile)
     layout_->addWidget(splitter);
     this->setLayout(layout_);
 
-
     bookmarks_widget_->viewport()->installEventFilter(this);
-
-
     bookmarks_widget_->setModel(logfile_->getBookmarksModel());
     bookmarks_widget_->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(bookmarks_widget_, &QListView::doubleClicked, this, &ProjectViewer::bookmarksItemDoubleClicked);
+    connect(bookmarks_widget_, &QListView::doubleClicked, this, &FileViewer::bookmarksItemDoubleClicked);
+}
+
+FileViewer::~FileViewer()
+{
+    if(on_destroy_action_) on_destroy_action_();
+    qDebug() << "File closed!";
 }
 
 LogViewer* find_deepest_active_tab(LogViewer* start_point)
@@ -59,12 +63,12 @@ LogViewer* find_deepest_active_tab(LogViewer* start_point)
     return result ? result : start_point;
 }
 
-LogViewer* ProjectViewer::getDeepestActiveTab()
+LogViewer* FileViewer::getDeepestActiveTab()
 {
     return find_deepest_active_tab(logViewer_);
 }
 
-bool ProjectViewer::eventFilter(QObject *obj, QEvent *event)
+bool FileViewer::eventFilter(QObject *obj, QEvent *event)
 {
     (void) obj;
     if (event->type() == QEvent::MouseButtonDblClick)
@@ -75,7 +79,7 @@ bool ProjectViewer::eventFilter(QObject *obj, QEvent *event)
     return false;
 }
 
-void ProjectViewer::bookmarksItemDoubleClicked(const QModelIndex& idx)
+void FileViewer::bookmarksItemDoubleClicked(const QModelIndex& idx)
 {
     Bookmark bookmark = logfile_->getBookmarksModel()->get_bookmark(static_cast<uint32_t>(idx.row()));
     LogViewer* text_viewer = find_deepest_active_tab(logViewer_);

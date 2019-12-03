@@ -6,6 +6,11 @@ ProjectModel::ProjectModel() : projectName_{""}, changed_{false}
 {
 }
 
+ProjectModel::~ProjectModel()
+{
+
+}
+
 Logfile* ProjectModel::add_to_project(std::unique_ptr<Logfile>&& lf)
 {
     logfiles_.push_back(std::move(lf));
@@ -32,4 +37,12 @@ void ProjectModel::on_logfile_change()
 bool ProjectModel::is_empty()
 {
     return logfiles_.empty();
+}
+
+void ProjectModel::remove_file_from_project(Logfile* logfile)
+{
+    auto logfile_it = std::find_if(logfiles_.begin(), logfiles_.end(),
+        [logfile](auto& managed_logfile){return managed_logfile.get() == logfile;});
+
+    if (logfile_it != logfiles_.end()) logfiles_.erase(logfile_it);
 }

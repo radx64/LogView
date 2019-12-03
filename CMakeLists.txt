@@ -28,7 +28,7 @@ set(SOURCES
     src/Logfile.cpp
     src/ModelNumberingPolicy.cpp
     src/ProjectUiManager.cpp
-    src/ProjectViewer.cpp
+    src/FileViewer.cpp
     src/main.cpp
     src/ProjectModel.cpp
     src/TextRenderer.cpp

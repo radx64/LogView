@@ -1,5 +1,5 @@
 #include "ProjectUiManager.hpp"
-
+#include <QDebug>
 
 ProjectUiManager::ProjectUiManager(Ui::MainWindow* ui) : ui_(ui)
 {
@@ -16,7 +16,13 @@ void ProjectUiManager::create_new()
 void ProjectUiManager::load_log_file(QString file_path)
 {
     Logfile* lf = pm_->add_to_project(std::make_unique<Logfile>(file_path));
-    loader::Logfile::load(ui_, lf);
+    loader::Logfile::load(ui_, lf, [&](){this->on_logfile_wiget_close(lf);});
+}
+
+void ProjectUiManager::on_logfile_wiget_close(Logfile* lf)
+{
+    qDebug() << "Clean some projet resources here";
+    pm_->remove_file_from_project(lf);
 }
 
 void ProjectUiManager::connect_update_notif(std::function<void(void)> notif_callback)
@@ -95,7 +101,7 @@ void ProjectUiManager::open_project()
 
     serializer::ProjectModel::deserialize(*pm_, object);
     QObject::connect(pm_.get(), &ProjectModel::changed, this, &ProjectUiManager::project_changed);
-    loader::Project::load(ui_, pm_.get());
+    loader::Project::load(ui_, pm_.get(), [&](Logfile* lf){this->on_logfile_wiget_close(lf);});
     pm_->changed_ = false;
 }
 
