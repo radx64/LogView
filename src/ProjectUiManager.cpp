@@ -4,7 +4,8 @@
 
 #include <QDebug>
 
-ProjectUiManager::ProjectUiManager(Ui::MainWindow* ui) : ui_(ui)
+ProjectUiManager::ProjectUiManager(Ui::MainWindow* ui)
+: ui_(ui)
 {
     pm_ = std::make_unique<ProjectModel>();
     pm_->changed_ = false;
@@ -62,12 +63,13 @@ void ProjectUiManager::save_project()
         file_path = QFileDialog::getSaveFileName(nullptr,
             tr("Save project"), "",
             tr("Project file (*.json)"));
+        qDebug() << "FP: " << file_path;
     }
 
     if (file_path.isEmpty())
         return;
 
-    QFile saveFile(project_name());
+    QFile saveFile(file_path);
     if (!saveFile.open(QIODevice::WriteOnly)) {
         qWarning("Couldn't open save file!");
         return;
@@ -85,6 +87,12 @@ void ProjectUiManager::save_project()
 
 void ProjectUiManager::open_project()
 {
+    QString file_path = QFileDialog::getOpenFileName(nullptr,
+                                                     tr("Open project"), "",
+                                                     tr("Project file (*.json)"));
+    if (file_path.isEmpty())
+        return;
+
     while(ui_->fileView->count())
     {
         ui_->fileView->removeTab(0);
@@ -92,12 +100,6 @@ void ProjectUiManager::open_project()
     ui_->fileView->clear();
 
     pm_ = std::make_unique<ProjectModel>();
-
-    QString file_path = QFileDialog::getOpenFileName(nullptr,
-                                                     tr("Open project"), "",
-                                                     tr("Project file (*.json)"));
-    if (file_path.isEmpty())
-        return;
 
     QFile loadFile(file_path);
     if (!loadFile.open(QIODevice::ReadOnly)) {

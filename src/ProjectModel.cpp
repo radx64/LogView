@@ -6,6 +6,11 @@ ProjectModel::ProjectModel() : projectName_{""}, changed_{false}
 {
 }
 
+ProjectModel::~ProjectModel()
+{
+    qDebug() << "Destroying ProjectModel @" << this;
+}
+
 Logfile* ProjectModel::add_to_project(std::unique_ptr<Logfile>&& lf)
 {
     logfiles_.push_back(std::move(lf));
