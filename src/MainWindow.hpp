@@ -14,6 +14,8 @@ class Logfile;
 class QTextEdit;
 class QTabWidget;
 class FileViewer;
+class ThemeManager;
+class QActionGroup;
 
 namespace Ui {
 class MainWindow;
@@ -55,6 +57,11 @@ private:
     void saveProject();
     void openProject();
 
+    void setupThemeMenu();
+    void updateThemeMenu();
+
     std::unique_ptr<ProjectUiManager> pm_{};
+    std::unique_ptr<ThemeManager> theme_manager_{};
+    QActionGroup* theme_action_group_{nullptr};
     Ui::MainWindow *ui{nullptr};
 };

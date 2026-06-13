@@ -5,6 +5,7 @@
 #include <QApplication>
 #include <QClipboard>
 #include <QColor>
+#include <QEvent>
 #include <QFontDatabase>
 #include <QFontMetrics>
 #include <QFontMetricsF>
@@ -105,6 +106,17 @@ void ChunkedTextView::scrollContentsBy(int /*dx*/, int /*dy*/)
     viewport()->update();
 }
 
+void ChunkedTextView::changeEvent(QEvent* event)
+{
+    QAbstractScrollArea::changeEvent(event);
+    if (event->type() == QEvent::PaletteChange ||
+        event->type() == QEvent::ApplicationPaletteChange ||
+        event->type() == QEvent::StyleChange)
+    {
+        viewport()->update();
+    }
+}
+
 ChunkedTextView::Pos ChunkedTextView::posAt(const QPoint& viewportPos) const
 {
     const qint64 total = source_ ? source_->count() : 0;
@@ -174,7 +186,14 @@ void ChunkedTextView::paintEvent(QPaintEvent* event)
 {
     QPainter painter(viewport());
     painter.setFont(font_);
-    painter.fillRect(event->rect(), Qt::white);
+
+    const QPalette pal = palette();
+    const QColor background_color = pal.color(QPalette::Base);
+    const QColor text_color = pal.color(QPalette::Text);
+    const QColor gutter_background_color = pal.color(QPalette::Window);
+    const QColor gutter_text_color = pal.color(QPalette::WindowText);
+
+    painter.fillRect(event->rect(), background_color);
 
     const qint64 total = source_ ? source_->count() : 0;
     const int gutter = gutterWidth();
@@ -185,8 +204,10 @@ void ChunkedTextView::paintEvent(QPaintEvent* event)
         const qint64 first = topLine();
         const qint64 last = std::min<qint64>(total, first + visibleLineCount() + 1);
 
-        const QColor current_line_color = QColor(Qt::yellow).lighter(160);
-        const QColor selection_color = QColor(Qt::blue).lighter(180);
+        QColor current_line_color = pal.color(QPalette::Highlight);
+        current_line_color.setAlpha(45);
+        QColor selection_color = pal.color(QPalette::Highlight);
+        selection_color.setAlpha(110);
 
         Pos sel_start = sel_anchor_;
         Pos sel_end = sel_caret_;
@@ -239,13 +260,13 @@ void ChunkedTextView::paintEvent(QPaintEvent* event)
                 painter.fillRect(sx, y, ex - sx, line_height_, selection_color);
             }
 
-            painter.setPen(Qt::black);
+            painter.setPen(text_color);
             painter.drawText(text_x0, y + ascent_, text);
         }
         painter.restore();
 
-        painter.fillRect(0, 0, gutter, viewport()->height(), QColor(Qt::gray).lighter(150));
-        painter.setPen(Qt::black);
+        painter.fillRect(0, 0, gutter, viewport()->height(), gutter_background_color);
+        painter.setPen(gutter_text_color);
         for (qint64 row = first; row < last; ++row)
         {
             const int y = static_cast<int>((row - first) * line_height_);
@@ -256,7 +277,7 @@ void ChunkedTextView::paintEvent(QPaintEvent* event)
     }
     else
     {
-        painter.fillRect(0, 0, gutter, viewport()->height(), QColor(Qt::gray).lighter(150));
+        painter.fillRect(0, 0, gutter, viewport()->height(), gutter_background_color);
     }
 
     const int text_area = std::max(0, viewport()->width() - gutter - kTextLeftPadding);

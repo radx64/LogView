@@ -36,6 +36,7 @@ set(SOURCES
     src/Logfile.cpp
     src/ProjectUiManager.cpp
     src/FileViewer.cpp
+    src/ThemeManager.cpp
     src/main.cpp
     src/ProjectModel.cpp
     src/loader/Project.cpp

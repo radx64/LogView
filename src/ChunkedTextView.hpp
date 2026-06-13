@@ -27,6 +27,7 @@ protected:
     void mouseDoubleClickEvent(QMouseEvent* event) override;
     void keyPressEvent(QKeyEvent* event) override;
     void scrollContentsBy(int dx, int dy) override;
+    void changeEvent(QEvent* event) override;
 
 private:
     struct Pos

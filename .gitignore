@@ -31,10 +31,15 @@
 *.out
 *.app
 
-# Build directories
+# Build & distribution directories
 build/
 build-*/
 cmake-build-*/
+dist/
+
+# Cross-compile tooling (aqtinstall venv + logs)
+.venv-aqt/
+aqtinstall.log
 
 # CMake
 CMakeCache.txt

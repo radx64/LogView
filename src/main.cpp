@@ -4,6 +4,7 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+    QApplication::setApplicationName("LogView");
     QApplication::setApplicationVersion(APP_VERSION);
     MainWindow mainWindow;
     mainWindow.setMinimumSize(200,200);

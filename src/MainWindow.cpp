@@ -5,6 +5,7 @@
 
 // TODO: cleanup this includes after some mockups creation and proper class segregation
 #include <QAction>
+#include <QActionGroup>
 #include <QDebug>
 #include <QFileDialog>
 #include <QInputDialog>
@@ -35,6 +36,7 @@
 #include "loader/Project.hpp"
 #include "serializer/SerializerProjectModel.hpp"
 #include "ProjectUiManager.hpp"
+#include "ThemeManager.hpp"
 
 void MainWindow::closeFileTab(const int index)
 {
@@ -79,6 +81,7 @@ MainWindow::MainWindow(QWidget* parent) :
     ui->fileView->setTabsClosable(true);
     statusBar()->showMessage(tr("Use load from file menu or drop files in this window to begin."));
     connect_signals();
+    setupThemeMenu();
     pm_ = std::make_unique<ProjectUiManager>(ui);
     connect(pm_.get(), &ProjectUiManager::projectStateChanged, this, &MainWindow::project_changed);
     newProject();
@@ -285,6 +288,54 @@ void MainWindow::updateUi()
 {
     refreshWindowTitle();
     updateMenus();
+}
+
+void MainWindow::setupThemeMenu()
+{
+    theme_manager_ = std::make_unique<ThemeManager>(this);
+
+    QMenu* viewMenu = new QMenu(tr("View"), this);
+    menuBar()->insertMenu(ui->menuHelp->menuAction(), viewMenu);
+    QMenu* themeMenu = viewMenu->addMenu(tr("Theme"));
+
+    theme_action_group_ = new QActionGroup(this);
+    theme_action_group_->setExclusive(true);
+
+    const auto addThemeAction = [&](const QString& text, ThemeManager::Theme theme)
+    {
+        QAction* action = themeMenu->addAction(text);
+        action->setCheckable(true);
+        action->setData(static_cast<int>(theme));
+        theme_action_group_->addAction(action);
+        connect(action, &QAction::triggered, this, [this, theme]()
+        {
+            theme_manager_->setTheme(theme);
+        });
+    };
+
+    addThemeAction(tr("System"), ThemeManager::Theme::System);
+    addThemeAction(tr("Light"), ThemeManager::Theme::Light);
+    addThemeAction(tr("Dark"), ThemeManager::Theme::Dark);
+
+    connect(theme_manager_.get(), &ThemeManager::themeChanged,
+            this, &MainWindow::updateThemeMenu);
+
+    theme_manager_->loadAndApply();
+    updateThemeMenu();
+}
+
+void MainWindow::updateThemeMenu()
+{
+    if (!theme_action_group_) return;
+    const int current = static_cast<int>(theme_manager_->theme());
+    for (QAction* action : theme_action_group_->actions())
+    {
+        if (action->data().toInt() == current)
+        {
+            action->setChecked(true);
+            break;
+        }
+    }
 }
 
 void MainWindow::saveProject()
