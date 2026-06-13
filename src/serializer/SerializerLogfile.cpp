@@ -3,11 +3,13 @@
 #include <QJsonObject>
 
 #include "../BookmarksModel.hpp"
+#include "../MarkingsModel.hpp"
 #include "../GrepNode.hpp"
 #include "../Logfile.hpp"
 
 #include "SerializerGrepNode.hpp"
 #include "SerializerBookmarksModel.hpp"
+#include "SerializerMarkingsModel.hpp"
 
 namespace serializer
 {
@@ -20,6 +22,7 @@ void Logfile::serialize(const ::Logfile &lf, QJsonObject &json)
 
     json["greps"] = greps;
     BookmarksModel::serialize(*lf.bookmarks_model_, json);
+    MarkingsModel::serialize(*lf.markings_model_, json);
 }
 void Logfile::deserialize(::Logfile &lf, const QJsonObject &json)
 {
@@ -32,6 +35,10 @@ void Logfile::deserialize(::Logfile &lf, const QJsonObject &json)
     std::unique_ptr<::BookmarksModel> bm = std::make_unique<::BookmarksModel>();
     serializer::BookmarksModel::deserialize(*bm, json);
     lf.bookmarks_model_ = std::move(bm);
+
+    std::unique_ptr<::MarkingsModel> mm = std::make_unique<::MarkingsModel>();
+    serializer::MarkingsModel::deserialize(*mm, json);
+    lf.markings_model_ = std::move(mm);
 
     lf.connect_events();
 }

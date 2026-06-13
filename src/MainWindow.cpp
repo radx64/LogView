@@ -20,6 +20,7 @@
 #include <QTabWidget>
 #include <QTextEdit>
 
+#include "AboutDialog.hpp"
 #include "Bookmark.hpp"
 #include "BookmarksModel.hpp"
 #include "GrepDialogWindow.hpp"
@@ -33,7 +34,6 @@
 #include "FileViewer.hpp"
 #include "loader/Project.hpp"
 #include "serializer/SerializerProjectModel.hpp"
-#include "Version.hpp"
 #include "ProjectUiManager.hpp"
 
 void MainWindow::closeFileTab(const int index)
@@ -215,10 +215,12 @@ void MainWindow::on_exit_app_triggered()
 
 void MainWindow::on_actionAbout_triggered()
 {
-    QMessageBox::about(this, QString("About application"),
-        QString("LogView: " + QString(APP_VERSION) +
-            "\nBuild: " + __DATE__ + " " + __TIME__ +
-            "\n\nRadX64 © 2019\nReleased under\nGNU GENERAL PUBLIC LICENSE"));
+    const QString text = QString("Version ") + QString(APP_VERSION) +
+        "\nBuild: " + __DATE__ + " " + __TIME__ +
+        "\n\nradX64 © 2026\nReleased under\nGNU GENERAL PUBLIC LICENSE";
+
+    AboutDialog dialog(text, this);
+    dialog.exec();
 }
 
 void MainWindow::on_actionSave_project_as_triggered()

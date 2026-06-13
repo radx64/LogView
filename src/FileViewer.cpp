@@ -1,6 +1,8 @@
 #include "FileViewer.hpp"
 
 #include <QHBoxLayout>
+#include <QVBoxLayout>
+#include <QLabel>
 #include <QListView>
 #include <QSizePolicy>
 #include <QIcon>
@@ -15,12 +17,15 @@
 #include "ProjectModel.hpp"
 #include "GrepNode.hpp"
 #include "BookmarksModel.hpp"
+#include "MarkingsModel.hpp"
 #include "GrepNode.hpp"
 #include "ChunkedTextView.hpp"
 #include "LineSource.hpp"
 #include "Logfile.hpp"
 #include "Bookmark.hpp"
+#include "Marking.hpp"
 #include "BookmarkDialogWindow.hpp"
+#include "MarkingDialogWindow.hpp"
 
 FileViewer::FileViewer(QWidget* parent, Logfile* logfile)
 {
@@ -29,15 +34,25 @@ FileViewer::FileViewer(QWidget* parent, Logfile* logfile)
 
     layout_ = new QHBoxLayout();
     bookmarks_widget_ = new QListView();
-    bookmarks_widget_->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding));
+    markings_widget_ = new QListView();
+
     logViewer_ = new LogViewer(
         this,
         logfile_->grep_hierarchy_.get(),
-        logfile_->getLineSource());
+        logfile_->getLineSource(),
+        logfile_->getMarkingsModel());
     logViewer_->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
 
+    QWidget* side_panel = new QWidget();
+    QVBoxLayout* side_layout = new QVBoxLayout(side_panel);
+    side_layout->setContentsMargins(0, 0, 0, 0);
+    side_layout->addWidget(new QLabel(tr("Bookmarks")));
+    side_layout->addWidget(bookmarks_widget_, 1);
+    side_layout->addWidget(new QLabel(tr("Markings")));
+    side_layout->addWidget(markings_widget_, 1);
+
     QSplitter* splitter = new QSplitter(Qt::Horizontal);
-    splitter->addWidget(bookmarks_widget_);
+    splitter->addWidget(side_panel);
     splitter->addWidget(logViewer_);
     splitter->setSizes({200,1000});
 
@@ -49,6 +64,13 @@ FileViewer::FileViewer(QWidget* parent, Logfile* logfile)
     bookmarks_widget_->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(bookmarks_widget_, &QListView::doubleClicked, this, &FileViewer::bookmarksItemDoubleClicked);
     connect(bookmarks_widget_, &QListView::customContextMenuRequested, this, &FileViewer::showBookmarksContextMenu);
+
+    markings_widget_->viewport()->installEventFilter(this);
+    markings_widget_->setModel(logfile_->getMarkingsModel());
+    markings_widget_->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    markings_widget_->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(markings_widget_, &QListView::doubleClicked, this, &FileViewer::markingsItemDoubleClicked);
+    connect(markings_widget_, &QListView::customContextMenuRequested, this, &FileViewer::showMarkingsContextMenu);
 }
 
 FileViewer::~FileViewer()
@@ -125,5 +147,57 @@ void FileViewer::showBookmarksContextMenu(const QPoint& pos)
 
         const auto result = dialog.getResult();
         model->update_bookmark(row, result.icon, result.name);
+    }
+}
+
+void FileViewer::markingsItemDoubleClicked(const QModelIndex& idx)
+{
+    if (!idx.isValid()) return;
+    const uint32_t row = static_cast<uint32_t>(idx.row());
+
+    MarkingsModel* model = logfile_->getMarkingsModel();
+    const Marking marking = model->get_marking(row);
+
+    MarkingDialogWindow dialog(this);
+    dialog.setWindowTitle(tr("Edit marking"));
+    dialog.setText(marking.text_);
+    dialog.setColor(marking.color_);
+    if (dialog.exec() != QDialog::Accepted) return;
+
+    const auto result = dialog.getResult();
+    model->update_marking(row, result.text, result.color);
+}
+
+void FileViewer::showMarkingsContextMenu(const QPoint& pos)
+{
+    const QModelIndex index = markings_widget_->indexAt(pos);
+    if (!index.isValid()) return;
+    const uint32_t row = static_cast<uint32_t>(index.row());
+
+    QMenu menu;
+    QAction* edit_action = menu.addAction(tr("Edit..."));
+    QAction* delete_action = menu.addAction(tr("Delete"));
+    QAction* chosen = menu.exec(markings_widget_->viewport()->mapToGlobal(pos));
+    if (chosen == nullptr) return;
+
+    MarkingsModel* model = logfile_->getMarkingsModel();
+
+    if (chosen == delete_action)
+    {
+        model->remove_marking(row);
+        return;
+    }
+
+    if (chosen == edit_action)
+    {
+        const Marking marking = model->get_marking(row);
+        MarkingDialogWindow dialog(this);
+        dialog.setWindowTitle(tr("Edit marking"));
+        dialog.setText(marking.text_);
+        dialog.setColor(marking.color_);
+        if (dialog.exec() != QDialog::Accepted) return;
+
+        const auto result = dialog.getResult();
+        model->update_marking(row, result.text, result.color);
     }
 }

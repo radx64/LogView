@@ -8,12 +8,14 @@ class QTabWidget;
 class ChunkedTextView;
 class GrepNode;
 class LineSource;
+class MarkingsModel;
 
 class LogViewer : public QWidget
 {
 Q_OBJECT
 public:
-    LogViewer(QWidget* parent, GrepNode* grep_node, std::shared_ptr<LineSource> source);
+    LogViewer(QWidget* parent, GrepNode* grep_node, std::shared_ptr<LineSource> source,
+              MarkingsModel* markings = nullptr);
     LogViewer* grep(GrepNode* grep);
 
     GrepNode* getGrepNode();
@@ -29,4 +31,5 @@ public slots:
 protected:
     std::shared_ptr<LineSource> source_;
     GrepNode* grep_node_;
+    MarkingsModel* markings_;
 };

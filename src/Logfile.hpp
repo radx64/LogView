@@ -7,6 +7,7 @@
 
 #include "Line.hpp"
 #include "BookmarksModel.hpp"
+#include "MarkingsModel.hpp"
 #include "GrepNode.hpp"
 
 namespace serializer { class Logfile; }
@@ -21,12 +22,14 @@ public:
     Logfile(const QString& filename);
     const QString& getFileName() const;
     BookmarksModel* getBookmarksModel();
+    MarkingsModel* getMarkingsModel();
     void reload();
 
     std::shared_ptr<LineSource> getLineSource() const;
 
     std::unique_ptr<GrepNode> grep_hierarchy_;
     std::unique_ptr<BookmarksModel> bookmarks_model_;
+    std::unique_ptr<MarkingsModel> markings_model_;
 
 protected:
     std::shared_ptr<FileLineSource> source_;

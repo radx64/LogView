@@ -1,5 +1,5 @@
 set(projectName "LogView")
-set(version \"0.0.3\")
+set(version \"0.0.4\")
 
 cmake_minimum_required(VERSION 3.9.0)
 project (${projectName})
@@ -18,9 +18,13 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(SOURCES
+    src/AboutDialog.cpp
     src/Bookmark.cpp
     src/BookmarksModel.cpp
     src/BookmarkDialogWindow.cpp
+    src/Marking.cpp
+    src/MarkingsModel.cpp
+    src/MarkingDialogWindow.cpp
     src/ChunkedTextView.cpp
     src/GrepDialogWindow.cpp
     src/GrepNode.cpp
@@ -38,6 +42,8 @@ set(SOURCES
     src/loader/LoaderLogFile.cpp
     src/serializer/SerializerBookmark.cpp
     src/serializer/SerializerBookmarksModel.cpp
+    src/serializer/SerializerMarking.cpp
+    src/serializer/SerializerMarkingsModel.cpp
     src/serializer/SerializerGrepNode.cpp
     src/serializer/SerializerLogfile.cpp
     src/serializer/SerializerProjectModel.cpp

@@ -19,6 +19,7 @@ public:
     LogViewer* getDeepestActiveTab();
 
     QListView* bookmarks_widget_;
+    QListView* markings_widget_;
     Logfile* logfile_; //TODO make this protected
 
 protected:
@@ -32,4 +33,6 @@ signals:
 private slots:
     void bookmarksItemDoubleClicked(const QModelIndex& idx);
     void showBookmarksContextMenu(const QPoint& pos);
+    void markingsItemDoubleClicked(const QModelIndex& idx);
+    void showMarkingsContextMenu(const QPoint& pos);
 };

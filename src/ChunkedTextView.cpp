@@ -17,6 +17,7 @@
 #include <QtMath>
 
 #include "LineSource.hpp"
+#include "MarkingsModel.hpp"
 
 namespace
 {
@@ -24,9 +25,15 @@ constexpr int kGutterPadding = 8;
 constexpr int kTextLeftPadding = 4;
 }
 
-ChunkedTextView::ChunkedTextView(QWidget* parent, LineSource* source)
-    : QAbstractScrollArea(parent), source_(source)
+ChunkedTextView::ChunkedTextView(QWidget* parent, LineSource* source, MarkingsModel* markings)
+    : QAbstractScrollArea(parent), source_(source), markings_(markings)
 {
+    if (markings_)
+    {
+        connect(markings_, &MarkingsModel::changed,
+                viewport(), QOverload<>::of(&QWidget::update));
+    }
+
     font_ = QFontDatabase::systemFont(QFontDatabase::FixedFont);
     font_.setStyleHint(QFont::Monospace);
     font_.setFixedPitch(true);
@@ -199,6 +206,28 @@ void ChunkedTextView::paintEvent(QPaintEvent* event)
                 painter.fillRect(0, y, viewport()->width(), line_height_, current_line_color);
             }
 
+            if (markings_)
+            {
+                for (const Marking& marking : markings_->markings())
+                {
+                    if (marking.text_.isEmpty()) continue;
+                    QColor marking_color(marking.color_);
+                    if (!marking_color.isValid()) continue;
+
+                    const int needle_len = static_cast<int>(marking.text_.length());
+                    int from = 0;
+                    while (true)
+                    {
+                        const int idx = text.indexOf(marking.text_, from, Qt::CaseSensitive);
+                        if (idx < 0) break;
+                        const int sx = qRound(text_x0 + idx * char_width_f_);
+                        const int ex = qRound(text_x0 + (idx + needle_len) * char_width_f_);
+                        painter.fillRect(sx, y, ex - sx, line_height_, marking_color);
+                        from = idx + needle_len;
+                    }
+                }
+            }
+
             if (selection && row >= sel_start.line && row <= sel_end.line)
             {
                 const int len = static_cast<int>(text.length());
@@ -325,6 +354,7 @@ void ChunkedTextView::keyPressEvent(QKeyEvent* event)
     const int visible = visibleLineCount();
 
     if (ctrl && event->key() == Qt::Key_C) { copySelection(); return; }
+    if (ctrl && event->key() == Qt::Key_M) { markSelection(); return; }
     if (ctrl && event->key() == Qt::Key_A)
     {
         sel_anchor_ = Pos{0, 0};
@@ -357,9 +387,9 @@ void ChunkedTextView::keyPressEvent(QKeyEvent* event)
     }
 }
 
-void ChunkedTextView::copySelection() const
+QString ChunkedTextView::selectedText() const
 {
-    if (!hasSelection() || !source_) return;
+    if (!hasSelection() || !source_) return QString();
 
     Pos start = sel_anchor_;
     Pos end = sel_caret_;
@@ -382,6 +412,13 @@ void ChunkedTextView::copySelection() const
         }
         result += source_->at(end.line).text.left(end.col);
     }
+    return result;
+}
+
+void ChunkedTextView::copySelection() const
+{
+    const QString result = selectedText();
+    if (result.isEmpty()) return;
 
     QClipboard* clipboard = QApplication::clipboard();
     clipboard->setText(result, QClipboard::Clipboard);
@@ -389,4 +426,18 @@ void ChunkedTextView::copySelection() const
     {
         clipboard->setText(result, QClipboard::Selection);
     }
+}
+
+void ChunkedTextView::markSelection()
+{
+    if (!markings_) return;
+
+    // Markings match within a single line, so only the first line of a
+    // selection is used as the marked needle.
+    QString text = selectedText();
+    const int newline = text.indexOf(QLatin1Char('\n'));
+    if (newline >= 0) text = text.left(newline);
+    if (text.isEmpty()) return;
+
+    markings_->add_marking(text);
 }

@@ -6,12 +6,13 @@
 #include <QFont>
 
 class LineSource;
+class MarkingsModel;
 
 class ChunkedTextView : public QAbstractScrollArea
 {
     Q_OBJECT
 public:
-    ChunkedTextView(QWidget* parent, LineSource* source);
+    ChunkedTextView(QWidget* parent, LineSource* source, MarkingsModel* markings = nullptr);
 
     qint64 currentLine() const { return caret_line_; }
 
@@ -46,9 +47,12 @@ private:
     void ensureVisible(qint64 line);
     void moveCaret(qint64 line, int col, bool extendSelection);
     bool hasSelection() const { return sel_anchor_ != sel_caret_; }
+    QString selectedText() const;
     void copySelection() const;
+    void markSelection();
 
     LineSource* source_;
+    MarkingsModel* markings_ = nullptr;
     QFont font_;
     int line_height_ = 1;
     int char_width_ = 1;

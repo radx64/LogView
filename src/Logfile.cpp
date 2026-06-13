@@ -5,6 +5,7 @@
 #include <QObject>
 
 #include "BookmarksModel.hpp"
+#include "MarkingsModel.hpp"
 #include "GrepNode.hpp"
 #include "FileLineSource.hpp"
 
@@ -16,12 +17,16 @@ Logfile::Logfile(const QString& filename)
 
     grep_hierarchy_ = std::make_unique<GrepNode>("ROOT");
     bookmarks_model_ = std::make_unique<BookmarksModel>(nullptr);
+    markings_model_ = std::make_unique<MarkingsModel>(nullptr);
     connect_events();
 }
 
 void Logfile::connect_events()
 {
     QObject::connect(bookmarks_model_.get(), &BookmarksModel::changed,
+                     this, &Logfile::changed);
+
+    QObject::connect(markings_model_.get(), &MarkingsModel::changed,
                      this, &Logfile::changed);
 
     QObject::connect(grep_hierarchy_.get(), &GrepNode::changed,
@@ -46,4 +51,9 @@ const QString& Logfile::getFileName() const
 BookmarksModel* Logfile::getBookmarksModel()
 {
     return bookmarks_model_.get();
+}
+
+MarkingsModel* Logfile::getMarkingsModel()
+{
+    return markings_model_.get();
 }
