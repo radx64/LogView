@@ -37,6 +37,7 @@
 #include "serializer/SerializerProjectModel.hpp"
 #include "ProjectUiManager.hpp"
 #include "ThemeManager.hpp"
+#include "SettingsDialog.hpp"
 
 void MainWindow::closeFileTab(const int index)
 {
@@ -320,8 +321,18 @@ void MainWindow::setupThemeMenu()
     connect(theme_manager_.get(), &ThemeManager::themeChanged,
             this, &MainWindow::updateThemeMenu);
 
+    viewMenu->addSeparator();
+    QAction* optionsAction = viewMenu->addAction(tr("Options..."));
+    connect(optionsAction, &QAction::triggered, this, &MainWindow::openSettings);
+
     theme_manager_->loadAndApply();
     updateThemeMenu();
+}
+
+void MainWindow::openSettings()
+{
+    SettingsDialog dialog(this);
+    dialog.exec();
 }
 
 void MainWindow::updateThemeMenu()

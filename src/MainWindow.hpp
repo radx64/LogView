@@ -59,6 +59,7 @@ private:
 
     void setupThemeMenu();
     void updateThemeMenu();
+    void openSettings();
 
     std::unique_ptr<ProjectUiManager> pm_{};
     std::unique_ptr<ThemeManager> theme_manager_{};

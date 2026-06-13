@@ -37,6 +37,8 @@ set(SOURCES
     src/ProjectUiManager.cpp
     src/FileViewer.cpp
     src/ThemeManager.cpp
+    src/Settings.cpp
+    src/SettingsDialog.cpp
     src/main.cpp
     src/ProjectModel.cpp
     src/loader/Project.cpp

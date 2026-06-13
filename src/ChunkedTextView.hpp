@@ -44,6 +44,7 @@ private:
     qint64 topLine() const;
     int horizontalOffset() const;
     void updateScrollBars();
+    void applySettings();
     Pos posAt(const QPoint& viewportPos) const;
     void ensureVisible(qint64 line);
     void moveCaret(qint64 line, int col, bool extendSelection);

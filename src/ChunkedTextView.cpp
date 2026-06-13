@@ -19,6 +19,7 @@
 
 #include "LineSource.hpp"
 #include "MarkingsModel.hpp"
+#include "Settings.hpp"
 
 namespace
 {
@@ -35,9 +36,23 @@ ChunkedTextView::ChunkedTextView(QWidget* parent, LineSource* source, MarkingsMo
                 viewport(), QOverload<>::of(&QWidget::update));
     }
 
-    font_ = QFontDatabase::systemFont(QFontDatabase::FixedFont);
+    connect(&Settings::instance(), &Settings::changed,
+            this, &ChunkedTextView::applySettings);
+
+    setFocusPolicy(Qt::StrongFocus);
+    viewport()->setCursor(Qt::IBeamCursor);
+    viewport()->setBackgroundRole(QPalette::Base);
+    setFrameStyle(QFrame::NoFrame);
+
+    verticalScrollBar()->setSingleStep(1);
+
+    applySettings();
+}
+
+void ChunkedTextView::applySettings()
+{
+    font_ = Settings::instance().editorFont();
     font_.setStyleHint(QFont::Monospace);
-    font_.setFixedPitch(true);
 
     const QFontMetrics metrics(font_);
     line_height_ = metrics.height();
@@ -47,15 +62,10 @@ ChunkedTextView::ChunkedTextView(QWidget* parent, LineSource* source, MarkingsMo
     char_width_f_ = std::max<qreal>(1.0, metricsF.horizontalAdvance(QLatin1Char('9')));
     char_width_ = std::max(1, qRound(char_width_f_));
 
-    setFocusPolicy(Qt::StrongFocus);
-    viewport()->setCursor(Qt::IBeamCursor);
-    viewport()->setBackgroundRole(QPalette::Base);
-    setFrameStyle(QFrame::NoFrame);
-
-    verticalScrollBar()->setSingleStep(1);
     horizontalScrollBar()->setSingleStep(char_width_);
 
     updateScrollBars();
+    viewport()->update();
 }
 
 int ChunkedTextView::gutterWidth() const
@@ -204,8 +214,12 @@ void ChunkedTextView::paintEvent(QPaintEvent* event)
         const qint64 first = topLine();
         const qint64 last = std::min<qint64>(total, first + visibleLineCount() + 1);
 
-        QColor current_line_color = pal.color(QPalette::Highlight);
-        current_line_color.setAlpha(45);
+        QColor current_line_color = Settings::instance().highlightLineColor();
+        if (!current_line_color.isValid())
+        {
+            current_line_color = pal.color(QPalette::Highlight);
+            current_line_color.setAlpha(45);
+        }
         QColor selection_color = pal.color(QPalette::Highlight);
         selection_color.setAlpha(110);
 
