@@ -8,6 +8,8 @@
 #include <QSplitter>
 #include <QDebug>
 #include <QTextBlock>
+#include <QMenu>
+#include <QAction>
 
 #include "LogViewer.hpp"
 #include "ProjectModel.hpp"
@@ -17,6 +19,8 @@
 #include "ChunkedTextView.hpp"
 #include "LineSource.hpp"
 #include "Logfile.hpp"
+#include "Bookmark.hpp"
+#include "BookmarkDialogWindow.hpp"
 
 FileViewer::FileViewer(QWidget* parent, Logfile* logfile)
 {
@@ -44,6 +48,7 @@ FileViewer::FileViewer(QWidget* parent, Logfile* logfile)
     bookmarks_widget_->setModel(logfile_->getBookmarksModel());
     bookmarks_widget_->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(bookmarks_widget_, &QListView::doubleClicked, this, &FileViewer::bookmarksItemDoubleClicked);
+    connect(bookmarks_widget_, &QListView::customContextMenuRequested, this, &FileViewer::showBookmarksContextMenu);
 }
 
 FileViewer::~FileViewer()
@@ -87,4 +92,38 @@ void FileViewer::bookmarksItemDoubleClicked(const QModelIndex& idx)
 
     const qint64 row = text_viewer->source()->rowForLineNumber(bookmark.line_number_);
     text_viewer->text_->gotoRow(row);
+}
+
+void FileViewer::showBookmarksContextMenu(const QPoint& pos)
+{
+    const QModelIndex index = bookmarks_widget_->indexAt(pos);
+    if (!index.isValid()) return;
+    const uint32_t row = static_cast<uint32_t>(index.row());
+
+    QMenu menu;
+    QAction* edit_action = menu.addAction(tr("Edit..."));
+    QAction* delete_action = menu.addAction(tr("Delete"));
+    QAction* chosen = menu.exec(bookmarks_widget_->viewport()->mapToGlobal(pos));
+    if (chosen == nullptr) return;
+
+    BookmarksModel* model = logfile_->getBookmarksModel();
+
+    if (chosen == delete_action)
+    {
+        model->remove_bookmark(row);
+        return;
+    }
+
+    if (chosen == edit_action)
+    {
+        const Bookmark bookmark = model->get_bookmark(row);
+        BookmarkDialogWindow dialog(this);
+        dialog.setWindowTitle(tr("Edit bookmark"));
+        dialog.setName(bookmark.text_);
+        dialog.setIcon(bookmark.icon_);
+        if (dialog.exec() != QDialog::Accepted) return;
+
+        const auto result = dialog.getResult();
+        model->update_bookmark(row, result.icon, result.name);
+    }
 }

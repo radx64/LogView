@@ -21,6 +21,7 @@
 #include "Bookmark.hpp"
 #include "BookmarksModel.hpp"
 #include "GrepDialogWindow.hpp"
+#include "BookmarkDialogWindow.hpp"
 #include "GrepNode.hpp"
 #include "Logfile.hpp"
 #include "ProjectModel.hpp"
@@ -140,17 +141,19 @@ void MainWindow::bookmark_current_line()
     if (!deepest_tab) return;
     const qint64 current_line_index = deepest_tab->text_->currentLine();
     const Line current_line = deepest_tab->source()->at(current_line_index);
-    uint32_t absolute_line_index = current_line.number;
+    const uint32_t absolute_line_index = current_line.number;
 
-    // Simple QInputDialog will be extended later for something more fancy
-    bool ok = false;
-    QString bookmark_name = QInputDialog::getText(this, tr("Bookmark creation"),
-        tr("Name:"), QLineEdit::Normal, current_line.text, &ok);
+    BookmarkDialogWindow dialog(this);
+    dialog.setWindowTitle(tr("Add bookmark"));
+    dialog.setName(current_line.text);
+    dialog.setIcon(QString(":/icon/Gnome-Bookmark-New-32.png"));
 
-    if (!ok) return;
+    if (dialog.exec() != QDialog::Accepted) return;
+
+    const auto result = dialog.getResult();
     viewerWidget->logfile_->getBookmarksModel()->add_bookmark(absolute_line_index,
-        QString(":/icon/Gnome-Bookmark-New-32.png"),
-        bookmark_name);
+        result.icon,
+        result.name);
 }
 
 void MainWindow::on_actionLoad_from_file_triggered()

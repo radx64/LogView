@@ -31,4 +31,5 @@ signals:
 
 private slots:
     void bookmarksItemDoubleClicked(const QModelIndex& idx);
+    void showBookmarksContextMenu(const QPoint& pos);
 };

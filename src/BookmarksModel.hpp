@@ -17,6 +17,8 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
     void add_bookmark(const uint32_t line, const QString& icon, const QString& text);
+    void update_bookmark(uint32_t index, const QString& icon, const QString& text);
+    void remove_bookmark(uint32_t index);
     Bookmark get_bookmark(uint32_t index);
 
 protected:

@@ -20,6 +20,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(SOURCES
     src/Bookmark.cpp
     src/BookmarksModel.cpp
+    src/BookmarkDialogWindow.cpp
     src/ChunkedTextView.cpp
     src/GrepDialogWindow.cpp
     src/GrepNode.cpp
@@ -43,6 +44,7 @@ set(SOURCES
 )
 
 set(FORMS
+    src/ui/BookmarkDialogWindow.ui
     src/ui/GrepDialogWindow.ui
     src/ui/MainWindow.ui
 )

@@ -34,14 +34,37 @@ QVariant BookmarksModel::data(const QModelIndex &index, int role) const
 
 void BookmarksModel::add_bookmark(const uint32_t line, const QString& icon, const QString& text)
 {
-    bookmarks_.append(Bookmark{line, text, icon});
-    std::sort(bookmarks_.begin(), bookmarks_.end());
+    const Bookmark bookmark{line, text, icon};
+    const auto position = std::upper_bound(bookmarks_.begin(), bookmarks_.end(), bookmark);
+    const int row = static_cast<int>(std::distance(bookmarks_.begin(), position));
 
-    QModelIndex firstElement = createIndex(0,0);
-    QModelIndex lastElement = createIndex(0,0);
-    // TODO: Emit real change index for interface update;
-    emit dataChanged(firstElement, lastElement, QVector<int>{Qt::DisplayRole});
-    // Emit signal for project tracking. Maybe reuse signal dataChanged later;
+    beginInsertRows(QModelIndex(), row, row);
+    bookmarks_.insert(position, bookmark);
+    endInsertRows();
+
+    emit changed();
+}
+
+void BookmarksModel::update_bookmark(uint32_t index, const QString& icon, const QString& text)
+{
+    if (static_cast<int>(index) >= bookmarks_.size()) return;
+
+    bookmarks_[static_cast<int>(index)].text_ = text;
+    bookmarks_[static_cast<int>(index)].icon_ = icon;
+
+    const QModelIndex changed_index = createIndex(static_cast<int>(index), 0);
+    emit dataChanged(changed_index, changed_index, QVector<int>{Qt::DisplayRole, Qt::DecorationRole});
+    emit changed();
+}
+
+void BookmarksModel::remove_bookmark(uint32_t index)
+{
+    if (static_cast<int>(index) >= bookmarks_.size()) return;
+
+    beginRemoveRows(QModelIndex(), static_cast<int>(index), static_cast<int>(index));
+    bookmarks_.removeAt(static_cast<int>(index));
+    endRemoveRows();
+
     emit changed();
 }
 
