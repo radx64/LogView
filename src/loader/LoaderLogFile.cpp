@@ -6,6 +6,7 @@
 
 #include "../BookmarksModel.hpp"
 #include "../GrepNode.hpp"
+#include "../Logfile.hpp"
 
 #include "../LogViewer.hpp"
 #include "../FileViewer.hpp"

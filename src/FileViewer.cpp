@@ -14,7 +14,8 @@
 #include "GrepNode.hpp"
 #include "BookmarksModel.hpp"
 #include "GrepNode.hpp"
-#include "TextRenderer.hpp"
+#include "ChunkedTextView.hpp"
+#include "LineSource.hpp"
 #include "Logfile.hpp"
 
 FileViewer::FileViewer(QWidget* parent, Logfile* logfile)
@@ -28,7 +29,7 @@ FileViewer::FileViewer(QWidget* parent, Logfile* logfile)
     logViewer_ = new LogViewer(
         this,
         logfile_->grep_hierarchy_.get(),
-        logfile_->getLines());
+        logfile_->getLineSource());
     logViewer_->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
 
     QSplitter* splitter = new QSplitter(Qt::Horizontal);
@@ -84,21 +85,6 @@ void FileViewer::bookmarksItemDoubleClicked(const QModelIndex& idx)
     Bookmark bookmark = logfile_->getBookmarksModel()->get_bookmark(static_cast<uint32_t>(idx.row()));
     LogViewer* text_viewer = find_deepest_active_tab(logViewer_);
 
-    int cursor_offset = 0;
-
-    auto line_it = text_viewer->lines_.begin();
-    while(line_it != text_viewer->lines_.end())
-    {
-        cursor_offset = static_cast<int>(std::distance(text_viewer->lines_.begin(), line_it));
-        if (line_it->number >= bookmark.line_number_)
-        {
-            break;
-        }
-       ++line_it;
-    }
-
-    QTextCursor cursor = text_viewer->text_->textCursor();
-    cursor.movePosition(QTextCursor::Start, QTextCursor::MoveAnchor,1);
-    cursor.movePosition(QTextCursor::Down, QTextCursor::MoveAnchor, cursor_offset);
-    text_viewer->text_->setTextCursor(cursor);
+    const qint64 row = text_viewer->source()->rowForLineNumber(bookmark.line_number_);
+    text_viewer->text_->gotoRow(row);
 }

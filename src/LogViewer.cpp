@@ -1,28 +1,18 @@
 #include "LogViewer.hpp"
 
-#include "QLabel"
 #include "QLayout"
 #include "QTabWidget"
-#include "QFileDialog"
-#include "QMessageBox"
-#include "QTextEdit"
-#include "QAction"
-#include "QMimeData"
-#include "QInputDialog"
-#include "QDebug"
 #include "QTabBar"
-#include "QRegularExpression"
 
-#include "Logfile.hpp"
-#include "TextRenderer.hpp"
-#include "ModelNumberingPolicy.hpp"
+#include "ChunkedTextView.hpp"
+#include "FilteredLineSource.hpp"
 #include "GrepNode.hpp"
+#include "LineSource.hpp"
 
-LogViewer::LogViewer(QWidget* parent, GrepNode* grep_node, const Lines lines)
-    : lines_(lines), grep_node_(grep_node)
+LogViewer::LogViewer(QWidget* parent, GrepNode* grep_node, std::shared_ptr<LineSource> source)
+    : source_(std::move(source)), grep_node_(grep_node)
 {
-    std::unique_ptr<ILineNumberingPolicy> lineNumberingPolicy = std::make_unique<ModelNumberingPolicy>(lines_);
-    text_ = new TextRenderer(parent, lines, std::move(lineNumberingPolicy));
+    text_ = new ChunkedTextView(parent, source_.get());
     tabs_ = new QTabWidget();
     tabs_->addTab(text_,"Base");
     tabs_->setTabsClosable(true);
@@ -50,46 +40,11 @@ QString generateTabName(const GrepNode* grep, const QString base_name)
 
 LogViewer* LogViewer::grep(GrepNode* grep)
 {
-    const QString pattern = QString().fromStdString(grep->getPattern());
+    const QString pattern = QString::fromStdString(grep->getPattern());
 
-    Lines filtered_results;
-    if (grep->isRegEx())
-    {
-        QRegularExpression exp(pattern);
-        for(auto line : lines_)
-        {
-            QRegularExpressionMatch match = exp.match(line.text);
-            if (grep->isInverted())
-            {
-                if (!match.hasMatch()) filtered_results.append({line.number, line.text});
-            }
-            else
-            {
-                if (match.hasMatch()) filtered_results.append({line.number, line.text});
-            }
-        }
-    }
-    else
-    {
-        for(auto line : lines_)
-        {   if (grep->isInverted())
-            {
-                if(!line.text.contains(pattern, grep->isCaseInsensitive() ? Qt::CaseInsensitive : Qt::CaseSensitive))
-                {
-                   filtered_results.append({line.number, line.text});
-                }
-            }
-            else
-            {
-                if(line.text.contains(pattern, grep->isCaseInsensitive() ? Qt::CaseInsensitive : Qt::CaseSensitive))
-                {
-                   filtered_results.append({line.number, line.text});
-                }
-            }
-        }
-    }
+    std::shared_ptr<LineSource> filtered = FilteredLineSource::create(source_, grep);
 
-    LogViewer* viewer = new LogViewer(this, grep, filtered_results);
+    LogViewer* viewer = new LogViewer(this, grep, std::move(filtered));
     tabs_->addTab(viewer, generateTabName(grep, pattern));
     return viewer;
 }

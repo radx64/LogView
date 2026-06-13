@@ -25,7 +25,8 @@
 #include "Logfile.hpp"
 #include "ProjectModel.hpp"
 #include "LogViewer.hpp"
-#include "TextRenderer.hpp"
+#include "ChunkedTextView.hpp"
+#include "LineSource.hpp"
 #include "FileViewer.hpp"
 #include "loader/Project.hpp"
 #include "serializer/SerializerProjectModel.hpp"
@@ -137,13 +138,14 @@ void MainWindow::bookmark_current_line()
     LogViewer* deepest_tab = viewerWidget->getDeepestActiveTab();
 
     if (!deepest_tab) return;
-    int current_line_index = deepest_tab->text_ ->textCursor().blockNumber();
-    uint32_t absolute_line_index = deepest_tab->lines_[current_line_index].number;
+    const qint64 current_line_index = deepest_tab->text_->currentLine();
+    const Line current_line = deepest_tab->source()->at(current_line_index);
+    uint32_t absolute_line_index = current_line.number;
 
     // Simple QInputDialog will be extended later for something more fancy
     bool ok = false;
     QString bookmark_name = QInputDialog::getText(this, tr("Bookmark creation"),
-        tr("Name:"), QLineEdit::Normal, deepest_tab->lines_[current_line_index].text, &ok);
+        tr("Name:"), QLineEdit::Normal, current_line.text, &ok);
 
     if (!ok) return;
     viewerWidget->logfile_->getBookmarksModel()->add_bookmark(absolute_line_index,

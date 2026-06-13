@@ -1,34 +1,34 @@
 #ifndef LOG_VIEWER_HPP
 #define LOG_VIEWER_HPP
 
-#include <QStringList>
+#include <memory>
+
 #include <QWidget>
 
-#include "Logfile.hpp"
-
-class QWidget;
 class QTabWidget;
-class TextRenderer;
+class ChunkedTextView;
 class GrepNode;
+class LineSource;
 
 class LogViewer : public QWidget
 {
 Q_OBJECT
 public:
-    LogViewer(QWidget* parent, GrepNode* current_grep_node_, const Lines lines);
+    LogViewer(QWidget* parent, GrepNode* grep_node, std::shared_ptr<LineSource> source);
     LogViewer* grep(GrepNode* grep);
 
     GrepNode* getGrepNode();
 
+    LineSource* source() const { return source_.get(); }
+
     QTabWidget* tabs_;
-    TextRenderer* text_;
-// in further improvements I need to hold only grepped lines from log model not copy of lines itself;
-    const Lines lines_;
+    ChunkedTextView* text_;
 
 public slots:
     void closeTab(const int);
 
 protected:
+    std::shared_ptr<LineSource> source_;
     GrepNode* grep_node_;
 };
 

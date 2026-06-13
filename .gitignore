@@ -30,3 +30,62 @@
 *.exe
 *.out
 *.app
+
+# Build directories
+build/
+build-*/
+cmake-build-*/
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+cmake_install.cmake
+install_manifest.txt
+CTestTestfile.cmake
+Testing/
+*.cmake
+!CMakeLists.txt
+
+# Make / Ninja
+Makefile
+.ninja_deps
+.ninja_log
+build.ninja
+rules.ninja
+
+# Qt generated files
+moc_*.cpp
+moc_*.h
+qrc_*.cpp
+ui_*.h
+*.moc
+*_autogen/
+qmlcache_loader.cpp
+
+# Qt qmake artifacts
+*.pro.user*
+*.qbs.user*
+Makefile.Debug
+Makefile.Release
+object_script.*
+*.qmlc
+*.jsc
+
+# Qt Creator
+*.autosave
+*.creator
+*.creator.user*
+*.config
+*.files
+*.includes
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
