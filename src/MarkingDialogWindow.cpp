@@ -2,11 +2,12 @@
 
 #include "Marking.hpp"
 
-#include <QComboBox>
+#include <QColorDialog>
 #include <QDialogButtonBox>
 #include <QFormLayout>
 #include <QLabel>
 #include <QLineEdit>
+#include <QPushButton>
 #include <QVBoxLayout>
 
 MarkingDialogWindow::MarkingDialogWindow(QWidget *parent)
@@ -16,12 +17,17 @@ MarkingDialogWindow::MarkingDialogWindow(QWidget *parent)
     resize(400, 120);
 
     text_edit_ = new QLineEdit(this);
-    color_combo_ = new QComboBox(this);
-    populateColors();
+
+    color_button_ = new QPushButton(this);
+    color_button_->setAutoFillBackground(true);
+    connect(color_button_, &QPushButton::clicked, this, &MarkingDialogWindow::pickColor);
+
+    color_ = QColor(QString::fromLatin1(marking_colors::kDefaultColor));
+    updateColorButton();
 
     QFormLayout* form = new QFormLayout();
     form->addRow(new QLabel(tr("Text"), this), text_edit_);
-    form->addRow(new QLabel(tr("Color"), this), color_combo_);
+    form->addRow(new QLabel(tr("Color"), this), color_button_);
 
     QDialogButtonBox* buttons = new QDialogButtonBox(
         QDialogButtonBox::Save | QDialogButtonBox::Cancel, this);
@@ -35,15 +41,25 @@ MarkingDialogWindow::MarkingDialogWindow(QWidget *parent)
     text_edit_->setFocus();
 }
 
-void MarkingDialogWindow::populateColors()
+void MarkingDialogWindow::pickColor()
 {
-    for (int i = 0; i < marking_colors::kPaletteSize; ++i)
+    const QColor chosen = QColorDialog::getColor(
+        color_.isValid() ? color_ : QColor(Qt::yellow),
+        this, tr("Select marking color"));
+    if (chosen.isValid())
     {
-        const auto& entry = marking_colors::kPalette[i];
-        const QString hex = QString::fromLatin1(entry.hex);
-        color_combo_->addItem(marking_color_icon(hex),
-                              QString::fromLatin1(entry.name), hex);
+        color_ = chosen;
+        updateColorButton();
     }
+}
+
+void MarkingDialogWindow::updateColorButton()
+{
+    const QString textColor = color_.lightnessF() > 0.5 ? "black" : "white";
+    color_button_->setStyleSheet(
+        QStringLiteral("background-color: %1; color: %2;")
+            .arg(color_.name(), textColor));
+    color_button_->setText(color_.name());
 }
 
 void MarkingDialogWindow::setText(const QString& text)
@@ -54,24 +70,20 @@ void MarkingDialogWindow::setText(const QString& text)
 
 void MarkingDialogWindow::setColor(const QString& color)
 {
-    const int index = color_combo_->findData(color);
-    if (index >= 0)
+    const QColor parsed(color);
+    if (parsed.isValid())
     {
-        color_combo_->setCurrentIndex(index);
-        return;
+        color_ = parsed;
+        updateColorButton();
     }
-
-    // Color is not part of the palette: add it as a custom entry.
-    color_combo_->addItem(marking_color_icon(color), tr("Custom"), color);
-    color_combo_->setCurrentIndex(color_combo_->count() - 1);
 }
 
 MarkingDialogWindow::Result MarkingDialogWindow::getResult() const
 {
     Result result;
     result.text = text_edit_->text();
-    result.color = color_combo_->currentData().toString();
-    if (result.color.isEmpty())
-        result.color = QString::fromLatin1(marking_colors::kDefaultColor);
+    result.color = color_.isValid()
+                       ? color_.name()
+                       : QString::fromLatin1(marking_colors::kDefaultColor);
     return result;
 }

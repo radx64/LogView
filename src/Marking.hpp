@@ -13,7 +13,6 @@ struct Entry
     const char* hex;
 };
 
-// Pastel colors that keep dark text readable when used as a background highlight.
 inline const Entry kPalette[] = {
     {"Yellow", "#fff59d"},
     {"Green",  "#c5e1a5"},
@@ -29,11 +28,15 @@ inline constexpr int kPaletteSize = static_cast<int>(sizeof(kPalette) / sizeof(k
 
 inline const char* kDefaultColor = kPalette[0].hex;
 
-// Returns a color from the palette cycling by index (used for auto-assigning).
 QString colorForIndex(int index);
+
+QString randomColor();
+
+int paletteIndexOf(const QString& hex);
+
+QString nextColor(const QString& hex);
 }  // namespace marking_colors
 
-// Builds a small filled square icon of the given color (for combo boxes / lists).
 QIcon marking_color_icon(const QString& hex, int size = 16);
 
 class Marking

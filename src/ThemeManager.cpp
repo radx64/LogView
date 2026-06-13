@@ -67,7 +67,6 @@ QPalette buildPalette(bool dark)
     }
     else
     {
-        // Standard light palette.
         palette = QApplication::style()->standardPalette();
     }
     return palette;
@@ -77,7 +76,6 @@ QPalette buildPalette(bool dark)
 ThemeManager::ThemeManager(QObject* parent)
     : QObject(parent)
 {
-    // React to OS color scheme changes while in System mode.
     connect(QGuiApplication::styleHints(), &QStyleHints::colorSchemeChanged,
             this, [this](Qt::ColorScheme)
             {
@@ -146,7 +144,6 @@ void ThemeManager::save() const
 
 void ThemeManager::apply()
 {
-    // Fusion provides consistent light/dark rendering across platforms.
     QApplication::setStyle(QStringLiteral("Fusion"));
     QApplication::setPalette(buildPalette(isDarkActive()));
 }

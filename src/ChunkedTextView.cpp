@@ -467,12 +467,17 @@ void ChunkedTextView::markSelection()
 {
     if (!markings_) return;
 
-    // Markings match within a single line, so only the first line of a
-    // selection is used as the marked needle.
     QString text = selectedText();
     const int newline = text.indexOf(QLatin1Char('\n'));
     if (newline >= 0) text = text.left(newline);
     if (text.isEmpty()) return;
+
+    const int existing = markings_->find_marking(text);
+    if (existing >= 0)
+    {
+        markings_->cycle_marking_color(static_cast<uint32_t>(existing));
+        return;
+    }
 
     markings_->add_marking(text);
 }

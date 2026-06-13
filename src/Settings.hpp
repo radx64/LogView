@@ -5,9 +5,6 @@
 #include <QObject>
 #include <QString>
 
-// Central application settings store.
-// Values are persisted in an INI file located next to the binary.
-// Designed to be extended with additional configuration sections over time.
 class Settings : public QObject
 {
     Q_OBJECT
@@ -17,7 +14,6 @@ public:
     QFont editorFont() const { return editor_font_; }
     void setEditorFont(const QFont& font);
 
-    // An invalid color means "derive from the active palette" (automatic).
     QColor highlightLineColor() const { return highlight_line_color_; }
     void setHighlightLineColor(const QColor& color);
 

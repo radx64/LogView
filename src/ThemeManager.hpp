@@ -5,8 +5,6 @@
 
 class QString;
 
-// Manages the application color theme (System / Light / Dark).
-// The selected mode is persisted in an INI file located next to the binary.
 class ThemeManager : public QObject
 {
     Q_OBJECT
@@ -24,10 +22,8 @@ public:
     Theme theme() const { return theme_; }
     void setTheme(Theme theme);
 
-    // Resolves System to the actual active scheme.
     bool isDarkActive() const;
 
-    // Loads persisted setting and applies it.
     void loadAndApply();
 
     static QString settingsFilePath();

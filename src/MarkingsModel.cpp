@@ -28,7 +28,7 @@ QVariant MarkingsModel::data(const QModelIndex &index, int role) const
 
 void MarkingsModel::add_marking(const QString& text)
 {
-    add_marking(text, marking_colors::colorForIndex(markings_.size()));
+    add_marking(text, marking_colors::randomColor());
 }
 
 void MarkingsModel::add_marking(const QString& text, const QString& color)
@@ -75,4 +75,25 @@ Marking MarkingsModel::get_marking(uint32_t index) const
 {
     if (static_cast<int>(index) < markings_.size()) return markings_[static_cast<int>(index)];
     return Marking();
+}
+
+int MarkingsModel::find_marking(const QString& text) const
+{
+    for (int i = 0; i < markings_.size(); ++i)
+    {
+        if (markings_[i].text_ == text) return i;
+    }
+    return -1;
+}
+
+void MarkingsModel::cycle_marking_color(uint32_t index)
+{
+    if (static_cast<int>(index) >= markings_.size()) return;
+
+    Marking& marking = markings_[static_cast<int>(index)];
+    marking.color_ = marking_colors::nextColor(marking.color_);
+
+    const QModelIndex changed_index = createIndex(static_cast<int>(index), 0);
+    emit dataChanged(changed_index, changed_index, QVector<int>{Qt::DecorationRole});
+    emit changed();
 }

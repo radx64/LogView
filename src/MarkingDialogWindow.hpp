@@ -1,10 +1,11 @@
 #pragma once
 
 #include <QDialog>
+#include <QColor>
 #include <QString>
 
 class QLineEdit;
-class QComboBox;
+class QPushButton;
 
 class MarkingDialogWindow : public QDialog
 {
@@ -25,8 +26,10 @@ public:
     Result getResult() const;
 
 private:
-    void populateColors();
+    void pickColor();
+    void updateColorButton();
 
     QLineEdit* text_edit_;
-    QComboBox* color_combo_;
+    QPushButton* color_button_;
+    QColor color_{};
 };
