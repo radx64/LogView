@@ -1,5 +1,4 @@
-#ifndef FILE_LINE_SOURCE_HPP
-#define FILE_LINE_SOURCE_HPP
+#pragma once
 
 #include <cstdint>
 
@@ -39,5 +38,3 @@ private:
     mutable QHash<int, QVector<QString>> cache_;
     mutable QList<int> lru_;
 };
-
-#endif // FILE_LINE_SOURCE_HPP

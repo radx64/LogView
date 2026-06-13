@@ -1,5 +1,4 @@
-#ifndef BOOKMARK_HPP
-#define BOOKMARK_HPP
+#pragma once
 
 #include <cstdint>
 
@@ -22,4 +21,3 @@ public:
 
     friend class serializer::Bookmark;
 };
-#endif // BOOKMARK_HPP

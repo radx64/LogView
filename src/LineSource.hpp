@@ -1,5 +1,4 @@
-#ifndef LINE_SOURCE_HPP
-#define LINE_SOURCE_HPP
+#pragma once
 
 #include <cstdint>
 
@@ -20,5 +19,3 @@ public:
 
     virtual qint64 rowForLineNumber(uint32_t number) const;
 };
-
-#endif // LINE_SOURCE_HPP

@@ -1,5 +1,4 @@
-#ifndef FILTERED_LINE_SOURCE_HPP
-#define FILTERED_LINE_SOURCE_HPP
+#pragma once
 
 #include <cstdint>
 #include <memory>
@@ -29,5 +28,3 @@ private:
     QVector<qint64> indices_;
     uint32_t max_line_number_ = 0;
 };
-
-#endif // FILTERED_LINE_SOURCE_HPP

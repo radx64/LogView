@@ -1,5 +1,4 @@
-#ifndef SERIALIZABLE_HPP
-#define SERIALIZABLE_HPP
+#pragma once
 
 class QJsonObject;
 
@@ -15,5 +14,3 @@ public:
 };
 
 }  // namespace serialzer
-
-#endif // SERIALIZABLE_HPP

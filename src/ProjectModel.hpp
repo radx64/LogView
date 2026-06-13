@@ -1,5 +1,4 @@
-#ifndef PROJECT_MODEL_HPP
-#define PROJECT_MODEL_HPP
+#pragma once
 
 #include <memory>
 #include <vector>
@@ -34,5 +33,3 @@ protected slots:
 signals:
     void changed(); // is emitted whenever project is changed
 };
-
-#endif // PROJECT_MODEL_HPP

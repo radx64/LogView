@@ -1,5 +1,4 @@
-#ifndef SERIALIZER_SERIALIZEGREP_NODE_HPP
-#define SERIALIZER_SERIALIZEGREP_NODE_HPP
+#pragma once
 
 #include <memory>
 #include <string>
@@ -21,4 +20,3 @@ static void deserialize(::GrepNode &gp, const QJsonObject &json);
 };
 
 }  // namespace serializer
-#endif // SERIALIZER_SERIALIZEGREP_NODE_HPP

@@ -1,5 +1,4 @@
-#ifndef GREPDIALOGWINDOW_HPP
-#define GREPDIALOGWINDOW_HPP
+#pragma once
 
 #include <QDialog>
 
@@ -33,5 +32,3 @@ private slots:
 private:
     Ui::GrepDialogWindow *ui;
 };
-
-#endif // GREPDIALOGWINDOW_HPP

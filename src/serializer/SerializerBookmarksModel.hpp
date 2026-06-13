@@ -1,5 +1,4 @@
-#ifndef SERIALIZER_SERIALIZERBOOKMARKS_MODEL_HPP
-#define SERIALIZER_SERIALIZERBOOKMARKS_MODEL_HPP
+#pragma once
 
 class QJsonObject;
 class BookmarksModel;
@@ -16,4 +15,3 @@ public:
 };
 
 }  // namespace serializer
-#endif // SERIALIZER_SERIALIZERBOOKMARKS_MODEL_HPP

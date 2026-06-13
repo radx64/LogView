@@ -1,5 +1,4 @@
-#ifndef SERIALIZER_SERIALIZERBOOKMARK_HPP
-#define SERIALIZER_SERIALIZERBOOKMARK_HPP
+#pragma once
 
 class QJsonObject;
 class Bookmark;
@@ -17,5 +16,3 @@ protected:
 };
 
 }  // namespace serialzer
-
-#endif // SERIALIZER_SERIALIZERBOOKMARK_HPP

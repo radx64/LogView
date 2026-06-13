@@ -1,5 +1,4 @@
-#ifndef SERIALIZER_SERIALIZERLOGFILE_HPP
-#define SERIALIZER_SERIALIZERLOGFILE_HPP
+#pragma once
 
 class Logfile;
 class QJsonObject;
@@ -16,5 +15,3 @@ public:
 };
 
 }  // namespace serializer
-
-#endif // SERIALIZER_SERIALIZERLOGFILE_HPP

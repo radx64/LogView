@@ -1,5 +1,4 @@
-#ifndef LOADER_LOGFILE_HPP
-#define LOADER_LOGFILE_HPP
+#pragma once
 
 #include <functional>
 #include <memory>
@@ -24,5 +23,3 @@ protected:
 };
 
 }  // namespace loader
-
-#endif // LOADER_LOGFILE_HPP

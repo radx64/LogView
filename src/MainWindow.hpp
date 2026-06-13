@@ -1,5 +1,4 @@
-#ifndef MAINWINDOW_HPP
-#define MAINWINDOW_HPP
+#pragma once
 
 #include <memory>
 
@@ -58,5 +57,3 @@ private:
     std::unique_ptr<ProjectUiManager> pm_{};
     Ui::MainWindow *ui{nullptr};
 };
-
-#endif // MAINWINDOW_HPP

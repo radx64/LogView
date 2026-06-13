@@ -1,5 +1,4 @@
-#ifndef PROJECT_MANAGER_HPP
-#define PROJECT_MANAGER_HPP
+#pragma once
 
 #include <functional>
 #include <memory>
@@ -45,5 +44,3 @@ private:
     Ui::MainWindow* ui_;
 };
 
-
-#endif // PROJECT_MANAGER_HPP

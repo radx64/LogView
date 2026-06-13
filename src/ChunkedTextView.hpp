@@ -1,5 +1,4 @@
-#ifndef CHUNKED_TEXT_VIEW_HPP
-#define CHUNKED_TEXT_VIEW_HPP
+#pragma once
 
 #include <cstdint>
 
@@ -64,5 +63,3 @@ private:
 
     mutable int max_line_width_chars_ = 0;
 };
-
-#endif // CHUNKED_TEXT_VIEW_HPP

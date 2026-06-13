@@ -1,5 +1,4 @@
-#ifndef SERIALIZER_SERIALIZERPROJECT_MODEL_HPP
-#define SERIALIZER_SERIALIZERPROJECT_MODEL_HPP
+#pragma once
 
 class ProjectModel;
 class QJsonObject;
@@ -16,5 +15,3 @@ public:
 };
 
 }  // namespace serializer
-
-#endif // SERIALIZER_SERIALIZERPROJECT_MODEL_HPP

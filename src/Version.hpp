@@ -1,6 +1,3 @@
-#ifndef VERSION_HPP_
-#define VERSION_HPP_
+#pragma once
 
 constexpr char VERSION[] = "0.0.1";
-
-#endif  // VERSION_HPP_

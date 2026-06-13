@@ -1,5 +1,4 @@
-#ifndef LOG_VIEWER_HPP
-#define LOG_VIEWER_HPP
+#pragma once
 
 #include <memory>
 
@@ -31,5 +30,3 @@ protected:
     std::shared_ptr<LineSource> source_;
     GrepNode* grep_node_;
 };
-
-#endif // LOG_VIEWER_HPP

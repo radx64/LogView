@@ -1,5 +1,4 @@
-#ifndef GREP_NODE_HPP
-#define GREP_NODE_HPP
+#pragma once
 
 #include <memory>
 #include <string>
@@ -52,5 +51,3 @@ private slots:
 signals:
     void changed();
 };
-
-#endif // GREP_NODE_HPP

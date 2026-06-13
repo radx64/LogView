@@ -1,5 +1,4 @@
-#ifndef PROJECT_VIEWER_HPP
-#define PROJECT_VIEWER_HPP
+#pragma once
 
 #include <functional>
 
@@ -33,5 +32,3 @@ signals:
 private slots:
     void bookmarksItemDoubleClicked(const QModelIndex& idx);
 };
-
-#endif // PROJECT_VIEWER_HPP

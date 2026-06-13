@@ -1,5 +1,4 @@
-#ifndef LINE_HPP
-#define LINE_HPP
+#pragma once
 
 #include <cstdint>
 
@@ -13,5 +12,3 @@ struct Line
 };
 
 using Lines = QVector<Line>;
-
-#endif // LINE_HPP

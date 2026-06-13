@@ -1,5 +1,4 @@
-#ifndef LOGFILE_HPP
-#define LOGFILE_HPP
+#pragma once
 
 #include <memory>
 
@@ -43,5 +42,3 @@ protected slots:
 signals:
     void changed();
 };
-
-#endif // LOGFILE_HPP

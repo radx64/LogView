@@ -1,5 +1,4 @@
-#ifndef LOADER_PROJECT_HPP
-#define LOADER_PROJECT_HPP
+#pragma once
 
 #include <functional>
 #include <memory>
@@ -21,5 +20,3 @@ public:
 };
 
 }  // namespace loader
-
-#endif // LOADER_PROJECT_HPP

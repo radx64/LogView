@@ -1,5 +1,4 @@
-#ifndef BOOKMARKS_MODEL_HPP
-#define BOOKMARKS_MODEL_HPP
+#pragma once
 
 #include <QString>
 #include <QAbstractListModel>
@@ -28,4 +27,3 @@ protected:
 signals:
     void changed();
 };
-#endif // BOOKMARKS_MODEL_HPP
