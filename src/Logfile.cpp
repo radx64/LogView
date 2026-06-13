@@ -22,10 +22,15 @@ Logfile::Logfile(const QString& filename)
 void Logfile::connect_events()
 {
     QObject::connect(bookmarks_model_.get(), &BookmarksModel::changed,
-                     this, &Logfile::bookmarks_model_changed);
+                     this, &Logfile::changed);
 
     QObject::connect(grep_hierarchy_.get(), &GrepNode::changed,
-                     this, &Logfile::grep_hierarchy_changed);
+                     this, &Logfile::changed);
+}
+
+void Logfile::reload()
+{
+    source_ = std::make_shared<FileLineSource>(filename_);
 }
 
 std::shared_ptr<LineSource> Logfile::getLineSource() const
@@ -41,13 +46,4 @@ const QString& Logfile::getFileName() const
 BookmarksModel* Logfile::getBookmarksModel()
 {
     return bookmarks_model_.get();
-}
-
-void Logfile::grep_hierarchy_changed()
-{
-    emit changed();
-}
-void Logfile::bookmarks_model_changed()
-{
-    emit changed();
 }

@@ -2,7 +2,7 @@
 #include <QDebug>
 
 
-ProjectModel::ProjectModel() : projectName_{""}, changed_{false}
+ProjectModel::ProjectModel() : projectName_{""}, dirty_{false}
 {
 }
 
@@ -19,7 +19,6 @@ Logfile* ProjectModel::add_to_project(std::unique_ptr<Logfile>&& lf)
     QObject::connect(moved_logfile, &Logfile::changed,
                      this, &ProjectModel::on_logfile_change);
 
-    on_logfile_change();
     return moved_logfile;
 }
 
@@ -30,8 +29,35 @@ std::vector<std::unique_ptr<Logfile>>& ProjectModel::get_log_files()
 
 void ProjectModel::on_logfile_change()
 {
-    changed_ = true;
-    emit changed();
+    markDirty();
+}
+
+const QString& ProjectModel::name() const
+{
+    return projectName_;
+}
+
+void ProjectModel::setName(const QString& name)
+{
+    projectName_ = name;
+    emit stateChanged();
+}
+
+bool ProjectModel::isDirty() const
+{
+    return dirty_;
+}
+
+void ProjectModel::markDirty()
+{
+    dirty_ = true;
+    emit stateChanged();
+}
+
+void ProjectModel::markClean()
+{
+    dirty_ = false;
+    emit stateChanged();
 }
 
 bool ProjectModel::is_empty()
@@ -48,6 +74,6 @@ void ProjectModel::remove_file_from_project(Logfile* logfile)
     {
         qDebug() << "Erasing logfile from memory @" << logfile_it->get();
         logfiles_.erase(logfile_it);
-        on_logfile_change();
+        markDirty();
     }
 }

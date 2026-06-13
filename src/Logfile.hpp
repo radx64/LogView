@@ -21,6 +21,7 @@ public:
     Logfile(const QString& filename);
     const QString& getFileName() const;
     BookmarksModel* getBookmarksModel();
+    void reload();
 
     std::shared_ptr<LineSource> getLineSource() const;
 
@@ -34,10 +35,6 @@ protected:
     void connect_events();
 
     friend class serializer::Logfile;
-
-protected slots:
-    void grep_hierarchy_changed();
-    void bookmarks_model_changed();
 
 signals:
     void changed();

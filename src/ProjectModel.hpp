@@ -20,16 +20,23 @@ public:
     std::vector<std::unique_ptr<Logfile>>& get_log_files();
     bool is_empty();
     void remove_file_from_project(Logfile* logfile);
-    QString projectName_;
-    bool changed_;
+
+    const QString& name() const;
+    void setName(const QString& name);
+
+    bool isDirty() const;
+    void markDirty();
+    void markClean();
 
 protected:
     friend class serializer::ProjectModel;
     std::vector<std::unique_ptr<Logfile>> logfiles_;
+    QString projectName_;
+    bool dirty_;
 
 protected slots:
     void on_logfile_change();
 
 signals:
-    void changed(); // is emitted whenever project is changed
+    void stateChanged();
 };

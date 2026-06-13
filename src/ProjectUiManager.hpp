@@ -24,23 +24,25 @@ public:
     ProjectUiManager(Ui::MainWindow* ui);
     void create_new();
     void load_log_file(QString file_path);
-    void connect_update_notif(std::function<void(void)> notif_callback);
+    void reload_file(int tab_index);
     bool is_empty();
     bool has_changed();
     const QString& project_name();
-    void save_empty_project();
     void save_project();
     void open_project();
 
+signals:
+    void projectStateChanged();
+
 private slots:
-    void project_changed();
     void file_viewer_closed(Logfile* lf);
 
 private:
     void on_logfile_wiget_close(Logfile* lf);
     void connect_logviewer_signal(FileViewer* fileviewer);
+    void adoptProjectModel();
+    void clearViews();
     std::unique_ptr<ProjectModel> pm_;
-    std::function<void(void)> update_client_notif_;
     Ui::MainWindow* ui_;
 };
 

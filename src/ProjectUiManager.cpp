@@ -8,13 +8,31 @@ ProjectUiManager::ProjectUiManager(Ui::MainWindow* ui)
 : ui_(ui)
 {
     pm_ = std::make_unique<ProjectModel>();
-    pm_->changed_ = false;
+    adoptProjectModel();
 }
 
 void ProjectUiManager::create_new()
 {
+    clearViews();
     pm_ = std::make_unique<ProjectModel>();
-    pm_->changed_ = false;
+    adoptProjectModel();
+}
+
+void ProjectUiManager::adoptProjectModel()
+{
+    connect(pm_.get(), &ProjectModel::stateChanged,
+            this, &ProjectUiManager::projectStateChanged);
+    emit projectStateChanged();
+}
+
+void ProjectUiManager::clearViews()
+{
+    while (ui_->fileView->count())
+    {
+        QWidget* tab = ui_->fileView->widget(0);
+        ui_->fileView->removeTab(0);
+        delete tab;
+    }
 }
 
 void ProjectUiManager::load_log_file(QString file_path)
@@ -27,6 +45,32 @@ void ProjectUiManager::load_log_file(QString file_path)
         {
             connect_logviewer_signal(fileviewer);
         });
+    pm_->markDirty();
+}
+
+void ProjectUiManager::reload_file(int tab_index)
+{
+    FileViewer* viewer = dynamic_cast<FileViewer*>(ui_->fileView->widget(tab_index));
+    if (viewer == nullptr)
+        return;
+
+    Logfile* lf = viewer->logfile_;
+    const QString tab_text = ui_->fileView->tabText(tab_index);
+    const QString tab_tooltip = ui_->fileView->tabToolTip(tab_index);
+
+    lf->reload();
+
+    disconnect(viewer, &FileViewer::destroyed, this, &ProjectUiManager::file_viewer_closed);
+    ui_->fileView->removeTab(tab_index);
+    delete viewer;
+
+    FileViewer* reloaded = new FileViewer(ui_->fileView, lf);
+    connect_logviewer_signal(reloaded);
+    ui_->fileView->insertTab(tab_index, reloaded, tab_text);
+    ui_->fileView->setTabToolTip(tab_index, tab_tooltip);
+    ui_->fileView->setCurrentIndex(tab_index);
+
+    loader::Logfile::spawnViews(reloaded->getDeepestActiveTab(), lf->grep_hierarchy_.get());
 }
 
 void ProjectUiManager::on_logfile_wiget_close(Logfile* lf)
@@ -35,23 +79,18 @@ void ProjectUiManager::on_logfile_wiget_close(Logfile* lf)
     pm_->remove_file_from_project(lf);
 }
 
-void ProjectUiManager::connect_update_notif(std::function<void(void)> notif_callback)
-{
-    update_client_notif_ = notif_callback;
-}
-
 bool ProjectUiManager::is_empty()
 {
     return pm_->is_empty();
 }
 bool ProjectUiManager::has_changed()
 {
-    return pm_->changed_;
+    return pm_->isDirty();
 }
 
 const QString& ProjectUiManager::project_name()
 {
-    return pm_->projectName_;
+    return pm_->name();
 }
 
 void ProjectUiManager::save_project()
@@ -60,7 +99,7 @@ void ProjectUiManager::save_project()
 
     if (file_path.isEmpty())
     {
-        file_path = QFileDialog::getSaveFileName(nullptr,
+        file_path = QFileDialog::getSaveFileName(ui_->fileView->window(),
             tr("Save project"), "",
             tr("Project file (*.json)"));
         qDebug() << "FP: " << file_path;
@@ -74,32 +113,28 @@ void ProjectUiManager::save_project()
         qWarning("Couldn't open save file!");
         return;
     }
-    pm_->projectName_ = saveFile.fileName();
+    pm_->setName(saveFile.fileName());
 
     QJsonObject object;
     serializer::ProjectModel::serialize(*pm_, object);
     QJsonDocument document(object);
     saveFile.write(document.toJson(QJsonDocument::Indented));
 
-    pm_->changed_ = false;
-    update_client_notif_();
+    pm_->markClean();
 }
 
 void ProjectUiManager::open_project()
 {
-    QString file_path = QFileDialog::getOpenFileName(nullptr,
+    QString file_path = QFileDialog::getOpenFileName(ui_->fileView->window(),
                                                      tr("Open project"), "",
                                                      tr("Project file (*.json)"));
     if (file_path.isEmpty())
         return;
 
-    while(ui_->fileView->count())
-    {
-        ui_->fileView->removeTab(0);
-    }
-    ui_->fileView->clear();
+    clearViews();
 
     pm_ = std::make_unique<ProjectModel>();
+    adoptProjectModel();
 
     QFile loadFile(file_path);
     if (!loadFile.open(QIODevice::ReadOnly)) {
@@ -110,7 +145,6 @@ void ProjectUiManager::open_project()
     QJsonObject object = document.object();
 
     serializer::ProjectModel::deserialize(*pm_, object);
-    QObject::connect(pm_.get(), &ProjectModel::changed, this, &ProjectUiManager::project_changed);
     loader::Project::load(
         ui_,
         pm_.get(),
@@ -118,17 +152,12 @@ void ProjectUiManager::open_project()
         {
             connect_logviewer_signal(fileviewer);
         });
-    pm_->changed_ = false;
+    pm_->markClean();
 }
 
 void ProjectUiManager::connect_logviewer_signal(FileViewer* fileviewer)
 {
     connect(fileviewer, &FileViewer::destroyed, this, &ProjectUiManager::file_viewer_closed);
-}
-
-void ProjectUiManager::project_changed()
-{
-    update_client_notif_();
 }
 
 void ProjectUiManager::file_viewer_closed(Logfile* lf)

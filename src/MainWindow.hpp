@@ -29,6 +29,7 @@ public:
 private slots:
     void on_actionLoad_from_file_triggered();
     void closeFileTab(const int index);
+    void showFileTabContextMenu(const QPoint& pos);
     void on_exit_app_triggered();
     void on_actionGrep_current_view_triggered();
     void on_actionBookmark_current_line_triggered();

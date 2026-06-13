@@ -67,6 +67,8 @@ void GrepNode::removeChild(GrepNode* node)
     QObject::disconnect(node, &GrepNode::changed,
                         this, &GrepNode::child_changed);
     delete node;
+
+    emit changed();
 }
 
 std::vector<GrepNode*> GrepNode::getChildren() const

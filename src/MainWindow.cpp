@@ -12,9 +12,11 @@
 #include <QJsonObject>
 #include <QLabel>
 #include <QLayout>
+#include <QMenu>
 #include <QMessageBox>
 #include <QMimeData>
 #include <QStandardItemModel>
+#include <QTabBar>
 #include <QTabWidget>
 #include <QTextEdit>
 
@@ -41,9 +43,26 @@ void MainWindow::closeFileTab(const int index)
     tabWidget->removeTab(index);
     if (tabContents != nullptr) delete(tabContents);
 }
+void MainWindow::showFileTabContextMenu(const QPoint& pos)
+{
+    QTabBar* bar = ui->fileView->tabBar();
+    const int index = bar->tabAt(pos);
+    if (index < 0)
+        return;
+
+    QMenu menu;
+    QAction* reload_action = menu.addAction(tr("Reload"));
+    if (menu.exec(bar->mapToGlobal(pos)) == reload_action)
+        pm_->reload_file(index);
+}
+
 void MainWindow::connect_signals()
 {
     connect(ui->fileView, &QTabWidget::tabCloseRequested, this, &MainWindow::closeFileTab);
+
+    QTabBar* bar = ui->fileView->tabBar();
+    bar->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(bar, &QTabBar::customContextMenuRequested, this, &MainWindow::showFileTabContextMenu);
 }
 
 void MainWindow::newProject()
@@ -61,7 +80,7 @@ MainWindow::MainWindow(QWidget* parent) :
     statusBar()->showMessage(tr("Use load from file menu or drop files in this window to begin."));
     connect_signals();
     pm_ = std::make_unique<ProjectUiManager>(ui);
-    pm_->connect_update_notif([this](){updateUi();});
+    connect(pm_.get(), &ProjectUiManager::projectStateChanged, this, &MainWindow::project_changed);
     newProject();
     updateUi();
 }
@@ -116,7 +135,7 @@ void MainWindow::grepCurrentView()
 
     LogViewer* deepest_tab = viewerWidget->getDeepestActiveTab();
 
-    GrepDialogWindow grepDialog;
+    GrepDialogWindow grepDialog(this);
 
     if (grepDialog.exec() != QDialog::Accepted) return;
     auto result = grepDialog.getResult();
@@ -180,7 +199,7 @@ void MainWindow::on_exit_app_triggered()
 {
     if (pm_->has_changed())
     {
-        QMessageBox msgBox;
+        QMessageBox msgBox(this);
         msgBox.setText("The document has been modified.");
         msgBox.setInformativeText("Do you want to save changes you made in current project? All changes will be lost if you don't save them.");
         msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
@@ -218,7 +237,7 @@ void MainWindow::on_actionLoad_project_triggered()
 {
     if (pm_->has_changed())
     {
-        QMessageBox msgBox;
+        QMessageBox msgBox(this);
         msgBox.setText("The document has been modified.");
         msgBox.setInformativeText("Do you want to save changes you made in current project? All changes will be lost if you don't save them.");
         msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);

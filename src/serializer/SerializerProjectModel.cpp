@@ -36,7 +36,6 @@ void ProjectModel::deserialize(::ProjectModel &pm, const QJsonObject &json)
          ::serializer::Logfile::deserialize(*logfile, child.toObject());
          pm.add_to_project(std::move(logfile));
     }
-    pm.changed_ = false;
 }
 
 }  // namespace serializer
