@@ -13,7 +13,9 @@ set(CMAKE_AUTOUIC_SEARCH_PATHS . src src/ui)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Network)
+# Qt 6.6 is the minimum: the code uses Qt::ColorScheme (6.5+) and
+# QList::assign (6.6+).
+find_package(Qt6 6.6 REQUIRED COMPONENTS Core Gui Widgets Network)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
