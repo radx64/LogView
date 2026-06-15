@@ -1,0 +1,41 @@
+name: Build Windows
+
+on:
+  push:
+    branches: [ master, main, develop ]
+  pull_request:
+    branches: [ master, main, develop ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: '6.7.0'
+        host: windows
+        target: desktop
+        arch: win64_msvc2019_64
+
+    - name: Configure CMake
+      run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+
+    - name: Build
+      run: cmake --build build --config Release
+
+    - name: Verify binary
+      shell: pwsh
+      run: |
+        if (!(Test-Path build/Release/LogView.exe)) { exit 1 }
+        Write-Host "Build successful: build/Release/LogView.exe"
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: LogView-windows-x64
+        path: build/Release/LogView.exe
+        retention-days: 30
