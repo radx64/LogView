@@ -16,6 +16,7 @@ class QTabWidget;
 class FileViewer;
 class ThemeManager;
 class QActionGroup;
+class UpdateChecker;
 
 namespace Ui {
 class MainWindow;
@@ -39,8 +40,18 @@ private slots:
     void on_actionSave_project_as_triggered();
     void on_actionSave_project_triggered();
     void on_actionLoad_project_triggered();
+    void on_actionCheck_for_updates_triggered();
 
 private:
+    void setupUpdateChecker();
+    void checkForUpdates(bool silent);
+    void onUpdateAvailable(const QString& version,
+                           const QString& url,
+                           const QString& title,
+                           const QString& notes);
+    void onUpToDate(const QString& currentVersion);
+    void onUpdateCheckFailed(const QString& error);
+
     void project_changed();
     void bookmark_current_line();
     void connect_signals();
@@ -63,6 +74,8 @@ private:
 
     std::unique_ptr<ProjectUiManager> pm_{};
     std::unique_ptr<ThemeManager> theme_manager_{};
+    std::unique_ptr<UpdateChecker> update_checker_{};
     QActionGroup* theme_action_group_{nullptr};
+    bool manual_update_check_{false};
     Ui::MainWindow *ui{nullptr};
 };

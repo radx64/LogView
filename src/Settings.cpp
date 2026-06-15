@@ -11,6 +11,9 @@ constexpr auto kEditorGroup = "Editor";
 constexpr auto kFontFamilyKey = "FontFamily";
 constexpr auto kFontSizeKey = "FontSize";
 constexpr auto kHighlightLineColorKey = "HighlightLineColor";
+constexpr auto kUpdatesGroup = "Updates";
+constexpr auto kCheckOnStartupKey = "CheckOnStartup";
+constexpr auto kSkippedVersionKey = "SkippedVersion";
 } // namespace
 
 Settings::Settings(QObject* parent)
@@ -57,6 +60,24 @@ void Settings::setHighlightLineColor(const QColor& color)
     emit changed();
 }
 
+void Settings::setCheckForUpdatesOnStartup(bool enabled)
+{
+    if (check_updates_on_startup_ == enabled)
+        return;
+    check_updates_on_startup_ = enabled;
+    save();
+    emit changed();
+}
+
+void Settings::setSkippedUpdateVersion(const QString& version)
+{
+    if (skipped_update_version_ == version)
+        return;
+    skipped_update_version_ = version;
+    save();
+    emit changed();
+}
+
 void Settings::load()
 {
     QSettings settings(filePath(), QSettings::IniFormat);
@@ -78,6 +99,13 @@ void Settings::load()
     highlight_line_color_ = color.isEmpty() ? QColor() : QColor(color);
 
     settings.endGroup();
+
+    settings.beginGroup(kUpdatesGroup);
+    check_updates_on_startup_ =
+        settings.value(kCheckOnStartupKey, true).toBool();
+    skipped_update_version_ =
+        settings.value(kSkippedVersionKey).toString();
+    settings.endGroup();
 }
 
 void Settings::save() const
@@ -92,5 +120,10 @@ void Settings::save() const
                           ? highlight_line_color_.name(QColor::HexArgb)
                           : QString());
 
+    settings.endGroup();
+
+    settings.beginGroup(kUpdatesGroup);
+    settings.setValue(kCheckOnStartupKey, check_updates_on_startup_);
+    settings.setValue(kSkippedVersionKey, skipped_update_version_);
     settings.endGroup();
 }

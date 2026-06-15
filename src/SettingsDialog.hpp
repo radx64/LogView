@@ -10,6 +10,7 @@ class QStackedWidget;
 class QFontComboBox;
 class QSpinBox;
 class QPushButton;
+class QCheckBox;
 
 class SettingsDialog : public QDialog
 {
@@ -19,6 +20,7 @@ public:
 
 private:
     QWidget* createEditorPage();
+    QWidget* createUpdatesPage();
     void addSection(const QString& title, QWidget* page);
     void loadValues();
     void applyChanges();
@@ -32,6 +34,7 @@ private:
     QSpinBox* font_size_spin_{nullptr};
     QPushButton* highlight_color_button_{nullptr};
     QPushButton* highlight_color_reset_{nullptr};
+    QCheckBox* check_updates_checkbox_{nullptr};
 
     QColor highlight_color_{};
 };

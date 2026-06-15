@@ -1,0 +1,86 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:22.04
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        apt-get update
+        apt-get install -y \
+          cmake \
+          g++ \
+          make \
+          qt6-base-dev \
+          qt6-tools-dev
+
+    - name: Configure CMake
+      run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+
+    - name: Build
+      run: cmake --build build --config Release -j$(nproc)
+
+    - name: Package
+      run: |
+        cd build
+        tar -czf LogView-linux-x64.tar.gz LogView
+
+    - name: Create release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: build/LogView-linux-x64.tar.gz
+        generate_release_notes: true
+        draft: false
+        prerelease: false
+
+  build-windows:
+    runs-on: windows-latest
+    needs: build-linux
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: '6.7.0'
+        host: windows
+        target: desktop
+        arch: win64_msvc2019_64
+
+    - name: Configure CMake
+      run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+
+    - name: Build
+      run: cmake --build build --config Release
+
+    - name: Bundle Qt runtime
+      shell: pwsh
+      run: |
+        New-Item -ItemType Directory -Force -Path dist | Out-Null
+        Copy-Item build/Release/LogView.exe dist/
+        windeployqt --release --no-translations --no-compiler-runtime dist/LogView.exe
+
+    - name: Package
+      shell: pwsh
+      run: Compress-Archive -Path dist/* -DestinationPath LogView-windows-x64.zip
+
+    - name: Upload to release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: LogView-windows-x64.zip
+        draft: false
+        prerelease: false

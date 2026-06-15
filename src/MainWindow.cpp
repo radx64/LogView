@@ -38,6 +38,11 @@
 #include "ProjectUiManager.hpp"
 #include "ThemeManager.hpp"
 #include "SettingsDialog.hpp"
+#include "Settings.hpp"
+#include "UpdateChecker.hpp"
+#include "UpdateDialog.hpp"
+
+#include <QTimer>
 
 void MainWindow::closeFileTab(const int index)
 {
@@ -85,8 +90,84 @@ MainWindow::MainWindow(QWidget* parent) :
     setupThemeMenu();
     pm_ = std::make_unique<ProjectUiManager>(ui);
     connect(pm_.get(), &ProjectUiManager::projectStateChanged, this, &MainWindow::project_changed);
+    setupUpdateChecker();
     newProject();
     updateUi();
+}
+
+void MainWindow::setupUpdateChecker()
+{
+    update_checker_ = std::make_unique<UpdateChecker>(this);
+    connect(update_checker_.get(), &UpdateChecker::updateAvailable,
+            this, &MainWindow::onUpdateAvailable);
+    connect(update_checker_.get(), &UpdateChecker::upToDate,
+            this, &MainWindow::onUpToDate);
+    connect(update_checker_.get(), &UpdateChecker::checkFailed,
+            this, &MainWindow::onUpdateCheckFailed);
+
+    if (Settings::instance().checkForUpdatesOnStartup())
+    {
+        // Defer slightly so the window is shown before any network work begins.
+        QTimer::singleShot(2000, this, [this]() { checkForUpdates(/*silent=*/true); });
+    }
+}
+
+void MainWindow::checkForUpdates(bool silent)
+{
+    manual_update_check_ = !silent;
+    if (!silent)
+        statusBar()->showMessage(tr("Checking for updates..."));
+    update_checker_->checkForUpdates();
+}
+
+void MainWindow::on_actionCheck_for_updates_triggered()
+{
+    checkForUpdates(/*silent=*/false);
+}
+
+void MainWindow::onUpdateAvailable(const QString& version,
+                                   const QString& url,
+                                   const QString& title,
+                                   const QString& notes)
+{
+    statusBar()->clearMessage();
+
+    // During an automatic check, respect a version the user chose to skip.
+    if (!manual_update_check_ &&
+        version == Settings::instance().skippedUpdateVersion())
+    {
+        return;
+    }
+
+    UpdateDialog dialog(QString(APP_VERSION), version, url, title, notes, this);
+    connect(&dialog, &UpdateDialog::skipVersionRequested, this,
+            [](const QString& skipped)
+            {
+                Settings::instance().setSkippedUpdateVersion(skipped);
+            });
+    dialog.exec();
+}
+
+void MainWindow::onUpToDate(const QString& currentVersion)
+{
+    statusBar()->clearMessage();
+    if (!manual_update_check_)
+        return;
+
+    QMessageBox::information(
+        this, tr("Check for updates"),
+        tr("You are running the latest version (%1).").arg(currentVersion));
+}
+
+void MainWindow::onUpdateCheckFailed(const QString& error)
+{
+    statusBar()->clearMessage();
+    if (!manual_update_check_)
+        return;
+
+    QMessageBox::warning(
+        this, tr("Check for updates"),
+        tr("Could not check for updates:\n%1").arg(error));
 }
 
 void MainWindow::dropEvent(QDropEvent* event)

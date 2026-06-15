@@ -17,6 +17,12 @@ public:
     QColor highlightLineColor() const { return highlight_line_color_; }
     void setHighlightLineColor(const QColor& color);
 
+    bool checkForUpdatesOnStartup() const { return check_updates_on_startup_; }
+    void setCheckForUpdatesOnStartup(bool enabled);
+
+    QString skippedUpdateVersion() const { return skipped_update_version_; }
+    void setSkippedUpdateVersion(const QString& version);
+
     void load();
     void save() const;
 
@@ -34,4 +40,6 @@ private:
 
     QFont editor_font_;
     QColor highlight_line_color_{};
+    bool check_updates_on_startup_{true};
+    QString skipped_update_version_{};
 };

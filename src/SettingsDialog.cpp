@@ -1,5 +1,6 @@
 #include "SettingsDialog.hpp"
 
+#include <QCheckBox>
 #include <QColorDialog>
 #include <QDialogButtonBox>
 #include <QFontComboBox>
@@ -36,6 +37,7 @@ SettingsDialog::SettingsDialog(QWidget* parent)
             });
 
     addSection(tr("Editor"), createEditorPage());
+    addSection(tr("Updates"), createUpdatesPage());
 
     QHBoxLayout* contentLayout = new QHBoxLayout();
     contentLayout->addWidget(section_tree_);
@@ -106,6 +108,26 @@ QWidget* SettingsDialog::createEditorPage()
     return page;
 }
 
+QWidget* SettingsDialog::createUpdatesPage()
+{
+    QWidget* page = new QWidget(this);
+    QFormLayout* form = new QFormLayout(page);
+
+    check_updates_checkbox_ = new QCheckBox(
+        tr("Check for updates on startup"), page);
+
+    QLabel* hint = new QLabel(
+        tr("LogView can check GitHub for new releases. You can also check\n"
+           "manually from Help \u2192 Check for updates..."),
+        page);
+    hint->setWordWrap(true);
+
+    form->addRow(check_updates_checkbox_);
+    form->addRow(hint);
+
+    return page;
+}
+
 void SettingsDialog::loadValues()
 {
     const QFont font = Settings::instance().editorFont();
@@ -114,6 +136,9 @@ void SettingsDialog::loadValues()
 
     highlight_color_ = Settings::instance().highlightLineColor();
     updateColorButton();
+
+    check_updates_checkbox_->setChecked(
+        Settings::instance().checkForUpdatesOnStartup());
 }
 
 void SettingsDialog::updateColorButton()
@@ -154,4 +179,6 @@ void SettingsDialog::applyChanges()
 
     Settings::instance().setEditorFont(font);
     Settings::instance().setHighlightLineColor(highlight_color_);
+    Settings::instance().setCheckForUpdatesOnStartup(
+        check_updates_checkbox_->isChecked());
 }
