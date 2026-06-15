@@ -90,6 +90,7 @@ object_script.*
 .idea/
 *.swp
 *~
+.cache/
 
 # OS files
 .DS_Store

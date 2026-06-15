@@ -33,6 +33,11 @@ void MarkingsModel::add_marking(const QString& text)
 
 void MarkingsModel::add_marking(const QString& text, const QString& color)
 {
+    add_marking(text, color, QString());
+}
+
+void MarkingsModel::add_marking(const QString& text, const QString& color, const QString& textColor)
+{
     if (text.isEmpty()) return;
 
     for (const auto& marking : markings_)
@@ -42,18 +47,20 @@ void MarkingsModel::add_marking(const QString& text, const QString& color)
 
     const int row = markings_.size();
     beginInsertRows(QModelIndex(), row, row);
-    markings_.append(Marking{text, color});
+    markings_.append(Marking{text, color, textColor});
     endInsertRows();
 
     emit changed();
 }
 
-void MarkingsModel::update_marking(uint32_t index, const QString& text, const QString& color)
+void MarkingsModel::update_marking(uint32_t index, const QString& text, const QString& color,
+                                   const QString& textColor)
 {
     if (static_cast<int>(index) >= markings_.size()) return;
 
     markings_[static_cast<int>(index)].text_ = text;
     markings_[static_cast<int>(index)].color_ = color;
+    markings_[static_cast<int>(index)].text_color_ = textColor;
 
     const QModelIndex changed_index = createIndex(static_cast<int>(index), 0);
     emit dataChanged(changed_index, changed_index, QVector<int>{Qt::DisplayRole, Qt::DecorationRole});

@@ -41,9 +41,7 @@ void GrepDialogWindow::on_regex_check_clicked()
     if (!ui->regex_check->isChecked())
     {
         ui->case_insensitive_check->setEnabled(true);
-        QPalette pallete = ui->pattern->palette();
-        pallete.setColor(QPalette::Base, Qt::white);
-        ui->pattern->setPalette(pallete);
+        ui->pattern->setPalette(QPalette());
     }
 }
 
@@ -53,8 +51,11 @@ void GrepDialogWindow::on_pattern_textEdited(const QString &arg1)
     {
         QPalette pallete = ui->pattern->palette();
         QRegularExpression expression(arg1);
-        if (expression.isValid()) pallete.setColor(QPalette::Base, QColor(Qt::green).lighter());
-        else pallete.setColor(QPalette::Base, QColor(Qt::red).lighter());
+        const QColor background = expression.isValid()
+                                      ? QColor(Qt::green).lighter()
+                                      : QColor(Qt::red).lighter();
+        pallete.setColor(QPalette::Base, background);
+        pallete.setColor(QPalette::Text, Qt::black);
         ui->pattern->setPalette(pallete);
     }
 }

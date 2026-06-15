@@ -162,10 +162,11 @@ void FileViewer::markingsItemDoubleClicked(const QModelIndex& idx)
     dialog.setWindowTitle(tr("Edit marking"));
     dialog.setText(marking.text_);
     dialog.setColor(marking.color_);
+    dialog.setTextColor(marking.text_color_);
     if (dialog.exec() != QDialog::Accepted) return;
 
     const auto result = dialog.getResult();
-    model->update_marking(row, result.text, result.color);
+    model->update_marking(row, result.text, result.color, result.text_color);
 }
 
 void FileViewer::showMarkingsContextMenu(const QPoint& pos)
@@ -195,9 +196,10 @@ void FileViewer::showMarkingsContextMenu(const QPoint& pos)
         dialog.setWindowTitle(tr("Edit marking"));
         dialog.setText(marking.text_);
         dialog.setColor(marking.color_);
+        dialog.setTextColor(marking.text_color_);
         if (dialog.exec() != QDialog::Accepted) return;
 
         const auto result = dialog.getResult();
-        model->update_marking(row, result.text, result.color);
+        model->update_marking(row, result.text, result.color, result.text_color);
     }
 }

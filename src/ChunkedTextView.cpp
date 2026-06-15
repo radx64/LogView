@@ -241,6 +241,10 @@ void ChunkedTextView::paintEvent(QPaintEvent* event)
                 painter.fillRect(0, y, viewport()->width(), line_height_, current_line_color);
             }
 
+            struct MarkedSegment { QRect rect; QColor textColor; };
+            QVector<MarkedSegment> marked_segments;
+            QRegion marked_region;
+
             if (markings_)
             {
                 for (const Marking& marking : markings_->markings())
@@ -248,6 +252,8 @@ void ChunkedTextView::paintEvent(QPaintEvent* event)
                     if (marking.text_.isEmpty()) continue;
                     QColor marking_color(marking.color_);
                     if (!marking_color.isValid()) continue;
+
+                    const QColor marking_text_color(marking.effectiveTextColor());
 
                     const int needle_len = static_cast<int>(marking.text_.length());
                     int from = 0;
@@ -257,7 +263,10 @@ void ChunkedTextView::paintEvent(QPaintEvent* event)
                         if (idx < 0) break;
                         const int sx = qRound(text_x0 + idx * char_width_f_);
                         const int ex = qRound(text_x0 + (idx + needle_len) * char_width_f_);
-                        painter.fillRect(sx, y, ex - sx, line_height_, marking_color);
+                        const QRect rect(sx, y, ex - sx, line_height_);
+                        painter.fillRect(rect, marking_color);
+                        marked_segments.append({rect, marking_text_color});
+                        marked_region += rect;
                         from = idx + needle_len;
                     }
                 }
@@ -274,8 +283,30 @@ void ChunkedTextView::paintEvent(QPaintEvent* event)
                 painter.fillRect(sx, y, ex - sx, line_height_, selection_color);
             }
 
-            painter.setPen(text_color);
-            painter.drawText(text_x0, y + ascent_, text);
+            if (marked_segments.isEmpty())
+            {
+                painter.setPen(text_color);
+                painter.drawText(text_x0, y + ascent_, text);
+            }
+            else
+            {
+                painter.save();
+                painter.setClipRegion(
+                    QRegion(0, y, viewport()->width(), line_height_) - marked_region,
+                    Qt::IntersectClip);
+                painter.setPen(text_color);
+                painter.drawText(text_x0, y + ascent_, text);
+                painter.restore();
+
+                for (const MarkedSegment& segment : marked_segments)
+                {
+                    painter.save();
+                    painter.setClipRect(segment.rect, Qt::IntersectClip);
+                    painter.setPen(segment.textColor);
+                    painter.drawText(text_x0, y + ascent_, text);
+                    painter.restore();
+                }
+            }
         }
         painter.restore();
 

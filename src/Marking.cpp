@@ -38,6 +38,20 @@ QString nextColor(const QString& hex)
     const int next = (current + 1) % kPaletteSize;
     return QString::fromLatin1(kPalette[next].hex);
 }
+
+QString contrastingTextColor(const QString& backgroundHex)
+{
+    QColor background(backgroundHex);
+    if (!background.isValid())
+        background = QColor(QString::fromLatin1(kDefaultColor));
+
+    const double luminance = 0.299 * background.redF()
+                           + 0.587 * background.greenF()
+                           + 0.114 * background.blueF();
+    return luminance > 0.55
+               ? QString::fromLatin1("#000000")
+               : QString::fromLatin1("#ffffff");
+}
 }  // namespace marking_colors
 
 QIcon marking_color_icon(const QString& hex, int size)
@@ -52,4 +66,16 @@ QIcon marking_color_icon(const QString& hex, int size)
 Marking::Marking(const QString& text, const QString& color)
     : text_(text), color_(color)
 {
+}
+
+Marking::Marking(const QString& text, const QString& color, const QString& textColor)
+    : text_(text), color_(color), text_color_(textColor)
+{
+}
+
+QString Marking::effectiveTextColor() const
+{
+    if (!text_color_.isEmpty() && QColor(text_color_).isValid())
+        return text_color_;
+    return marking_colors::contrastingTextColor(color_);
 }

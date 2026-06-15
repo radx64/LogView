@@ -1,7 +1,7 @@
 set(projectName "LogView")
 set(version \"0.0.4\")
 
-cmake_minimum_required(VERSION 3.9.0)
+cmake_minimum_required(VERSION 3.16)
 project (${projectName})
 add_definitions(-DAPP_VERSION=${version})
 

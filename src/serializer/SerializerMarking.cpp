@@ -11,6 +11,7 @@ void Marking::serialize(const ::Marking& marking, QJsonObject &json)
 {
     json["text"] = marking.text_;
     json["color"] = marking.color_;
+    json["text_color"] = marking.text_color_;
 }
 
 void Marking::deserialize(::Marking& marking, const QJsonObject &json)
@@ -19,6 +20,7 @@ void Marking::deserialize(::Marking& marking, const QJsonObject &json)
     marking.color_ = json["color"].toString();
     if (marking.color_.isEmpty())
         marking.color_ = QString::fromLatin1(marking_colors::kDefaultColor);
+    marking.text_color_ = json["text_color"].toString();
 }
 
 }  // namespace serializer

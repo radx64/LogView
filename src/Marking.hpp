@@ -35,6 +35,8 @@ QString randomColor();
 int paletteIndexOf(const QString& hex);
 
 QString nextColor(const QString& hex);
+
+QString contrastingTextColor(const QString& backgroundHex);
 }  // namespace marking_colors
 
 QIcon marking_color_icon(const QString& hex, int size = 16);
@@ -44,9 +46,13 @@ class Marking
 public:
     Marking() = default;
     Marking(const QString& text, const QString& color);
+    Marking(const QString& text, const QString& color, const QString& textColor);
+
+    QString effectiveTextColor() const;
 
     QString text_{};
     QString color_{};
+    QString text_color_{};
 
     friend class serializer::Marking;
 };
