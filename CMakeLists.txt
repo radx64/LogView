@@ -1,5 +1,5 @@
 set(projectName "LogView")
-set(version \"0.0.5\")
+set(version \"0.0.6\")
 
 cmake_minimum_required(VERSION 3.16)
 project (${projectName})
