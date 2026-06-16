@@ -8,6 +8,7 @@
 #include <QActionGroup>
 #include <QDebug>
 #include <QFileDialog>
+#include <QFileInfo>
 #include <QInputDialog>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -71,6 +72,8 @@ void MainWindow::connect_signals()
     QTabBar* bar = ui->fileView->tabBar();
     bar->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(bar, &QTabBar::customContextMenuRequested, this, &MainWindow::showFileTabContextMenu);
+
+    connect(ui->fileView, &QTabWidget::currentChanged, this, &MainWindow::refreshWindowTitle);
 }
 
 void MainWindow::newProject()
@@ -262,13 +265,14 @@ void MainWindow::bookmark_current_line()
 
 void MainWindow::on_actionLoad_from_file_triggered()
 {
-    QString file_path = QFileDialog::getOpenFileName(this,
-        tr("Open log file"), "",
+    QStringList file_paths = QFileDialog::getOpenFileNames(this,
+        tr("Open log files"), "",
         tr("All Files (*)"));
-    if (file_path.isEmpty())
+    if (file_paths.isEmpty())
         return;
 
-    load_log_file(file_path);
+    for (const QString& file_path : file_paths)
+        load_log_file(file_path);
 }
 
 void MainWindow::on_actionGrep_current_view_triggered()
@@ -341,14 +345,28 @@ void MainWindow::on_actionLoad_project_triggered()
 
 void MainWindow::setWindowTitle(const QString& title)
 {
-    QMainWindow::setWindowTitle("LogView " + QString(APP_VERSION) +"\t" + title);
+    QMainWindow::setWindowTitle(title);
 }
 
 void MainWindow::refreshWindowTitle()
 {
-    setWindowTitle(pm_->project_name().isEmpty()?"":"  -  " +
-                   pm_->project_name() +
-                   QString(pm_->has_changed()?" *":""));
+    QStringList parts;
+
+    if (!pm_->project_name().isEmpty())
+        parts << QFileInfo(pm_->project_name()).fileName() +
+                 QString(pm_->has_changed()?" *":"");
+
+    parts << "LogView " + QString(APP_VERSION);
+
+    const int tab_index = ui->fileView->currentIndex();
+    if (tab_index != -1)
+    {
+        FileViewer* viewer = dynamic_cast<FileViewer*>(ui->fileView->widget(tab_index));
+        if (viewer && viewer->logfile_)
+            parts << viewer->logfile_->getFileName();
+    }
+
+    setWindowTitle(parts.join(" - "));
 }
 
 void MainWindow::project_changed()

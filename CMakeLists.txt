@@ -80,3 +80,54 @@ add_definitions(${Qt6Widgets_DEFINITIONS} ${QtQml_DEFINITIONS} ${${Qt6Quick_DEFI
 
 add_executable(${projectName} ${FORMS} ${RESOURCES} ${RC_FILE} ${SOURCES})
 target_link_libraries(${projectName} PUBLIC Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Network)
+
+# ---------------------------------------------------------------------------
+# Static linking for release builds.
+#
+# Release executables should carry everything they need so they run on a clean
+# machine without hunting for runtime DLLs/shared objects. The C++/compiler
+# runtime (libgcc, libstdc++ and, on MinGW, winpthread) is always folded in.
+# Qt itself can only be linked statically when the located Qt is a static
+# build (e.g. an MXE *.static target or a custom static Qt); against a shared
+# Qt a full "-static" link would fail, so we detect this and fall back to just
+# a static runtime while Qt stays dynamic (and is bundled by the build script).
+# ---------------------------------------------------------------------------
+option(LOGVIEW_STATIC "Statically link release executables with their runtime/Qt" ON)
+
+if(LOGVIEW_STATIC)
+    get_target_property(_qt_core_type Qt6::Core TYPE)
+
+    if(_qt_core_type STREQUAL "STATIC_LIBRARY")
+        message(STATUS "LogView: static Qt detected -> fully static release executable")
+        if(MINGW)
+            # -static also pulls libgcc/libstdc++/winpthread in statically.
+            target_link_options(${projectName} PRIVATE
+                $<$<CONFIG:Release>:-static>)
+        elseif(MSVC)
+            # Fold the MSVC C runtime in (/MT). Only safe with a static Qt,
+            # which is itself built against the static CRT; mixing /MT with a
+            # shared (/MD) Qt would clash, so we never do this for shared Qt.
+            set_property(TARGET ${projectName} PROPERTY
+                MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+        elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+            target_link_options(${projectName} PRIVATE
+                $<$<CONFIG:Release>:-static-libgcc>
+                $<$<CONFIG:Release>:-static-libstdc++>)
+        endif()
+        # Pull Qt's default plugins (platform, styles, image formats) into the
+        # binary so it runs without an external plugins/ directory.
+        if(COMMAND qt_import_plugins)
+            qt_import_plugins(${projectName}
+                INCLUDE_BY_TYPE platforms
+                INCLUDE_BY_TYPE styles
+                INCLUDE_BY_TYPE imageformats)
+        endif()
+    else()
+        message(STATUS "LogView: shared Qt detected -> static C++ runtime only (Qt remains dynamic)")
+        if(MINGW OR CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+            target_link_options(${projectName} PRIVATE
+                $<$<CONFIG:Release>:-static-libgcc>
+                $<$<CONFIG:Release>:-static-libstdc++>)
+        endif()
+    endif()
+endif()

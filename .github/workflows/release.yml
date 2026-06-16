@@ -18,7 +18,8 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y cmake g++ make libgl1-mesa-dev
+        sudo apt-get install -y cmake g++ make libgl1-mesa-dev \
+          patchelf file desktop-file-utils libfuse2 wget
 
     - name: Install Qt
       uses: jurplel/install-qt-action@v4
@@ -28,21 +29,42 @@ jobs:
         target: desktop
         arch: linux_gcc_64
 
-    - name: Configure CMake
-      run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-
-    - name: Build
-      run: cmake --build build --config Release -j$(nproc)
-
-    - name: Package
+    - name: Install linuxdeploy (for AppImage)
       run: |
-        cd build
-        tar -czf LogView-linux-x64.tar.gz LogView
+        mkdir -p "$HOME/.local/bin"
+        base=https://github.com/linuxdeploy
+        wget -qO "$HOME/.local/bin/linuxdeploy" \
+          "$base/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage"
+        wget -qO "$HOME/.local/bin/linuxdeploy-plugin-qt" \
+          "$base/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage"
+        wget -qO "$HOME/.local/bin/appimagetool" \
+          "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
+        chmod +x "$HOME/.local/bin/linuxdeploy" \
+                 "$HOME/.local/bin/linuxdeploy-plugin-qt" \
+                 "$HOME/.local/bin/appimagetool"
+        echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+    - name: Build (shared Qt) and package AppImage
+      env:
+        # GitHub runners have no FUSE; run the AppImage tools by extraction.
+        APPIMAGE_EXTRACT_AND_RUN: '1'
+        APPIMAGE: '1'
+      run: ./scripts/build-linux.sh
+
+    - name: Package shared-Qt tarball
+      run: |
+        tar -C dist/linux -czf LogView-linux-x64.tar.gz LogView
+
+    - name: Rename AppImage
+      run: |
+        mv dist/linux/*.AppImage LogView-linux-x86_64.AppImage
 
     - name: Create release
       uses: softprops/action-gh-release@v2
       with:
-        files: build/LogView-linux-x64.tar.gz
+        files: |
+          LogView-linux-x64.tar.gz
+          LogView-linux-x86_64.AppImage
         generate_release_notes: true
         draft: false
         prerelease: false

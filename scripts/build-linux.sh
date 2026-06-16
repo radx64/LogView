@@ -56,11 +56,24 @@ ok "Linux binary -> ${OUT_DIR}/LogView"
 if [ "${APPIMAGE:-0}" = "1" ]; then
     if command -v linuxdeploy >/dev/null 2>&1; then
         log "Packaging AppImage with linuxdeploy"
+        DESKTOP_FILE="${PROJECT_ROOT}/packaging/LogView.desktop"
+        ICON_FILE="${PROJECT_ROOT}/img/Gnome-Logviewer-32.png"
+        [ -f "${DESKTOP_FILE}" ] || die "Missing desktop file: ${DESKTOP_FILE}"
+        [ -f "${ICON_FILE}" ]    || die "Missing icon file: ${ICON_FILE}"
+
+        # Let the Qt plugin find the same Qt we built against.
+        export QMAKE="${QMAKE:-$(command -v qmake6 || command -v qmake || true)}"
+
+        # linuxdeploy needs a desktop entry + icon to build an AppImage; the icon
+        # is deployed as LogView.png so it matches the desktop's Icon=LogView.
+        rm -f "${OUT_DIR}"/*.AppImage
         ( cd "${OUT_DIR}" && \
           linuxdeploy --appdir AppDir -e LogView \
+              -d "${DESKTOP_FILE}" \
+              -i "${ICON_FILE}" --icon-filename LogView \
               --plugin qt --output appimage ) \
           && ok "AppImage created in ${OUT_DIR}" \
-          || warn "AppImage packaging failed"
+          || die "AppImage packaging failed"
     else
         warn "APPIMAGE=1 set but 'linuxdeploy' not found; skipping packaging."
     fi

@@ -13,6 +13,15 @@
 #           because the Windows package ships Windows .exe tools. On Debian/Ubuntu
 #           the system Qt6 (qt6-base-dev) is auto-detected as QT_HOST_PATH.
 #
+#       Linkage: by default the build prefers a *static* Qt when one is available
+#       (e.g. MXE's x86_64-w64-mingw32.static target), producing a single
+#       self-contained LogView.exe with no DLLs. With a shared Qt it folds the
+#       C++ runtime in and bundles the Qt DLLs/plugins. Force a choice with
+#       QT_LINKAGE=static|shared (default: auto).
+#
+#       Fully static example (MXE):
+#         MXE_ROOT=/opt/mxe ./scripts/build-windows.sh
+#
 #       Getting the MinGW Qt6 (must match your host Qt6 version), e.g. 6.9.2:
 #         pip install aqtinstall
 #         aqt install-qt linux desktop 6.9.2 win64_mingw -O ~/Qt
@@ -25,6 +34,7 @@
 # Optional environment variables:
 #   BUILD_TYPE            CMake build type (default: Release)
 #   JOBS                  Parallel build jobs (default: auto)
+#   QT_LINKAGE            Qt linkage preference: auto (default) | static | shared
 #   QT_ROOT               Path to the (target) MinGW Qt6 install
 #   QT_HOST_PATH          Host Qt6 prefix for moc/rcc/uic (auto on Debian/Ubuntu)
 #   QT_HOST_PATH_CMAKE_DIR  Host Qt6 cmake dir (auto on Debian/Ubuntu multiarch)
@@ -90,25 +100,67 @@ _collect_dlls() {
 
 # ---------------------------------------------------------------------------
 build_cross() {
-    local cxx="${TOOLCHAIN_PREFIX}-g++${MINGW_THREAD_SUFFIX}"
     log "Cross-compiling LogView for Windows with MinGW-w64 (${BUILD_TYPE}, ${JOBS} jobs)"
-    require_cmd "${cxx}" "Install mingw-w64 (e.g. 'sudo apt install mingw-w64')."
 
-    # Resolve the MinGW (target) Qt6 prefix.
+    # Preferred Qt linkage: auto (prefer static), static, or shared.
+    local qt_linkage="${QT_LINKAGE:-auto}"
+
+    # Resolve the MinGW (target) Qt6 prefix. MXE ships separate static/shared
+    # trees (and a matching compiler per tree), so pick one based on QT_LINKAGE.
     local qt_prefix=""
+    local toolchain_prefix="${TOOLCHAIN_PREFIX}"
+    local thread_suffix="${MINGW_THREAD_SUFFIX}"
+    local mxe_sysroot=""
     if [ -n "${QT_ROOT:-}" ]; then
         qt_prefix="${QT_ROOT}"
     elif [ -n "${MXE_ROOT:-}" ]; then
-        qt_prefix="${MXE_ROOT}/usr/${TOOLCHAIN_PREFIX}.shared/qt6"
-        [ -d "${qt_prefix}" ] || qt_prefix="${MXE_ROOT}/usr/${TOOLCHAIN_PREFIX}.static/qt6"
         export PATH="${MXE_ROOT}/usr/bin:${PATH}"
+        local mxe_static="${MXE_ROOT}/usr/${TOOLCHAIN_PREFIX}.static/qt6"
+        local mxe_shared="${MXE_ROOT}/usr/${TOOLCHAIN_PREFIX}.shared/qt6"
+        case "${qt_linkage}" in
+            shared) qt_prefix="${mxe_shared}" ;;
+            static) qt_prefix="${mxe_static}" ;;
+            *)      # auto: prefer static, fall back to shared
+                    if [ -d "${mxe_static}" ]; then qt_prefix="${mxe_static}"
+                    else qt_prefix="${mxe_shared}"; fi ;;
+        esac
+        # MXE provides its own compiler per linkage (suffixed .static/.shared)
+        # and does not use the Debian "-posix" thread variant.
+        if [ "${qt_prefix}" = "${mxe_static}" ]; then
+            toolchain_prefix="${TOOLCHAIN_PREFIX}.static"
+        else
+            toolchain_prefix="${TOOLCHAIN_PREFIX}.shared"
+        fi
+        thread_suffix=""
+        mxe_sysroot="${MXE_ROOT}/usr/${toolchain_prefix}"
     else
         # Fall back to a default aqtinstall layout: ~/Qt/<ver>/mingw_64
         qt_prefix="$(ls -d "${HOME}"/Qt/*/mingw_64 2>/dev/null | sort -V | tail -n1 || true)"
     fi
     [ -n "${qt_prefix}" ] || die "Set QT_ROOT to a MinGW build of Qt6 (see header comment)."
     [ -d "${qt_prefix}" ] || die "Qt6 prefix not found: ${qt_prefix}"
-    log "Target Qt6 (MinGW): ${qt_prefix}"
+
+    # Detect static vs shared Qt from what is actually on disk: a static Qt has
+    # libQt6Core.a and no Qt6Core.dll. An explicit QT_LINKAGE wins.
+    local qt_is_static=0
+    if [ -f "${qt_prefix}/lib/libQt6Core.a" ] && \
+       ! ls "${qt_prefix}"/bin/Qt6Core.dll >/dev/null 2>&1; then
+        qt_is_static=1
+    fi
+    case "${qt_linkage}" in
+        static) qt_is_static=1 ;;
+        shared) qt_is_static=0 ;;
+    esac
+
+    local cxx="${toolchain_prefix}-g++${thread_suffix}"
+    require_cmd "${cxx}" "Install mingw-w64 (e.g. 'sudo apt install mingw-w64') or set MXE_ROOT/QT_ROOT."
+    OBJDUMP="${toolchain_prefix}-objdump"
+
+    if [ "${qt_is_static}" = "1" ]; then
+        log "Target Qt6 (MinGW, static): ${qt_prefix}"
+    else
+        log "Target Qt6 (MinGW, shared): ${qt_prefix}"
+    fi
 
     # The Windows Qt ships Windows .exe tools (moc/rcc/uic) that can't run on a
     # Linux host, so point Qt at a matching host Qt for codegen via QT_HOST_PATH.
@@ -132,13 +184,19 @@ build_cross() {
         fi
     fi
 
+    # Static Qt pulls in many transitive deps (png, harfbuzz, zlib, ...) that
+    # live in the MXE sysroot, so make CMake search there too.
+    local find_root="${qt_prefix}"
+    [ -n "${mxe_sysroot}" ] && find_root="${mxe_sysroot};${qt_prefix}"
+
     cmake -S "${PROJECT_ROOT}" -B "${BUILD_DIR}" \
         -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" \
         -DCMAKE_TOOLCHAIN_FILE="${SCRIPT_DIR}/toolchain-mingw-w64.cmake" \
-        -DTOOLCHAIN_PREFIX="${TOOLCHAIN_PREFIX}" \
-        -DMINGW_THREAD_SUFFIX="${MINGW_THREAD_SUFFIX}" \
-        -DCMAKE_FIND_ROOT_PATH="${qt_prefix}" \
+        -DTOOLCHAIN_PREFIX="${toolchain_prefix}" \
+        -DMINGW_THREAD_SUFFIX="${thread_suffix}" \
+        -DCMAKE_FIND_ROOT_PATH="${find_root}" \
         -DCMAKE_PREFIX_PATH="${qt_prefix}" \
+        -DLOGVIEW_STATIC=ON \
         "${host_args[@]}"
 
     cmake --build "${BUILD_DIR}" -j "${JOBS}"
@@ -147,16 +205,24 @@ build_cross() {
     [ -f "${bin}" ] || die "Build finished but LogView.exe not found at ${bin}"
     cp "${bin}" "${OUT_DIR}/"
 
-    # Bundle Qt + runtime DLLs so the .exe is portable. windeployqt is a Windows
-    # binary and can't run on a Linux host, so collect dependencies manually.
+    # A static Qt build bakes Qt, its plugins and the runtime into the .exe, so
+    # there is nothing to bundle - ship the single self-contained executable.
+    if [ "${qt_is_static}" = "1" ]; then
+        ok "Static Windows binary -> ${OUT_DIR}/LogView.exe (self-contained, no DLLs)"
+        return
+    fi
+
+    # Shared Qt: the compiler runtime is folded in by LOGVIEW_STATIC, but Qt and
+    # its plugins still ship as DLLs. windeployqt is a Windows binary and can't
+    # run on a Linux host, so collect dependencies manually.
     log "Collecting dependent DLLs"
     local gcc_libdir
-    gcc_libdir="$(ls -d /usr/lib/gcc/${TOOLCHAIN_PREFIX}/*${MINGW_THREAD_SUFFIX} 2>/dev/null | sort -V | tail -n1 || true)"
+    gcc_libdir="$(ls -d /usr/lib/gcc/${toolchain_prefix}/*${thread_suffix} 2>/dev/null | sort -V | tail -n1 || true)"
     WIN_DLL_PATHS=(
         "${qt_prefix}/bin"
         "${gcc_libdir}"
-        "/usr/${TOOLCHAIN_PREFIX}/lib"
-        "/usr/${TOOLCHAIN_PREFIX}/bin"
+        "/usr/${toolchain_prefix}/lib"
+        "/usr/${toolchain_prefix}/bin"
     )
     _collect_dlls "${OUT_DIR}/LogView.exe"
 
