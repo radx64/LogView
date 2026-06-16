@@ -8,9 +8,9 @@
 #include "../GrepNode.hpp"
 #include "../Logfile.hpp"
 
-#include "../LogViewer.hpp"
-#include "../FileViewer.hpp"
-#include "ui_MainWindow.h"
+#include "LogViewer.hpp"
+#include "FileViewer.hpp"
+#include "UiMainWindow.hpp"
 
 #include <QtDebug>
 

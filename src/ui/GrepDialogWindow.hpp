@@ -1,10 +1,11 @@
 #pragma once
 
 #include <QDialog>
+#include <QString>
 
-namespace Ui {
-class GrepDialogWindow;
-}
+class QLineEdit;
+class QPushButton;
+class QCheckBox;
 
 class GrepDialogWindow : public QDialog
 {
@@ -30,7 +31,11 @@ private slots:
     void on_pattern_textEdited(const QString &arg1);
 
 private:
-    Ui::GrepDialogWindow *ui;
+    QLineEdit* pattern_{nullptr};
+    QPushButton* button_{nullptr};
+    QCheckBox* regex_check_{nullptr};
+    QCheckBox* case_sensitive_check_{nullptr};
+    QCheckBox* inverted_check_{nullptr};
 
     static bool last_regex_;
     static bool last_case_sensitive_;

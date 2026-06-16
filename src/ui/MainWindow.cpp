@@ -1,11 +1,12 @@
 #include "MainWindow.hpp"
-#include "ui_MainWindow.h"
+#include "UiMainWindow.hpp"
 
 #include <memory>
 
 // TODO: cleanup this includes after some mockups creation and proper class segregation
 #include <QAction>
 #include <QActionGroup>
+#include <QApplication>
 #include <QDebug>
 #include <QFileDialog>
 #include <QFileInfo>

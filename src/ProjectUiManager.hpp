@@ -11,7 +11,7 @@
 #include "ProjectModel.hpp"
 #include "loader/LoaderLogFile.hpp"
 #include "loader/Project.hpp"
-#include "ui_MainWindow.h"
+#include "UiMainWindow.hpp"
 #include "Logfile.hpp"
 #include "serializer/SerializerProjectModel.hpp"
 
