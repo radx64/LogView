@@ -43,7 +43,7 @@ std::shared_ptr<FilteredLineSource> FilteredLineSource::create(
     else
     {
         const Qt::CaseSensitivity sensitivity =
-            grep->isCaseInsensitive() ? Qt::CaseInsensitive : Qt::CaseSensitive;
+            grep->isCaseSensitive() ? Qt::CaseSensitive : Qt::CaseInsensitive;
         for (qint64 i = 0; i < total; ++i)
         {
             const Line line = parent->at(i);

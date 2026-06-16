@@ -54,9 +54,9 @@
       </widget>
      </item>
      <item row="2" column="0">
-      <widget class="QCheckBox" name="case_insensitive_check">
+      <widget class="QCheckBox" name="case_sensitive_check">
        <property name="text">
-        <string>Case Insensitive</string>
+        <string>Case Sensitive</string>
        </property>
       </widget>
      </item>
@@ -77,7 +77,7 @@
  <tabstops>
   <tabstop>pattern</tabstop>
   <tabstop>regex_check</tabstop>
-  <tabstop>case_insensitive_check</tabstop>
+  <tabstop>case_sensitive_check</tabstop>
   <tabstop>button</tabstop>
  </tabstops>
  <resources/>

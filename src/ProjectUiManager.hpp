@@ -29,7 +29,7 @@ public:
     bool has_changed();
     const QString& project_name();
     void save_project();
-    void open_project();
+    QString open_project(const QString& file_path = QString());
 
 signals:
     void projectStateChanged();
