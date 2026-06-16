@@ -2,6 +2,7 @@
 
 #include <QCoreApplication>
 #include <QDir>
+#include <QFileInfo>
 #include <QFontDatabase>
 #include <QSettings>
 
@@ -14,6 +15,26 @@ constexpr auto kHighlightLineColorKey = "HighlightLineColor";
 constexpr auto kUpdatesGroup = "Updates";
 constexpr auto kCheckOnStartupKey = "CheckOnStartup";
 constexpr auto kSkippedVersionKey = "SkippedVersion";
+constexpr auto kRecentGroup = "Recent";
+constexpr auto kRecentFilesKey = "Files";
+constexpr auto kRecentProjectsKey = "Projects";
+
+QString normalizePath(const QString& path)
+{
+    const QString absolute = QFileInfo(path).absoluteFilePath();
+    return absolute.isEmpty() ? path : absolute;
+}
+
+void prependRecent(QStringList& list, const QString& path)
+{
+    const QString normalized = normalizePath(path);
+    if (normalized.isEmpty())
+        return;
+    list.removeAll(normalized);
+    list.prepend(normalized);
+    while (list.size() > Settings::kMaxRecent)
+        list.removeLast();
+}
 } // namespace
 
 Settings::Settings(QObject* parent)
@@ -78,6 +99,38 @@ void Settings::setSkippedUpdateVersion(const QString& version)
     emit changed();
 }
 
+void Settings::addRecentFile(const QString& path)
+{
+    prependRecent(recent_files_, path);
+    save();
+    emit changed();
+}
+
+void Settings::addRecentProject(const QString& path)
+{
+    prependRecent(recent_projects_, path);
+    save();
+    emit changed();
+}
+
+void Settings::removeRecentFile(const QString& path)
+{
+    if (recent_files_.removeAll(normalizePath(path)) > 0)
+    {
+        save();
+        emit changed();
+    }
+}
+
+void Settings::removeRecentProject(const QString& path)
+{
+    if (recent_projects_.removeAll(normalizePath(path)) > 0)
+    {
+        save();
+        emit changed();
+    }
+}
+
 void Settings::load()
 {
     QSettings settings(filePath(), QSettings::IniFormat);
@@ -106,6 +159,16 @@ void Settings::load()
     skipped_update_version_ =
         settings.value(kSkippedVersionKey).toString();
     settings.endGroup();
+
+    settings.beginGroup(kRecentGroup);
+    recent_files_ = settings.value(kRecentFilesKey).toStringList();
+    recent_projects_ = settings.value(kRecentProjectsKey).toStringList();
+    settings.endGroup();
+
+    while (recent_files_.size() > kMaxRecent)
+        recent_files_.removeLast();
+    while (recent_projects_.size() > kMaxRecent)
+        recent_projects_.removeLast();
 }
 
 void Settings::save() const
@@ -125,5 +188,10 @@ void Settings::save() const
     settings.beginGroup(kUpdatesGroup);
     settings.setValue(kCheckOnStartupKey, check_updates_on_startup_);
     settings.setValue(kSkippedVersionKey, skipped_update_version_);
+    settings.endGroup();
+
+    settings.beginGroup(kRecentGroup);
+    settings.setValue(kRecentFilesKey, recent_files_);
+    settings.setValue(kRecentProjectsKey, recent_projects_);
     settings.endGroup();
 }

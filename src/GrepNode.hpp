@@ -15,7 +15,7 @@ public:
     GrepNode(
         const std::string& value,
         const bool& is_regex = false,
-        const bool& is_case_insensitive = false,
+        const bool& is_case_sensitive = false,
         const bool& is_inverted = false);
 
     GrepNode() = default;
@@ -26,7 +26,7 @@ public:
 
     bool isRegEx() const;
 
-    bool isCaseInsensitive() const;
+    bool isCaseSensitive() const;
 
     bool isInverted() const;
 
@@ -40,7 +40,7 @@ protected:
     std::vector<GrepNode*> children_{};
     std::string pattern_{};
     bool is_regex_{};
-    bool is_case_insensitive_{};
+    bool is_case_sensitive_{};
     bool is_inverted_{};
 
     friend class serializer::GrepNode;

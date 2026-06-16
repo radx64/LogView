@@ -33,7 +33,7 @@ QString generateTabName(const GrepNode* grep, const QString base_name)
 {
     QString tabName = base_name + " (";
     tabName += grep->isRegEx() ? "R" : "r";
-    tabName += grep->isCaseInsensitive() ? "C" : "c";
+    tabName += grep->isCaseSensitive() ? "C" : "c";
     tabName += grep->isInverted() ? "I" : "i";
     tabName += ")";
     return tabName;

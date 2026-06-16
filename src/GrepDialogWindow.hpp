@@ -18,7 +18,7 @@ public:
     {
         QString pattern{};
         bool is_regex{};
-        bool is_case_insensitive{};
+        bool is_case_sensitive{};
         bool is_inverted{};
     };
 
@@ -31,4 +31,8 @@ private slots:
 
 private:
     Ui::GrepDialogWindow *ui;
+
+    static bool last_regex_;
+    static bool last_case_sensitive_;
+    static bool last_inverted_;
 };

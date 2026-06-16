@@ -91,6 +91,7 @@ MainWindow::MainWindow(QWidget* parent) :
     statusBar()->showMessage(tr("Use load from file menu or drop files in this window to begin."));
     connect_signals();
     setupThemeMenu();
+    setupRecentMenus();
     pm_ = std::make_unique<ProjectUiManager>(ui);
     connect(pm_.get(), &ProjectUiManager::projectStateChanged, this, &MainWindow::project_changed);
     setupUpdateChecker();
@@ -204,6 +205,7 @@ MainWindow::~MainWindow()
 void MainWindow::load_log_file(QString file_path)
 {
    pm_->load_log_file(file_path);
+   Settings::instance().addRecentFile(file_path);
 }
 
 FileViewer* MainWindow::get_active_viewer_widget()
@@ -231,7 +233,7 @@ void MainWindow::grepCurrentView()
     {
         GrepNode* new_grep_node = new GrepNode(result.pattern.toStdString(),
                                                result.is_regex,
-                                               result.is_case_insensitive,
+                                               result.is_case_sensitive,
                                                result.is_inverted);
 
         deepest_tab->grep(new_grep_node);
@@ -434,6 +436,107 @@ void MainWindow::openSettings()
     dialog.exec();
 }
 
+void MainWindow::setupRecentMenus()
+{
+    recent_files_menu_ = new QMenu(tr("Recent files"), this);
+    recent_projects_menu_ = new QMenu(tr("Recent projects"), this);
+    recent_files_menu_->setToolTipsVisible(true);
+    recent_projects_menu_->setToolTipsVisible(true);
+
+    const auto actionAfter = [this](QAction* anchor) -> QAction*
+    {
+        const QList<QAction*> acts = ui->menuTest->actions();
+        const int idx = acts.indexOf(anchor);
+        if (idx < 0 || idx + 1 >= acts.size())
+            return nullptr;
+        return acts.at(idx + 1);
+    };
+
+    ui->menuTest->insertMenu(actionAfter(ui->actionLoad_from_file), recent_files_menu_);
+    ui->menuTest->insertMenu(actionAfter(ui->actionSave_project_as), recent_projects_menu_);
+
+    connect(&Settings::instance(), &Settings::changed,
+            this, &MainWindow::updateRecentMenus);
+
+    updateRecentMenus();
+}
+
+void MainWindow::updateRecentMenus()
+{
+    if (!recent_files_menu_ || !recent_projects_menu_)
+        return;
+
+    const auto populate = [this](QMenu* menu, const QStringList& items, bool isProject)
+    {
+        menu->clear();
+        if (items.isEmpty())
+        {
+            QAction* empty = menu->addAction(tr("(empty)"));
+            empty->setEnabled(false);
+            return;
+        }
+
+        int index = 1;
+        for (const QString& path : items)
+        {
+            QAction* action =
+                menu->addAction(QStringLiteral("&%1  %2").arg(index % 10).arg(path));
+            action->setToolTip(path);
+            if (isProject)
+                connect(action, &QAction::triggered, this,
+                        [this, path]() { openRecentProject(path); });
+            else
+                connect(action, &QAction::triggered, this,
+                        [this, path]() { openRecentFile(path); });
+            ++index;
+        }
+    };
+
+    populate(recent_files_menu_, Settings::instance().recentFiles(), false);
+    populate(recent_projects_menu_, Settings::instance().recentProjects(), true);
+}
+
+void MainWindow::openRecentFile(const QString& file_path)
+{
+    if (!QFileInfo::exists(file_path))
+    {
+        QMessageBox::warning(this, tr("Open recent file"),
+            tr("File no longer exists:\n%1").arg(file_path));
+        Settings::instance().removeRecentFile(file_path);
+        return;
+    }
+    load_log_file(file_path);
+}
+
+void MainWindow::openRecentProject(const QString& file_path)
+{
+    if (!QFileInfo::exists(file_path))
+    {
+        QMessageBox::warning(this, tr("Open recent project"),
+            tr("Project no longer exists:\n%1").arg(file_path));
+        Settings::instance().removeRecentProject(file_path);
+        return;
+    }
+
+    if (pm_->has_changed())
+    {
+        QMessageBox msgBox(this);
+        msgBox.setText("The document has been modified.");
+        msgBox.setInformativeText("Do you want to save changes you made in current project? All changes will be lost if you don't save them.");
+        msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+        msgBox.setDefaultButton(QMessageBox::Save);
+        int ret = msgBox.exec();
+
+        if (ret == QMessageBox::Cancel) return;
+        if (ret == QMessageBox::Save) saveProject();
+    }
+
+    const QString opened = pm_->open_project(file_path);
+    if (!opened.isEmpty())
+        Settings::instance().addRecentProject(opened);
+    updateUi();
+}
+
 void MainWindow::updateThemeMenu()
 {
     if (!theme_action_group_) return;
@@ -454,6 +557,7 @@ void MainWindow::saveProject()
 }
 void MainWindow::openProject()
 {
-    pm_->open_project();
-
+    const QString opened = pm_->open_project();
+    if (!opened.isEmpty())
+        Settings::instance().addRecentProject(opened);
 }

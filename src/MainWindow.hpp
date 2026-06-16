@@ -13,6 +13,7 @@
 class Logfile;
 class QTextEdit;
 class QTabWidget;
+class QMenu;
 class FileViewer;
 class ThemeManager;
 class QActionGroup;
@@ -72,10 +73,17 @@ private:
     void updateThemeMenu();
     void openSettings();
 
+    void setupRecentMenus();
+    void updateRecentMenus();
+    void openRecentFile(const QString& file_path);
+    void openRecentProject(const QString& file_path);
+
     std::unique_ptr<ProjectUiManager> pm_{};
     std::unique_ptr<ThemeManager> theme_manager_{};
     std::unique_ptr<UpdateChecker> update_checker_{};
     QActionGroup* theme_action_group_{nullptr};
+    QMenu* recent_files_menu_{nullptr};
+    QMenu* recent_projects_menu_{nullptr};
     bool manual_update_check_{false};
     Ui::MainWindow *ui{nullptr};
 };

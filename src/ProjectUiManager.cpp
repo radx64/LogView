@@ -123,24 +123,29 @@ void ProjectUiManager::save_project()
     pm_->markClean();
 }
 
-void ProjectUiManager::open_project()
+QString ProjectUiManager::open_project(const QString& file_path)
 {
-    QString file_path = QFileDialog::getOpenFileName(ui_->fileView->window(),
-                                                     tr("Open project"), "",
-                                                     tr("Project file (*.json)"));
-    if (file_path.isEmpty())
-        return;
+    QString path = file_path;
+    if (path.isEmpty())
+    {
+        path = QFileDialog::getOpenFileName(ui_->fileView->window(),
+                                            tr("Open project"), "",
+                                            tr("Project file (*.json)"));
+    }
+    if (path.isEmpty())
+        return QString();
+
+    QFile loadFile(path);
+    if (!loadFile.open(QIODevice::ReadOnly)) {
+        qWarning("Couldn't open save file!");
+        return QString();
+    }
 
     clearViews();
 
     pm_ = std::make_unique<ProjectModel>();
     adoptProjectModel();
 
-    QFile loadFile(file_path);
-    if (!loadFile.open(QIODevice::ReadOnly)) {
-        qWarning("Couldn't open save file!");
-        return;
-    }
     QJsonDocument document = QJsonDocument::fromJson(loadFile.readAll());
     QJsonObject object = document.object();
 
@@ -153,6 +158,7 @@ void ProjectUiManager::open_project()
             connect_logviewer_signal(fileviewer);
         });
     pm_->markClean();
+    return path;
 }
 
 void ProjectUiManager::connect_logviewer_signal(FileViewer* fileviewer)

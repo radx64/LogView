@@ -25,6 +25,7 @@ void Logfile::load(Ui::MainWindow *ui, ::Logfile* lf, std::function<void(FileVie
 
     int tab_index = file_viewer_widget ->addTab(viewer, lf->getFileName().split(QRegularExpression("[\\/]")).last());
     file_viewer_widget ->setTabToolTip(tab_index, lf->getFileName());
+    file_viewer_widget ->setCurrentIndex(tab_index);
     spawnViews(viewer->getDeepestActiveTab(), lf->grep_hierarchy_.get());
 }
 

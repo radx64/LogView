@@ -12,7 +12,7 @@ void GrepNode::serialize(const ::GrepNode &gp, QJsonObject &json)
 {
     json["pattern"] = QString::fromStdString(gp.pattern_);
     json["is_regex"] = gp.is_regex_;
-    json["is_case_insensitive"] = gp.is_case_insensitive_;
+    json["is_case_sensitive"] = gp.is_case_sensitive_;
     json["is_inverted"] = gp.is_inverted_;
 
     QJsonArray array;
@@ -29,7 +29,7 @@ void GrepNode::deserialize(::GrepNode &gp, const QJsonObject &json)
 {
     gp.pattern_ = json["pattern"].toString().toStdString();
     gp.is_regex_ = json["is_regex"].toBool();
-    gp.is_case_insensitive_= json["is_case_insensitive"].toBool();
+    gp.is_case_sensitive_ = json["is_case_sensitive"].toBool();
     gp.is_inverted_= json["is_inverted"].toBool();
 
     QJsonArray children = json["childern"].toArray();

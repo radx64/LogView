@@ -4,6 +4,7 @@
 #include <QFont>
 #include <QObject>
 #include <QString>
+#include <QStringList>
 
 class Settings : public QObject
 {
@@ -22,6 +23,16 @@ public:
 
     QString skippedUpdateVersion() const { return skipped_update_version_; }
     void setSkippedUpdateVersion(const QString& version);
+
+    static constexpr int kMaxRecent = 10;
+
+    QStringList recentFiles() const { return recent_files_; }
+    QStringList recentProjects() const { return recent_projects_; }
+
+    void addRecentFile(const QString& path);
+    void addRecentProject(const QString& path);
+    void removeRecentFile(const QString& path);
+    void removeRecentProject(const QString& path);
 
     void load();
     void save() const;
@@ -42,4 +53,6 @@ private:
     QColor highlight_line_color_{};
     bool check_updates_on_startup_{true};
     QString skipped_update_version_{};
+    QStringList recent_files_{};
+    QStringList recent_projects_{};
 };

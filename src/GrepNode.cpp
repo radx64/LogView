@@ -11,11 +11,11 @@
 GrepNode::GrepNode(
     const std::string& value,
     const bool& is_regex,
-    const bool& is_case_insensitive,
+    const bool& is_case_sensitive,
     const bool& is_inverted)
 : pattern_{value},
     is_regex_{is_regex},
-    is_case_insensitive_{is_case_insensitive},
+    is_case_sensitive_{is_case_sensitive},
     is_inverted_{is_inverted}
 {}
 
@@ -39,9 +39,9 @@ bool GrepNode::isRegEx() const
     return is_regex_;
 }
 
-bool GrepNode::isCaseInsensitive() const
+bool GrepNode::isCaseSensitive() const
 {
-    return is_case_insensitive_;
+    return is_case_sensitive_;
 }
 
 bool GrepNode::isInverted() const
