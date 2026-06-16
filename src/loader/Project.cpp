@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "ui_MainWindow.h"
+#include "UiMainWindow.hpp"
 
 #include "../ProjectModel.hpp"
 

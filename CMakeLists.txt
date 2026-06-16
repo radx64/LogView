@@ -8,8 +8,6 @@ add_definitions(-DGITHUB_REPO=\"radx64/LogView\")
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
-set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTOUIC_SEARCH_PATHS . src src/ui)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
@@ -21,29 +19,30 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(SOURCES
-    src/AboutDialog.cpp
+    src/ui/AboutDialog.cpp
     src/UpdateChecker.cpp
-    src/UpdateDialog.cpp
+    src/ui/UpdateDialog.cpp
     src/Bookmark.cpp
     src/BookmarksModel.cpp
-    src/BookmarkDialogWindow.cpp
+    src/ui/BookmarkDialogWindow.cpp
     src/Marking.cpp
     src/MarkingsModel.cpp
-    src/MarkingDialogWindow.cpp
-    src/ChunkedTextView.cpp
-    src/GrepDialogWindow.cpp
+    src/ui/MarkingDialogWindow.cpp
+    src/ui/ChunkedTextView.cpp
+    src/ui/GrepDialogWindow.cpp
     src/GrepNode.cpp
     src/LineSource.cpp
     src/FileLineSource.cpp
     src/FilteredLineSource.cpp
-    src/LogViewer.cpp
-    src/MainWindow.cpp
+    src/ui/LogViewer.cpp
+    src/ui/MainWindow.cpp
+    src/ui/UiMainWindow.cpp
     src/Logfile.cpp
     src/ProjectUiManager.cpp
-    src/FileViewer.cpp
-    src/ThemeManager.cpp
+    src/ui/FileViewer.cpp
+    src/ui/ThemeManager.cpp
     src/Settings.cpp
-    src/SettingsDialog.cpp
+    src/ui/SettingsDialog.cpp
     src/main.cpp
     src/ProjectModel.cpp
     src/loader/Project.cpp
@@ -57,17 +56,11 @@ set(SOURCES
     src/serializer/SerializerProjectModel.cpp
 )
 
-set(FORMS
-    src/ui/BookmarkDialogWindow.ui
-    src/ui/GrepDialogWindow.ui
-    src/ui/MainWindow.ui
-)
-
 set(RESOURCES icons.qrc)
 
 set(RC_FILE src/ui/app.rc)
 
-include_directories(. src)
+include_directories(. src src/ui)
 
 if(WIN32)
   set(CMAKE_WIN32_EXECUTABLE ON)
@@ -78,7 +71,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt6Widgets_EXECUTABLE_COMPILE_FLAGS}")
 include_directories(${Qt6Widgets_INCLUDE_DIRS} ${QtQml_INCLUDE_DIRS})
 add_definitions(${Qt6Widgets_DEFINITIONS} ${QtQml_DEFINITIONS} ${${Qt6Quick_DEFINITIONS}})
 
-add_executable(${projectName} ${FORMS} ${RESOURCES} ${RC_FILE} ${SOURCES})
+add_executable(${projectName} ${RESOURCES} ${RC_FILE} ${SOURCES})
 target_link_libraries(${projectName} PUBLIC Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Network)
 
 # ---------------------------------------------------------------------------

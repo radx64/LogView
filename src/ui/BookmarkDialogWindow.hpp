@@ -3,9 +3,9 @@
 #include <QDialog>
 #include <QString>
 
-namespace Ui {
-class BookmarkDialogWindow;
-}
+class QLineEdit;
+class QComboBox;
+class QPushButton;
 
 class BookmarkDialogWindow : public QDialog
 {
@@ -32,5 +32,7 @@ private slots:
 private:
     void populateIcons();
 
-    Ui::BookmarkDialogWindow *ui;
+    QLineEdit* name_{nullptr};
+    QComboBox* icon_combo_{nullptr};
+    QPushButton* button_{nullptr};
 };
