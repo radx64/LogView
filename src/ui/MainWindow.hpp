@@ -30,6 +30,9 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+protected:
+    bool eventFilter(QObject* watched, QEvent* event) override;
+
 private slots:
     void on_actionLoad_from_file_triggered();
     void closeFileTab(const int index);
@@ -53,6 +56,7 @@ private:
     void onUpToDate(const QString& currentVersion);
     void onUpdateCheckFailed(const QString& error);
 
+    QString filePathForTab(const int index) const;
     void project_changed();
     void bookmark_current_line();
     void connect_signals();
