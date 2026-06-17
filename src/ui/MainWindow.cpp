@@ -7,7 +7,10 @@
 #include <QAction>
 #include <QActionGroup>
 #include <QApplication>
+#include <QClipboard>
 #include <QDebug>
+#include <QDesktopServices>
+#include <QDir>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QInputDialog>
@@ -18,10 +21,12 @@
 #include <QMenu>
 #include <QMessageBox>
 #include <QMimeData>
+#include <QMouseEvent>
 #include <QStandardItemModel>
 #include <QTabBar>
 #include <QTabWidget>
 #include <QTextEdit>
+#include <QUrl>
 
 #include "AboutDialog.hpp"
 #include "Bookmark.hpp"
@@ -61,9 +66,58 @@ void MainWindow::showFileTabContextMenu(const QPoint& pos)
         return;
 
     QMenu menu;
+    QAction* copy_name_action = menu.addAction(tr("Copy file name"));
+    QAction* copy_path_action = menu.addAction(tr("Copy file path"));
+    QAction* open_folder_action = menu.addAction(tr("Open containing folder"));
+    menu.addSeparator();
     QAction* reload_action = menu.addAction(tr("Reload"));
-    if (menu.exec(bar->mapToGlobal(pos)) == reload_action)
+    menu.addSeparator();
+    QAction* close_action = menu.addAction(tr("Close tab (MMB)"));
+
+    const QString file_path = filePathForTab(index);
+    const bool has_path = !file_path.isEmpty();
+    copy_name_action->setEnabled(has_path);
+    copy_path_action->setEnabled(has_path);
+    open_folder_action->setEnabled(has_path);
+
+    QAction* chosen = menu.exec(bar->mapToGlobal(pos));
+    if (chosen == reload_action)
         pm_->reload_file(index);
+    else if (chosen == close_action)
+        closeFileTab(index);
+    else if (chosen == copy_name_action)
+        QApplication::clipboard()->setText(QFileInfo(file_path).fileName());
+    else if (chosen == copy_path_action)
+        QApplication::clipboard()->setText(QDir::toNativeSeparators(file_path));
+    else if (chosen == open_folder_action)
+        QDesktopServices::openUrl(QUrl::fromLocalFile(QFileInfo(file_path).absolutePath()));
+}
+
+QString MainWindow::filePathForTab(const int index) const
+{
+    FileViewer* viewer = dynamic_cast<FileViewer*>(ui->fileView->widget(index));
+    if (viewer == nullptr || viewer->logfile_ == nullptr)
+        return QString();
+    return viewer->logfile_->getFileName();
+}
+
+bool MainWindow::eventFilter(QObject* watched, QEvent* event)
+{
+    if (watched == ui->fileView->tabBar() && event->type() == QEvent::MouseButtonRelease)
+    {
+        QMouseEvent* mouse_event = static_cast<QMouseEvent*>(event);
+        if (mouse_event->button() == Qt::MiddleButton)
+        {
+            QTabBar* bar = ui->fileView->tabBar();
+            const int index = bar->tabAt(mouse_event->pos());
+            if (index >= 0)
+            {
+                closeFileTab(index);
+                return true;
+            }
+        }
+    }
+    return QMainWindow::eventFilter(watched, event);
 }
 
 void MainWindow::connect_signals()
@@ -73,6 +127,7 @@ void MainWindow::connect_signals()
     QTabBar* bar = ui->fileView->tabBar();
     bar->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(bar, &QTabBar::customContextMenuRequested, this, &MainWindow::showFileTabContextMenu);
+    bar->installEventFilter(this);
 
     connect(ui->fileView, &QTabWidget::currentChanged, this, &MainWindow::refreshWindowTitle);
 }

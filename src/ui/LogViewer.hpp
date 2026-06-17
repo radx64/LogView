@@ -28,7 +28,12 @@ public:
 public slots:
     void closeTab(const int);
 
+private slots:
+    void showTabContextMenu(const QPoint& pos);
+
 protected:
+    bool eventFilter(QObject* watched, QEvent* event) override;
+
     std::shared_ptr<LineSource> source_;
     GrepNode* grep_node_;
     MarkingsModel* markings_;
