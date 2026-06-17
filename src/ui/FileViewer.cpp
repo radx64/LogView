@@ -43,13 +43,22 @@ FileViewer::FileViewer(QWidget* parent, Logfile* logfile)
         logfile_->getMarkingsModel());
     logViewer_->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
 
-    QWidget* side_panel = new QWidget();
-    QVBoxLayout* side_layout = new QVBoxLayout(side_panel);
-    side_layout->setContentsMargins(0, 0, 0, 0);
-    side_layout->addWidget(new QLabel(tr("Bookmarks")));
-    side_layout->addWidget(bookmarks_widget_, 1);
-    side_layout->addWidget(new QLabel(tr("Markings")));
-    side_layout->addWidget(markings_widget_, 1);
+    QWidget* bookmarks_section = new QWidget();
+    QVBoxLayout* bookmarks_layout = new QVBoxLayout(bookmarks_section);
+    bookmarks_layout->setContentsMargins(0, 0, 0, 0);
+    bookmarks_layout->addWidget(new QLabel(tr("Bookmarks")));
+    bookmarks_layout->addWidget(bookmarks_widget_, 1);
+
+    QWidget* markings_section = new QWidget();
+    QVBoxLayout* markings_layout = new QVBoxLayout(markings_section);
+    markings_layout->setContentsMargins(0, 0, 0, 0);
+    markings_layout->addWidget(new QLabel(tr("Markings")));
+    markings_layout->addWidget(markings_widget_, 1);
+
+    QSplitter* side_panel = new QSplitter(Qt::Vertical);
+    side_panel->addWidget(bookmarks_section);
+    side_panel->addWidget(markings_section);
+    side_panel->setSizes({500, 500});
 
     QSplitter* splitter = new QSplitter(Qt::Horizontal);
     splitter->addWidget(side_panel);
