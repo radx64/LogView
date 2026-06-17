@@ -49,6 +49,9 @@ void MainWindow::setupUi(QMainWindow* MainWindow)
     icon3.addFile(QStringLiteral(":/icon/Gnome-Bookmark-New-32.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
     actionBookmark_current_line->setIcon(icon3);
 
+    actionAutomatic_markings = new QAction(MainWindow);
+    actionAutomatic_markings->setObjectName("actionAutomatic_markings");
+
     actionAbout = new QAction(MainWindow);
     actionAbout->setObjectName("actionAbout");
     QIcon icon4;
@@ -131,6 +134,8 @@ void MainWindow::setupUi(QMainWindow* MainWindow)
     menuTest->addSeparator();
     menuFind->addAction(actionGrep_current_view);
     menuFind->addAction(actionBookmark_current_line);
+    menuFind->addSeparator();
+    menuFind->addAction(actionAutomatic_markings);
     menuHelp->addAction(actionCheck_for_updates);
     menuHelp->addSeparator();
     menuHelp->addAction(actionAbout);
@@ -161,6 +166,7 @@ void MainWindow::retranslateUi(QMainWindow* MainWindow)
     actionGrep_current_view->setShortcut(QCoreApplication::translate("MainWindow", "Ctrl+G", nullptr));
     actionBookmark_current_line->setText(QCoreApplication::translate("MainWindow", "Bookmark current line", nullptr));
     actionBookmark_current_line->setShortcut(QCoreApplication::translate("MainWindow", "Ctrl+B", nullptr));
+    actionAutomatic_markings->setText(QCoreApplication::translate("MainWindow", "Automatic markings...", nullptr));
     actionAbout->setText(QCoreApplication::translate("MainWindow", "About", nullptr));
     actionCheck_for_updates->setText(QCoreApplication::translate("MainWindow", "Check for updates...", nullptr));
     actionLoad_project->setText(QCoreApplication::translate("MainWindow", "Load project ...", nullptr));

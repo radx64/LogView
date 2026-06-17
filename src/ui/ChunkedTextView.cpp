@@ -13,10 +13,13 @@
 #include <QMouseEvent>
 #include <QPainter>
 #include <QPaintEvent>
+#include <QRegularExpression>
+#include <QRegularExpressionMatchIterator>
 #include <QResizeEvent>
 #include <QScrollBar>
 #include <QtMath>
 
+#include "AutoMarkingsModel.hpp"
 #include "LineSource.hpp"
 #include "MarkingsModel.hpp"
 #include "Settings.hpp"
@@ -35,6 +38,8 @@ ChunkedTextView::ChunkedTextView(QWidget* parent, LineSource* source, MarkingsMo
         connect(markings_, &MarkingsModel::changed,
                 viewport(), QOverload<>::of(&QWidget::update));
     }
+    connect(&AutoMarkingsModel::instance(), &AutoMarkingsModel::changed,
+            viewport(), QOverload<>::of(&QWidget::update));
 
     connect(&Settings::instance(), &Settings::changed,
             this, &ChunkedTextView::applySettings);
@@ -269,6 +274,35 @@ void ChunkedTextView::paintEvent(QPaintEvent* event)
                         marked_region += rect;
                         from = idx + needle_len;
                     }
+                }
+            }
+
+            for (const AutoMarking& marking : AutoMarkingsModel::instance().markings())
+            {
+                if (!marking.enabled_ || marking.pattern_.isEmpty()) continue;
+
+                const QColor marking_text_color(marking.text_color_);
+                if (!marking_text_color.isValid()) continue;
+
+                const QRegularExpression expression = marking.regularExpression();
+                if (!expression.isValid()) continue;
+
+                const QColor background_color(marking.background_color_);
+                QRegularExpressionMatchIterator matches = expression.globalMatch(text);
+                while (matches.hasNext())
+                {
+                    const QRegularExpressionMatch match = matches.next();
+                    const int idx = match.capturedStart();
+                    const int len = match.capturedLength();
+                    if (idx < 0 || len <= 0) continue;
+
+                    const int sx = qRound(text_x0 + idx * char_width_f_);
+                    const int ex = qRound(text_x0 + (idx + len) * char_width_f_);
+                    const QRect rect(sx, y, ex - sx, line_height_);
+                    if (background_color.isValid())
+                        painter.fillRect(rect, background_color);
+                    marked_segments.append({rect, marking_text_color});
+                    marked_region += rect;
                 }
             }
 
