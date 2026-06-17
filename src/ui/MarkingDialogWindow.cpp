@@ -93,7 +93,8 @@ void MarkingDialogWindow::updateColorButton()
 {
     const QString textColor = color_.lightnessF() > 0.5 ? "black" : "white";
     color_button_->setStyleSheet(
-        QStringLiteral("background-color: %1; color: %2;")
+        QStringLiteral("QPushButton { background-color: %1; color: %2;"
+                       " border: 1px solid palette(mid); padding: 4px; }")
             .arg(color_.name(), textColor));
     color_button_->setText(color_.name());
 }
@@ -108,7 +109,8 @@ void MarkingDialogWindow::updateTextColorButton()
                                  : QColor(marking_colors::contrastingTextColor(color_.name()));
 
     text_color_button_->setStyleSheet(
-        QStringLiteral("background-color: %1; color: %2;")
+        QStringLiteral("QPushButton { background-color: %1; color: %2;"
+                       " border: 1px solid palette(mid); padding: 4px; }")
             .arg(color_.name(), effective.name()));
     text_color_button_->setText(automatic ? tr("Auto (%1)").arg(effective.name())
                                            : effective.name());
