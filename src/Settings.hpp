@@ -18,6 +18,12 @@ public:
     QColor highlightLineColor() const { return highlight_line_color_; }
     void setHighlightLineColor(const QColor& color);
 
+    QColor searchHighlightColor() const { return search_highlight_color_; }
+    void setSearchHighlightColor(const QColor& color);
+
+    QColor searchCurrentMatchColor() const { return search_current_match_color_; }
+    void setSearchCurrentMatchColor(const QColor& color);
+
     bool checkForUpdatesOnStartup() const { return check_updates_on_startup_; }
     void setCheckForUpdatesOnStartup(bool enabled);
 
@@ -57,6 +63,8 @@ private:
 
     QFont editor_font_;
     QColor highlight_line_color_{};
+    QColor search_highlight_color_{};
+    QColor search_current_match_color_{};
     bool check_updates_on_startup_{true};
     QString skipped_update_version_{};
     QString last_file_dir_{};

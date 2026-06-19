@@ -357,6 +357,16 @@ void MainWindow::on_actionMerge_files_triggered()
         load_log_file(merged_path);
 }
 
+void MainWindow::on_actionFind_triggered()
+{
+    FileViewer* viewerWidget = get_active_viewer_widget();
+    if (!viewerWidget) return;
+
+    LogViewer* deepest_tab = viewerWidget->getDeepestActiveTab();
+    if (deepest_tab && deepest_tab->text_)
+        deepest_tab->text_->showSearch();
+}
+
 void MainWindow::on_actionGrep_current_view_triggered()
 {
     grepCurrentView();

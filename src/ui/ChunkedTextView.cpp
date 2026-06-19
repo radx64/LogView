@@ -17,12 +17,14 @@
 #include <QRegularExpressionMatchIterator>
 #include <QResizeEvent>
 #include <QScrollBar>
+#include <QTimer>
 #include <QWheelEvent>
 #include <QtMath>
 
 #include "AutoMarkingsModel.hpp"
 #include "LineSource.hpp"
 #include "MarkingsModel.hpp"
+#include "SearchWidget.hpp"
 #include "Settings.hpp"
 
 namespace
@@ -31,6 +33,9 @@ constexpr int kGutterPadding = 8;
 constexpr int kTextLeftPadding = 4;
 constexpr int kMinFontPointSize = 6;
 constexpr int kMaxFontPointSize = 72;
+constexpr int kSearchDebounceMs = 120;
+const QColor kDefaultSearchHighlightColor(255, 215, 0, 120);
+const QColor kDefaultSearchCurrentMatchColor(255, 140, 0, 200);
 }
 
 ChunkedTextView::ChunkedTextView(QWidget* parent, LineSource* source, MarkingsModel* markings)
@@ -117,6 +122,8 @@ void ChunkedTextView::resizeEvent(QResizeEvent* event)
 {
     QAbstractScrollArea::resizeEvent(event);
     updateScrollBars();
+    if (search_widget_ && search_widget_->isVisible())
+        positionSearchWidget();
 }
 
 void ChunkedTextView::wheelEvent(QWheelEvent* event)
@@ -259,6 +266,15 @@ void ChunkedTextView::paintEvent(QPaintEvent* event)
         QColor selection_color = pal.color(QPalette::Highlight);
         selection_color.setAlpha(110);
 
+        QColor search_all_color = Settings::instance().searchHighlightColor();
+        if (!search_all_color.isValid())
+            search_all_color = kDefaultSearchHighlightColor;
+        QColor search_current_color = Settings::instance().searchCurrentMatchColor();
+        if (!search_current_color.isValid())
+            search_current_color = kDefaultSearchCurrentMatchColor;
+        const bool show_search = search_active_ && !matches_.isEmpty();
+        int search_cursor = 0;
+
         Pos sel_start = sel_anchor_;
         Pos sel_end = sel_caret_;
         if (sel_end < sel_start) std::swap(sel_start, sel_end);
@@ -334,6 +350,20 @@ void ChunkedTextView::paintEvent(QPaintEvent* event)
                         painter.fillRect(rect, background_color);
                     marked_segments.append({rect, marking_text_color});
                     marked_region += rect;
+                }
+            }
+
+            if (show_search)
+            {
+                while (search_cursor < matches_.size() && matches_[search_cursor].line < row)
+                    ++search_cursor;
+                for (int i = search_cursor; i < matches_.size() && matches_[i].line == row; ++i)
+                {
+                    const Match& match = matches_[i];
+                    const int sx = qRound(text_x0 + match.col * char_width_f_);
+                    const int ex = qRound(text_x0 + (match.col + match.len) * char_width_f_);
+                    painter.fillRect(sx, y, ex - sx, line_height_,
+                        (i == current_match_) ? search_current_color : search_all_color);
                 }
             }
 
@@ -486,6 +516,14 @@ void ChunkedTextView::keyPressEvent(QKeyEvent* event)
 
     if (ctrl && event->key() == Qt::Key_C) { copySelection(); return; }
     if (ctrl && event->key() == Qt::Key_M) { markSelection(); return; }
+    if (ctrl && event->key() == Qt::Key_F) { showSearch(); return; }
+    if (event->key() == Qt::Key_Escape && search_active_) { hideSearch(); return; }
+    if (event->key() == Qt::Key_F3)
+    {
+        flushPendingSearch();
+        if (shift) findPrevious(); else findNext();
+        return;
+    }
     if (ctrl && event->key() == Qt::Key_A)
     {
         sel_anchor_ = Pos{0, 0};
@@ -576,4 +614,238 @@ void ChunkedTextView::markSelection()
     }
 
     markings_->add_marking(text);
+}
+
+void ChunkedTextView::showSearch()
+{
+    if (!search_widget_)
+    {
+        search_widget_ = new SearchWidget(viewport());
+
+        search_debounce_ = new QTimer(this);
+        search_debounce_->setSingleShot(true);
+        search_debounce_->setInterval(kSearchDebounceMs);
+        connect(search_debounce_, &QTimer::timeout, this, &ChunkedTextView::runSearch);
+
+        connect(search_widget_, &SearchWidget::queryChanged,
+                this, &ChunkedTextView::onSearchQueryChanged);
+        connect(search_widget_, &SearchWidget::findNext, this, [this]()
+        {
+            flushPendingSearch();
+            findNext();
+        });
+        connect(search_widget_, &SearchWidget::findPrevious, this, [this]()
+        {
+            flushPendingSearch();
+            findPrevious();
+        });
+        connect(search_widget_, &SearchWidget::closeRequested,
+                this, &ChunkedTextView::hideSearch);
+    }
+
+    search_active_ = true;
+
+    if (hasSelection())
+    {
+        const QString sel = selectedText();
+        if (!sel.contains(QLatin1Char('\n')) && !sel.isEmpty())
+            search_widget_->setPattern(sel);
+    }
+
+    positionSearchWidget();
+    search_widget_->show();
+    search_widget_->raise();
+    search_widget_->focusInput();
+
+    onSearchQueryChanged();
+    flushPendingSearch();
+}
+
+void ChunkedTextView::hideSearch()
+{
+    if (search_debounce_) search_debounce_->stop();
+    if (search_widget_) search_widget_->hide();
+    search_active_ = false;
+    matches_.clear();
+    current_match_ = -1;
+    viewport()->update();
+    setFocus();
+}
+
+void ChunkedTextView::positionSearchWidget()
+{
+    if (!search_widget_) return;
+    constexpr int margin = 4;
+    search_widget_->adjustSize();
+    const int x = viewport()->width() - search_widget_->width() - margin;
+    search_widget_->move(std::max(margin, x), margin);
+}
+
+void ChunkedTextView::onSearchQueryChanged()
+{
+    if (!search_widget_) return;
+    search_pattern_ = search_widget_->pattern();
+    search_regex_ = search_widget_->isRegex();
+    search_case_ = search_widget_->isCaseSensitive();
+    if (search_debounce_) search_debounce_->start();
+}
+
+void ChunkedTextView::flushPendingSearch()
+{
+    if (search_debounce_ && search_debounce_->isActive())
+    {
+        search_debounce_->stop();
+        runSearch();
+    }
+}
+
+void ChunkedTextView::runSearch()
+{
+    matches_.clear();
+    current_match_ = -1;
+
+    const qint64 total = source_ ? source_->count() : 0;
+
+    if (!search_active_ || search_pattern_.isEmpty() || total <= 0)
+    {
+        if (search_widget_)
+            search_widget_->setMatchInfo(-1, search_pattern_.isEmpty() ? -1 : 0);
+        if (search_widget_) search_widget_->setPatternValid(true);
+        viewport()->update();
+        return;
+    }
+
+    if (search_regex_)
+    {
+        QRegularExpression::PatternOptions options = QRegularExpression::NoPatternOption;
+        if (!search_case_)
+            options |= QRegularExpression::CaseInsensitiveOption;
+
+        const QRegularExpression expression(search_pattern_, options);
+        if (!expression.isValid())
+        {
+            if (search_widget_) search_widget_->setPatternValid(false);
+            updateSearchInfo();
+            viewport()->update();
+            return;
+        }
+        if (search_widget_) search_widget_->setPatternValid(true);
+
+        for (qint64 row = 0; row < total; ++row)
+        {
+            const QString text = source_->at(row).text;
+            QRegularExpressionMatchIterator it = expression.globalMatch(text);
+            while (it.hasNext())
+            {
+                const QRegularExpressionMatch match = it.next();
+                if (match.capturedLength() <= 0) continue;
+                matches_.append({row,
+                    static_cast<int>(match.capturedStart()),
+                    static_cast<int>(match.capturedLength())});
+            }
+        }
+    }
+    else
+    {
+        if (search_widget_) search_widget_->setPatternValid(true);
+        const Qt::CaseSensitivity sensitivity =
+            search_case_ ? Qt::CaseSensitive : Qt::CaseInsensitive;
+        const int len = static_cast<int>(search_pattern_.length());
+
+        for (qint64 row = 0; row < total; ++row)
+        {
+            const QString text = source_->at(row).text;
+            int from = 0;
+            while (true)
+            {
+                const int idx = text.indexOf(search_pattern_, from, sensitivity);
+                if (idx < 0) break;
+                matches_.append({row, idx, len});
+                from = idx + len;
+            }
+        }
+    }
+
+    updateSearchInfo();
+    viewport()->update();
+}
+
+void ChunkedTextView::findNext()
+{
+    if (matches_.isEmpty()) return;
+
+    if (current_match_ < 0)
+    {
+        int target = 0;
+        for (int i = 0; i < matches_.size(); ++i)
+        {
+            const Match& match = matches_[i];
+            if (match.line > caret_line_ ||
+                (match.line == caret_line_ && match.col >= caret_col_))
+            {
+                target = i;
+                break;
+            }
+        }
+        gotoMatch(target);
+        return;
+    }
+
+    gotoMatch((current_match_ + 1) % matches_.size());
+}
+
+void ChunkedTextView::findPrevious()
+{
+    if (matches_.isEmpty()) return;
+
+    if (current_match_ < 0)
+    {
+        int target = matches_.size() - 1;
+        for (int i = matches_.size() - 1; i >= 0; --i)
+        {
+            const Match& match = matches_[i];
+            if (match.line < caret_line_ ||
+                (match.line == caret_line_ && match.col < caret_col_))
+            {
+                target = i;
+                break;
+            }
+        }
+        gotoMatch(target);
+        return;
+    }
+
+    gotoMatch((current_match_ - 1 + matches_.size()) % matches_.size());
+}
+
+void ChunkedTextView::gotoMatch(int index)
+{
+    if (matches_.isEmpty()) return;
+
+    const int size = matches_.size();
+    current_match_ = ((index % size) + size) % size;
+    const Match& match = matches_[current_match_];
+
+    sel_anchor_ = Pos{match.line, match.col};
+    sel_caret_ = Pos{match.line, match.col + match.len};
+    caret_line_ = match.line;
+    caret_col_ = match.col + match.len;
+
+    const int visible = visibleLineCount();
+    const qint64 target = std::max<qint64>(0, match.line - visible / 2);
+    verticalScrollBar()->setValue(static_cast<int>(target));
+
+    updateSearchInfo();
+    viewport()->update();
+}
+
+void ChunkedTextView::updateSearchInfo()
+{
+    if (!search_widget_) return;
+    if (search_pattern_.isEmpty())
+    {
+        search_widget_->setMatchInfo(-1, -1);
+        return;
+    }
+    search_widget_->setMatchInfo(current_match_, matches_.size());
 }

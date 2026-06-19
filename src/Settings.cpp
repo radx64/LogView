@@ -12,6 +12,8 @@ constexpr auto kEditorGroup = "Editor";
 constexpr auto kFontFamilyKey = "FontFamily";
 constexpr auto kFontSizeKey = "FontSize";
 constexpr auto kHighlightLineColorKey = "HighlightLineColor";
+constexpr auto kSearchHighlightColorKey = "SearchHighlightColor";
+constexpr auto kSearchCurrentMatchColorKey = "SearchCurrentMatchColor";
 constexpr auto kUpdatesGroup = "Updates";
 constexpr auto kCheckOnStartupKey = "CheckOnStartup";
 constexpr auto kSkippedVersionKey = "SkippedVersion";
@@ -80,6 +82,24 @@ void Settings::setHighlightLineColor(const QColor& color)
     if (highlight_line_color_ == color)
         return;
     highlight_line_color_ = color;
+    save();
+    emit changed();
+}
+
+void Settings::setSearchHighlightColor(const QColor& color)
+{
+    if (search_highlight_color_ == color)
+        return;
+    search_highlight_color_ = color;
+    save();
+    emit changed();
+}
+
+void Settings::setSearchCurrentMatchColor(const QColor& color)
+{
+    if (search_current_match_color_ == color)
+        return;
+    search_current_match_color_ = color;
     save();
     emit changed();
 }
@@ -172,6 +192,13 @@ void Settings::load()
     const QString color = settings.value(kHighlightLineColorKey).toString();
     highlight_line_color_ = color.isEmpty() ? QColor() : QColor(color);
 
+    const QString search_color = settings.value(kSearchHighlightColorKey).toString();
+    search_highlight_color_ = search_color.isEmpty() ? QColor() : QColor(search_color);
+
+    const QString search_current_color = settings.value(kSearchCurrentMatchColorKey).toString();
+    search_current_match_color_ =
+        search_current_color.isEmpty() ? QColor() : QColor(search_current_color);
+
     settings.endGroup();
 
     settings.beginGroup(kUpdatesGroup);
@@ -207,6 +234,14 @@ void Settings::save() const
     settings.setValue(kHighlightLineColorKey,
                       highlight_line_color_.isValid()
                           ? highlight_line_color_.name(QColor::HexArgb)
+                          : QString());
+    settings.setValue(kSearchHighlightColorKey,
+                      search_highlight_color_.isValid()
+                          ? search_highlight_color_.name(QColor::HexArgb)
+                          : QString());
+    settings.setValue(kSearchCurrentMatchColorKey,
+                      search_current_match_color_.isValid()
+                          ? search_current_match_color_.name(QColor::HexArgb)
                           : QString());
 
     settings.endGroup();

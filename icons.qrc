@@ -19,5 +19,7 @@
     <file alias="Gnome-Go-Up-32.png">img/Gnome-Go-Up-32.png</file>
     <file alias="Gnome-Go-Down-32.png">img/Gnome-Go-Down-32.png</file>
     <file alias="Add-Files-To-Archive-32.png">img/Add-Files-To-Archive-32.png</file>
+    <file alias="Gnome-Window-Close-32.png">img/Gnome-Window-Close-32.png</file>
+    <file alias="Gnome-Edit-Find-32.png">img/Gnome-Edit-Find-32.png</file>
 </qresource>
 </RCC>

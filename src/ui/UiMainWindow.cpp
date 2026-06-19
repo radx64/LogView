@@ -43,6 +43,12 @@ void MainWindow::setupUi(QMainWindow* MainWindow)
     icon1.addFile(QStringLiteral(":/icon/Gnome-System-Log-Out-32.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
     exit_app->setIcon(icon1);
 
+    actionFind = new QAction(MainWindow);
+    actionFind->setObjectName("actionFind");
+    QIcon iconFind;
+    iconFind.addFile(QStringLiteral(":/icon/Gnome-Edit-Find-32.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
+    actionFind->setIcon(iconFind);
+
     actionGrep_current_view = new QAction(MainWindow);
     actionGrep_current_view->setObjectName("actionGrep_current_view");
     QIcon icon2;
@@ -177,6 +183,8 @@ void MainWindow::setupUi(QMainWindow* MainWindow)
     menuTest->addSeparator();
     menuTest->addAction(exit_app);
     menuTest->addSeparator();
+    menuFind->addAction(actionFind);
+    menuFind->addSeparator();
     menuFind->addAction(actionGrep_current_view);
     menuFind->addAction(actionBookmark_current_line);
     menuView->addAction(menuTheme->menuAction());
@@ -216,6 +224,9 @@ void MainWindow::retranslateUi(QMainWindow* MainWindow)
     exit_app->setText(QCoreApplication::translate("MainWindow", "Exit", nullptr));
     exit_app->setShortcut(QCoreApplication::translate("MainWindow", "Ctrl+Q", nullptr));
     
+    actionFind->setText(QCoreApplication::translate("MainWindow", "Find...", nullptr));
+    actionFind->setShortcut(QCoreApplication::translate("MainWindow", "Ctrl+F", nullptr));
+
     actionGrep_current_view->setText(QCoreApplication::translate("MainWindow", "Grep current view", nullptr));
     actionGrep_current_view->setShortcut(QCoreApplication::translate("MainWindow", "Ctrl+G", nullptr));
     

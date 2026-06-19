@@ -16,6 +16,12 @@
 #include "AutoMarkingsWidget.hpp"
 #include "Settings.hpp"
 
+namespace
+{
+const QColor kDefaultSearchHighlightColor(255, 215, 0, 120);
+const QColor kDefaultSearchCurrentMatchColor(255, 140, 0, 200);
+}
+
 SettingsDialog::SettingsDialog(QWidget* parent)
     : QDialog(parent)
 {
@@ -103,9 +109,51 @@ QWidget* SettingsDialog::createEditorPage()
     colorLayout->addWidget(highlight_color_button_, 1);
     colorLayout->addWidget(highlight_color_reset_);
 
+    search_color_button_ = new QPushButton(page);
+    search_color_button_->setAutoFillBackground(true);
+    connect(search_color_button_, &QPushButton::clicked, this, [this]()
+            {
+                pickColor(search_color_, tr("Select search highlight color"),
+                          kDefaultSearchHighlightColor);
+            });
+
+    search_color_reset_ = new QPushButton(tr("Auto"), page);
+    search_color_reset_->setToolTip(tr("Use the default search highlight color"));
+    connect(search_color_reset_, &QPushButton::clicked, this, [this]()
+            {
+                search_color_ = QColor();
+                updateColorButton();
+            });
+
+    QHBoxLayout* searchColorLayout = new QHBoxLayout();
+    searchColorLayout->addWidget(search_color_button_, 1);
+    searchColorLayout->addWidget(search_color_reset_);
+
+    search_current_color_button_ = new QPushButton(page);
+    search_current_color_button_->setAutoFillBackground(true);
+    connect(search_current_color_button_, &QPushButton::clicked, this, [this]()
+            {
+                pickColor(search_current_color_, tr("Select current match color"),
+                          kDefaultSearchCurrentMatchColor);
+            });
+
+    search_current_color_reset_ = new QPushButton(tr("Auto"), page);
+    search_current_color_reset_->setToolTip(tr("Use the default current match color"));
+    connect(search_current_color_reset_, &QPushButton::clicked, this, [this]()
+            {
+                search_current_color_ = QColor();
+                updateColorButton();
+            });
+
+    QHBoxLayout* searchCurrentColorLayout = new QHBoxLayout();
+    searchCurrentColorLayout->addWidget(search_current_color_button_, 1);
+    searchCurrentColorLayout->addWidget(search_current_color_reset_);
+
     form->addRow(tr("Font:"), font_combo_);
     form->addRow(tr("Size:"), font_size_spin_);
     form->addRow(tr("Current line color:"), colorLayout);
+    form->addRow(tr("Search highlight color:"), searchColorLayout);
+    form->addRow(tr("Current match color:"), searchCurrentColorLayout);
 
     return page;
 }
@@ -142,41 +190,53 @@ void SettingsDialog::loadValues()
     font_size_spin_->setValue(font.pointSize() > 0 ? font.pointSize() : 10);
 
     highlight_color_ = Settings::instance().highlightLineColor();
+    search_color_ = Settings::instance().searchHighlightColor();
+    search_current_color_ = Settings::instance().searchCurrentMatchColor();
     updateColorButton();
 
     check_updates_checkbox_->setChecked(
         Settings::instance().checkForUpdatesOnStartup());
 }
 
-void SettingsDialog::updateColorButton()
+void SettingsDialog::applyColorButtonStyle(QPushButton* button, const QColor& color)
 {
-    if (highlight_color_.isValid())
+    if (color.isValid())
     {
-        const QString textColor =
-            highlight_color_.lightnessF() > 0.5 ? "black" : "white";
-        highlight_color_button_->setStyleSheet(
+        const QString textColor = color.lightnessF() > 0.5 ? "black" : "white";
+        button->setStyleSheet(
             QStringLiteral("background-color: %1; color: %2;")
-                .arg(highlight_color_.name(QColor::HexArgb), textColor));
-        highlight_color_button_->setText(highlight_color_.name(QColor::HexArgb));
+                .arg(color.name(QColor::HexArgb), textColor));
+        button->setText(color.name(QColor::HexArgb));
     }
     else
     {
-        highlight_color_button_->setStyleSheet(QString());
-        highlight_color_button_->setText(tr("Automatic"));
+        button->setStyleSheet(QString());
+        button->setText(tr("Automatic"));
+    }
+}
+
+void SettingsDialog::updateColorButton()
+{
+    applyColorButtonStyle(highlight_color_button_, highlight_color_);
+    applyColorButtonStyle(search_color_button_, search_color_);
+    applyColorButtonStyle(search_current_color_button_, search_current_color_);
+}
+
+void SettingsDialog::pickColor(QColor& target, const QString& title, const QColor& fallback)
+{
+    const QColor initial = target.isValid() ? target : fallback;
+    const QColor chosen = QColorDialog::getColor(
+        initial, this, title, QColorDialog::ShowAlphaChannel);
+    if (chosen.isValid())
+    {
+        target = chosen;
+        updateColorButton();
     }
 }
 
 void SettingsDialog::pickHighlightColor()
 {
-    const QColor initial = highlight_color_.isValid() ? highlight_color_ : QColor(Qt::yellow);
-    const QColor chosen = QColorDialog::getColor(
-        initial, this, tr("Select current line color"),
-        QColorDialog::ShowAlphaChannel);
-    if (chosen.isValid())
-    {
-        highlight_color_ = chosen;
-        updateColorButton();
-    }
+    pickColor(highlight_color_, tr("Select current line color"), QColor(Qt::yellow));
 }
 
 void SettingsDialog::applyChanges()
@@ -186,6 +246,8 @@ void SettingsDialog::applyChanges()
 
     Settings::instance().setEditorFont(font);
     Settings::instance().setHighlightLineColor(highlight_color_);
+    Settings::instance().setSearchHighlightColor(search_color_);
+    Settings::instance().setSearchCurrentMatchColor(search_current_color_);
     Settings::instance().setCheckForUpdatesOnStartup(
         check_updates_checkbox_->isChecked());
 }

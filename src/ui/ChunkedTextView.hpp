@@ -4,9 +4,12 @@
 
 #include <QAbstractScrollArea>
 #include <QFont>
+#include <QVector>
 
 class LineSource;
 class MarkingsModel;
+class SearchWidget;
+class QTimer;
 
 class ChunkedTextView : public QAbstractScrollArea
 {
@@ -17,6 +20,9 @@ public:
     qint64 currentLine() const { return caret_line_; }
 
     void gotoRow(qint64 row);
+
+    void showSearch();
+    void hideSearch();
 
 protected:
     void paintEvent(QPaintEvent* event) override;
@@ -40,6 +46,13 @@ private:
         bool operator<(const Pos& o) const { return line < o.line || (line == o.line && col < o.col); }
     };
 
+    struct Match
+    {
+        qint64 line = 0;
+        int col = 0;
+        int len = 0;
+    };
+
     int gutterWidth() const;
     int visibleLineCount() const;
     qint64 topLine() const;
@@ -53,6 +66,15 @@ private:
     QString selectedText() const;
     void copySelection() const;
     void markSelection();
+
+    void positionSearchWidget();
+    void onSearchQueryChanged();
+    void runSearch();
+    void flushPendingSearch();
+    void findNext();
+    void findPrevious();
+    void gotoMatch(int index);
+    void updateSearchInfo();
 
     LineSource* source_;
     MarkingsModel* markings_ = nullptr;
@@ -69,4 +91,13 @@ private:
     bool selecting_ = false;
 
     mutable int max_line_width_chars_ = 0;
+
+    SearchWidget* search_widget_ = nullptr;
+    QTimer* search_debounce_ = nullptr;
+    QString search_pattern_;
+    bool search_regex_ = false;
+    bool search_case_ = false;
+    bool search_active_ = false;
+    QVector<Match> matches_;
+    int current_match_ = -1;
 };
