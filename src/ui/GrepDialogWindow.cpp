@@ -32,7 +32,7 @@ GrepDialogWindow::GrepDialogWindow(QWidget *parent) :
     patternLayout->addWidget(pattern_, 0, 1, 1, 1);
 
     regex_check_ = new QCheckBox(tr("Regex"), this);
-    case_sensitive_check_ = new QCheckBox(tr("Case Sensitive"), this);
+    case_sensitive_check_ = new QCheckBox(tr("Case sensitive"), this);
     inverted_check_ = new QCheckBox(tr("Inverted"), this);
     inverted_check_->setFocusPolicy(Qt::StrongFocus);
     button_ = new QPushButton(tr("Grep"), this);

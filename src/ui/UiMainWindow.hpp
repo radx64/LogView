@@ -19,6 +19,7 @@ public:
     QAction* actionLoad_from_file{nullptr};
     QAction* exit_app{nullptr};
     QAction* actionGrep_current_view{nullptr};
+    QAction* actionExport_grep{nullptr};
     QAction* actionBookmark_current_line{nullptr};
     QAction* actionAbout{nullptr};
     QAction* actionCheck_for_updates{nullptr};

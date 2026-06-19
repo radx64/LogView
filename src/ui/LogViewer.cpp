@@ -53,7 +53,8 @@ LogViewer* LogViewer::grep(GrepNode* grep)
     std::shared_ptr<LineSource> filtered = FilteredLineSource::create(source_, grep);
 
     LogViewer* viewer = new LogViewer(this, grep, std::move(filtered), markings_);
-    tabs_->addTab(viewer, generateTabName(grep, pattern));
+    const int new_index = tabs_->addTab(viewer, generateTabName(grep, pattern));
+    tabs_->setCurrentIndex(new_index);
     return viewer;
 }
 void LogViewer::closeTab(const int index)

@@ -43,6 +43,9 @@ void MainWindow::setupUi(QMainWindow* MainWindow)
     icon2.addFile(QStringLiteral(":/icon/Gnome-Format-Indent-More-32.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
     actionGrep_current_view->setIcon(icon2);
 
+    actionExport_grep = new QAction(MainWindow);
+    actionExport_grep->setObjectName("actionExport_grep");
+
     actionBookmark_current_line = new QAction(MainWindow);
     actionBookmark_current_line->setObjectName("actionBookmark_current_line");
     QIcon icon3;
@@ -127,6 +130,8 @@ void MainWindow::setupUi(QMainWindow* MainWindow)
     menuTest->addAction(actionSave_project);
     menuTest->addAction(actionSave_project_as);
     menuTest->addSeparator();
+    menuTest->addAction(actionExport_grep);
+    menuTest->addSeparator();
     menuTest->addAction(exit_app);
     menuTest->addSeparator();
     menuFind->addAction(actionGrep_current_view);
@@ -159,6 +164,7 @@ void MainWindow::retranslateUi(QMainWindow* MainWindow)
     exit_app->setShortcut(QCoreApplication::translate("MainWindow", "Ctrl+Q", nullptr));
     actionGrep_current_view->setText(QCoreApplication::translate("MainWindow", "Grep current view", nullptr));
     actionGrep_current_view->setShortcut(QCoreApplication::translate("MainWindow", "Ctrl+G", nullptr));
+    actionExport_grep->setText(QCoreApplication::translate("MainWindow", "Export grep...", nullptr));
     actionBookmark_current_line->setText(QCoreApplication::translate("MainWindow", "Bookmark current line", nullptr));
     actionBookmark_current_line->setShortcut(QCoreApplication::translate("MainWindow", "Ctrl+B", nullptr));
     actionAbout->setText(QCoreApplication::translate("MainWindow", "About", nullptr));

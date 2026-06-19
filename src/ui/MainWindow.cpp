@@ -11,6 +11,7 @@
 #include <QDebug>
 #include <QDesktopServices>
 #include <QDir>
+#include <QFile>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QInputDialog>
@@ -26,6 +27,7 @@
 #include <QTabBar>
 #include <QTabWidget>
 #include <QTextEdit>
+#include <QTextStream>
 #include <QUrl>
 
 #include "AboutDialog.hpp"
@@ -340,6 +342,49 @@ void MainWindow::on_actionLoad_from_file_triggered()
 void MainWindow::on_actionGrep_current_view_triggered()
 {
     grepCurrentView();
+}
+
+void MainWindow::on_actionExport_grep_triggered()
+{
+    FileViewer* viewerWidget = get_active_viewer_widget();
+    if (!viewerWidget)
+    {
+        QMessageBox::information(this, tr("Export grep"),
+            tr("Open a file before exporting."));
+        return;
+    }
+
+    LogViewer* deepest_tab = viewerWidget->getDeepestActiveTab();
+    LineSource* source = deepest_tab ? deepest_tab->source() : nullptr;
+    if (!source || source->count() <= 0)
+    {
+        QMessageBox::information(this, tr("Export grep"),
+            tr("The active view has no content to export."));
+        return;
+    }
+
+    const QString file_path = QFileDialog::getSaveFileName(this,
+        tr("Export grep"),
+        Settings::instance().lastOpenedFileDirectory(),
+        tr("Text files (*.txt);;All Files (*)"));
+    if (file_path.isEmpty())
+        return;
+
+    QFile out_file(file_path);
+    if (!out_file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate))
+    {
+        QMessageBox::warning(this, tr("Export grep"),
+            tr("Could not open %1 for writing.").arg(file_path));
+        return;
+    }
+
+    Settings::instance().setLastOpenedFileDirectory(
+        QFileInfo(file_path).absolutePath());
+
+    QTextStream stream(&out_file);
+    const qint64 total = source->count();
+    for (qint64 row = 0; row < total; ++row)
+        stream << source->at(row).text << '\n';
 }
 void MainWindow::on_actionBookmark_current_line_triggered()
 {
