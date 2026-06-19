@@ -33,6 +33,7 @@ set(SOURCES
     src/ui/MarkingDialogWindow.cpp
     src/ui/ChunkedTextView.cpp
     src/ui/GrepDialogWindow.cpp
+    src/ui/MergerDialogWindow.cpp
     src/GrepNode.cpp
     src/LineSource.cpp
     src/FileLineSource.cpp

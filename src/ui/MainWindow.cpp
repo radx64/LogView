@@ -34,6 +34,7 @@
 #include "Bookmark.hpp"
 #include "BookmarksModel.hpp"
 #include "GrepDialogWindow.hpp"
+#include "MergerDialogWindow.hpp"
 #include "BookmarkDialogWindow.hpp"
 #include "GrepNode.hpp"
 #include "Logfile.hpp"
@@ -337,6 +338,23 @@ void MainWindow::on_actionLoad_from_file_triggered()
 
     for (const QString& file_path : file_paths)
         load_log_file(file_path);
+}
+
+void MainWindow::on_actionMerge_files_triggered()
+{
+    MergerDialogWindow dialog(this);
+
+    if (dialog.exec() != QDialog::Accepted)
+        return;
+
+    const QString merged_path = dialog.outputPath();
+    if (merged_path.isEmpty())
+        return;
+
+    Settings::instance().addRecentFile(merged_path);
+
+    if (dialog.shouldOpenResult())
+        load_log_file(merged_path);
 }
 
 void MainWindow::on_actionGrep_current_view_triggered()

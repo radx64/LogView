@@ -31,6 +31,12 @@ void MainWindow::setupUi(QMainWindow* MainWindow)
     actionLoad_from_file->setIcon(icon);
     actionLoad_from_file->setShortcutContext(Qt::ApplicationShortcut);
 
+    actionMerge_files = new QAction(MainWindow);
+    actionMerge_files->setObjectName("actionMerge_files");
+    QIcon iconMerge;
+    iconMerge.addFile(QStringLiteral(":/icon/Add-Files-To-Archive-32.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
+    actionMerge_files->setIcon(iconMerge);
+
     exit_app = new QAction(MainWindow);
     exit_app->setObjectName("exit_app");
     QIcon icon1;
@@ -160,6 +166,8 @@ void MainWindow::setupUi(QMainWindow* MainWindow)
     menuTest->addAction(actionLoad_from_file);
     menuTest->addAction(menuRecent_files->menuAction());
     menuTest->addSeparator();
+    menuTest->addAction(actionMerge_files);
+    menuTest->addSeparator();
     menuTest->addAction(actionLoad_project);
     menuTest->addAction(actionSave_project);
     menuTest->addAction(actionSave_project_as);
@@ -202,6 +210,8 @@ void MainWindow::retranslateUi(QMainWindow* MainWindow)
     
     actionLoad_from_file->setText(QCoreApplication::translate("MainWindow", "Open file...", nullptr));
     actionLoad_from_file->setShortcut(QCoreApplication::translate("MainWindow", "Ctrl+O", nullptr));
+
+    actionMerge_files->setText(QCoreApplication::translate("MainWindow", "Merge files...", nullptr));
     
     exit_app->setText(QCoreApplication::translate("MainWindow", "Exit", nullptr));
     exit_app->setShortcut(QCoreApplication::translate("MainWindow", "Ctrl+Q", nullptr));

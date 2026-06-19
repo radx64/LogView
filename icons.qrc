@@ -13,5 +13,11 @@
     <file alias="Gnome-Preferences-System-32.png">img/Gnome-Preferences-System-32.png</file>
     <file alias="Gnome-Preferences-Desktop-Theme-32.png">img/Gnome-Preferences-Desktop-Theme-32.png</file>
     <file alias="Gnome-Document-Send-32.png">img/Gnome-Document-Send-32.png</file>
+    <file alias="Gnome-List-Add-32.png">img/Gnome-List-Add-32.png</file>
+    <file alias="Gnome-List-Remove-32.png">img/Gnome-List-Remove-32.png</file>
+    <file alias="Gnome-Edit-Clear-32.png">img/Gnome-Edit-Clear-32.png</file>
+    <file alias="Gnome-Go-Up-32.png">img/Gnome-Go-Up-32.png</file>
+    <file alias="Gnome-Go-Down-32.png">img/Gnome-Go-Down-32.png</file>
+    <file alias="Add-Files-To-Archive-32.png">img/Add-Files-To-Archive-32.png</file>
 </qresource>
 </RCC>

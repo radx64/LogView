@@ -17,6 +17,7 @@ class MainWindow
 {
 public:
     QAction* actionLoad_from_file{nullptr};
+    QAction* actionMerge_files{nullptr};
     QAction* exit_app{nullptr};
     QAction* actionGrep_current_view{nullptr};
     QAction* actionExport_grep{nullptr};
