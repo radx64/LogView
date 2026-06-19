@@ -1,16 +1,16 @@
 #pragma once
 
-#include <QDialog>
+#include <QWidget>
 
 class QModelIndex;
 class QPushButton;
 class QTableView;
 
-class AutoMarkingsDialogWindow : public QDialog
+class AutoMarkingsWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit AutoMarkingsDialogWindow(QWidget* parent = nullptr);
+    explicit AutoMarkingsWidget(QWidget* parent = nullptr);
 
 private:
     int selectedRow() const;

@@ -20,7 +20,6 @@ public:
     QAction* exit_app{nullptr};
     QAction* actionGrep_current_view{nullptr};
     QAction* actionBookmark_current_line{nullptr};
-    QAction* actionAutomatic_markings{nullptr};
     QAction* actionAbout{nullptr};
     QAction* actionCheck_for_updates{nullptr};
     QAction* actionLoad_project{nullptr};

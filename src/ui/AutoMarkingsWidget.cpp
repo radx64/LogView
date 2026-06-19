@@ -1,7 +1,8 @@
-#include "AutoMarkingsDialogWindow.hpp"
+#include "AutoMarkingsWidget.hpp"
 
 #include <QCheckBox>
 #include <QColorDialog>
+#include <QDialog>
 #include <QDialogButtonBox>
 #include <QFileInfo>
 #include <QFormLayout>
@@ -212,12 +213,9 @@ private:
 };
 } // namespace
 
-AutoMarkingsDialogWindow::AutoMarkingsDialogWindow(QWidget* parent)
-    : QDialog(parent)
+AutoMarkingsWidget::AutoMarkingsWidget(QWidget* parent)
+    : QWidget(parent)
 {
-    setWindowTitle(tr("Automatic markings"));
-    resize(760, 420);
-
     QLabel* hint = new QLabel(
         tr("These regex templates are saved in %1 and are applied to every opened log file.")
             .arg(QFileInfo(AutoMarkingsModel::filePath()).fileName()),
@@ -256,33 +254,29 @@ AutoMarkingsDialogWindow::AutoMarkingsDialogWindow(QWidget* parent)
     actions->addWidget(remove_button_);
     actions->addStretch();
 
-    QDialogButtonBox* buttons =
-        new QDialogButtonBox(QDialogButtonBox::Close, this);
-    connect(buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);
-
     QVBoxLayout* layout = new QVBoxLayout(this);
+    layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(hint);
     layout->addWidget(table_, 1);
     layout->addLayout(actions);
-    layout->addWidget(buttons);
 
     updateButtonState();
 }
 
-int AutoMarkingsDialogWindow::selectedRow() const
+int AutoMarkingsWidget::selectedRow() const
 {
     const QModelIndex index = table_->currentIndex();
     return index.isValid() ? index.row() : -1;
 }
 
-void AutoMarkingsDialogWindow::addMarking()
+void AutoMarkingsWidget::addMarking()
 {
     AutoMarkingRuleDialog dialog(this);
     if (dialog.exec() != QDialog::Accepted) return;
     AutoMarkingsModel::instance().add_marking(dialog.marking());
 }
 
-void AutoMarkingsDialogWindow::editSelectedMarking()
+void AutoMarkingsWidget::editSelectedMarking()
 {
     const int row = selectedRow();
     if (row < 0) return;
@@ -295,14 +289,14 @@ void AutoMarkingsDialogWindow::editSelectedMarking()
     AutoMarkingsModel::instance().update_marking(row, dialog.marking());
 }
 
-void AutoMarkingsDialogWindow::removeSelectedMarking()
+void AutoMarkingsWidget::removeSelectedMarking()
 {
     const int row = selectedRow();
     if (row < 0) return;
     AutoMarkingsModel::instance().remove_marking(row);
 }
 
-void AutoMarkingsDialogWindow::updateButtonState()
+void AutoMarkingsWidget::updateButtonState()
 {
     const bool has_selection = selectedRow() >= 0;
     edit_button_->setEnabled(has_selection);

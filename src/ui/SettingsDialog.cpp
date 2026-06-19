@@ -13,6 +13,7 @@
 #include <QTreeWidget>
 #include <QVBoxLayout>
 
+#include "AutoMarkingsWidget.hpp"
 #include "Settings.hpp"
 
 SettingsDialog::SettingsDialog(QWidget* parent)
@@ -37,6 +38,7 @@ SettingsDialog::SettingsDialog(QWidget* parent)
             });
 
     addSection(tr("Editor"), createEditorPage());
+    addSection(tr("Automatic markings"), createAutoMarkingsPage());
     addSection(tr("Updates"), createUpdatesPage());
 
     QHBoxLayout* contentLayout = new QHBoxLayout();
@@ -106,6 +108,11 @@ QWidget* SettingsDialog::createEditorPage()
     form->addRow(tr("Current line color:"), colorLayout);
 
     return page;
+}
+
+QWidget* SettingsDialog::createAutoMarkingsPage()
+{
+    return new AutoMarkingsWidget(this);
 }
 
 QWidget* SettingsDialog::createUpdatesPage()

@@ -20,6 +20,7 @@ public:
 
 private:
     QWidget* createEditorPage();
+    QWidget* createAutoMarkingsPage();
     QWidget* createUpdatesPage();
     void addSection(const QString& title, QWidget* page);
     void loadValues();

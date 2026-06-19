@@ -40,7 +40,6 @@ private slots:
     void on_exit_app_triggered();
     void on_actionGrep_current_view_triggered();
     void on_actionBookmark_current_line_triggered();
-    void on_actionAutomatic_markings_triggered();
     void on_actionAbout_triggered();
     void on_actionSave_project_as_triggered();
     void on_actionSave_project_triggered();

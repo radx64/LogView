@@ -29,7 +29,6 @@
 #include <QUrl>
 
 #include "AboutDialog.hpp"
-#include "AutoMarkingsDialogWindow.hpp"
 #include "Bookmark.hpp"
 #include "BookmarksModel.hpp"
 #include "GrepDialogWindow.hpp"
@@ -341,12 +340,6 @@ void MainWindow::on_actionGrep_current_view_triggered()
 void MainWindow::on_actionBookmark_current_line_triggered()
 {
     bookmark_current_line();
-}
-
-void MainWindow::on_actionAutomatic_markings_triggered()
-{
-    AutoMarkingsDialogWindow dialog(this);
-    dialog.exec();
 }
 
 void MainWindow::on_exit_app_triggered()

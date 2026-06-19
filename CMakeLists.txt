@@ -27,7 +27,7 @@ set(SOURCES
     src/ui/BookmarkDialogWindow.cpp
     src/AutoMarking.cpp
     src/AutoMarkingsModel.cpp
-    src/ui/AutoMarkingsDialogWindow.cpp
+    src/ui/AutoMarkingsWidget.cpp
     src/Marking.cpp
     src/MarkingsModel.cpp
     src/ui/MarkingDialogWindow.cpp
