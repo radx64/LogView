@@ -18,6 +18,9 @@ public:
     ~FileViewer();
     LogViewer* getDeepestActiveTab();
 
+    // Refreshes the base log view after its backing source finished loading.
+    void refreshAfterLoad();
+
     QListView* bookmarks_widget_;
     QListView* markings_widget_;
     Logfile* logfile_; //TODO make this protected

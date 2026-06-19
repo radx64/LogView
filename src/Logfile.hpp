@@ -26,6 +26,7 @@ public:
     void reload();
 
     std::shared_ptr<LineSource> getLineSource() const;
+    std::shared_ptr<FileLineSource> getFileSource() const;
 
     std::unique_ptr<GrepNode> grep_hierarchy_;
     std::unique_ptr<BookmarksModel> bookmarks_model_;

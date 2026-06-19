@@ -17,7 +17,7 @@
 namespace loader
 {
 
-void Logfile::load(Ui::MainWindow *ui, ::Logfile* lf, std::function<void(FileViewer*)> connect_slots_to_manager)
+FileViewer* Logfile::createView(Ui::MainWindow *ui, ::Logfile* lf, std::function<void(FileViewer*)> connect_slots_to_manager)
 {
     QTabWidget* file_viewer_widget = ui->fileView;
     FileViewer* viewer = new FileViewer(file_viewer_widget, lf);
@@ -26,7 +26,7 @@ void Logfile::load(Ui::MainWindow *ui, ::Logfile* lf, std::function<void(FileVie
     int tab_index = file_viewer_widget ->addTab(viewer, lf->getFileName().split(QRegularExpression("[\\/]")).last());
     file_viewer_widget ->setTabToolTip(tab_index, lf->getFileName());
     file_viewer_widget ->setCurrentIndex(tab_index);
-    spawnViews(viewer->getDeepestActiveTab(), lf->grep_hierarchy_.get());
+    return viewer;
 }
 
 void Logfile::spawnViews(LogViewer* parent_tab, const GrepNode* node)

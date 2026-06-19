@@ -105,6 +105,11 @@ LogViewer* FileViewer::getDeepestActiveTab()
     return find_deepest_active_tab(logViewer_);
 }
 
+void FileViewer::refreshAfterLoad()
+{
+    if (logViewer_) logViewer_->refresh();
+}
+
 bool FileViewer::eventFilter(QObject *obj, QEvent *event)
 {
     (void) obj;

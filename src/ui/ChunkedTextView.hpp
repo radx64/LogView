@@ -21,6 +21,10 @@ public:
 
     void gotoRow(qint64 row);
 
+    // Recomputes scrollbars and repaints. Call after the backing LineSource
+    // has finished loading so the freshly-available content becomes visible.
+    void refresh();
+
     void showSearch();
     void hideSearch();
 

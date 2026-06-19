@@ -114,3 +114,8 @@ GrepNode* LogViewer::getGrepNode()
 {
     return grep_node_;
 }
+
+void LogViewer::refresh()
+{
+    if (text_) text_->refresh();
+}

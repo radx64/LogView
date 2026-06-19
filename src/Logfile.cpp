@@ -43,6 +43,11 @@ std::shared_ptr<LineSource> Logfile::getLineSource() const
     return source_;
 }
 
+std::shared_ptr<FileLineSource> Logfile::getFileSource() const
+{
+    return source_;
+}
+
 const QString& Logfile::getFileName() const
 {
     return filename_;

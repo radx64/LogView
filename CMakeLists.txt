@@ -50,7 +50,7 @@ set(SOURCES
     src/ui/SettingsDialog.cpp
     src/main.cpp
     src/ProjectModel.cpp
-    src/loader/Project.cpp
+    src/loader/FileLoader.cpp
     src/loader/LoaderLogFile.cpp
     src/serializer/SerializerBookmark.cpp
     src/serializer/SerializerBookmarksModel.cpp
@@ -128,4 +128,11 @@ if(LOGVIEW_STATIC)
                 $<$<CONFIG:Release>:-static-libstdc++>)
         endif()
     endif()
+endif()
+
+# Strip symbols from MinGW release builds. A stripped binary looks more like a
+# normal release artifact and helps reduce antivirus false positives that the
+# unsigned, symbol-laden cross-compiled .exe tends to trigger.
+if(MINGW)
+    target_link_options(${projectName} PRIVATE $<$<CONFIG:Release>:-s>)
 endif()

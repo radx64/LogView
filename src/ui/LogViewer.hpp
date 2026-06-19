@@ -18,6 +18,8 @@ public:
               MarkingsModel* markings = nullptr);
     LogViewer* grep(GrepNode* grep);
 
+    void refresh();
+
     GrepNode* getGrepNode();
 
     LineSource* source() const { return source_.get(); }

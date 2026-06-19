@@ -62,6 +62,13 @@ ChunkedTextView::ChunkedTextView(QWidget* parent, LineSource* source, MarkingsMo
     applySettings();
 }
 
+void ChunkedTextView::refresh()
+{
+    max_line_width_chars_ = 0;
+    updateScrollBars();
+    viewport()->update();
+}
+
 void ChunkedTextView::applySettings()
 {
     font_ = Settings::instance().editorFont();

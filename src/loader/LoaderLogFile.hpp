@@ -16,7 +16,10 @@ class Logfile
 {
 public:
     Logfile() = delete;
-    static void load(Ui::MainWindow *ui, ::Logfile* pm, std::function<void(FileViewer*)> connect_slots_method);
+    // Creates the FileViewer/tab for a logfile and returns it. Does not spawn
+    // the grep hierarchy views; that is deferred until the backing source has
+    // finished loading (see spawnViews).
+    static FileViewer* createView(Ui::MainWindow *ui, ::Logfile* pm, std::function<void(FileViewer*)> connect_slots_method);
     static void spawnViews(LogViewer* parent_tab, const GrepNode* node);
 };
 

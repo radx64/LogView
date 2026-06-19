@@ -23,7 +23,9 @@
 #include <QMessageBox>
 #include <QMimeData>
 #include <QMouseEvent>
+#include <QProgressBar>
 #include <QStandardItemModel>
+#include <QStatusBar>
 #include <QTabBar>
 #include <QTabWidget>
 #include <QTextEdit>
@@ -43,7 +45,6 @@
 #include "ChunkedTextView.hpp"
 #include "LineSource.hpp"
 #include "FileViewer.hpp"
-#include "loader/Project.hpp"
 #include "serializer/SerializerProjectModel.hpp"
 #include "ProjectUiManager.hpp"
 #include "ThemeManager.hpp"
@@ -151,11 +152,48 @@ MainWindow::MainWindow(QWidget* parent) :
     connect_signals();
     setupThemeMenu();
     setupRecentMenus();
+    setupLoadProgressUi();
     pm_ = std::make_unique<ProjectUiManager>(ui);
     connect(pm_.get(), &ProjectUiManager::projectStateChanged, this, &MainWindow::project_changed);
+    connect(pm_.get(), &ProjectUiManager::loadProgressChanged, this, &MainWindow::onLoadProgressChanged);
     setupUpdateChecker();
     newProject();
     updateUi();
+}
+
+void MainWindow::setupLoadProgressUi()
+{
+    load_progress_label_ = new QLabel(this);
+    load_progress_bar_ = new QProgressBar(this);
+    load_progress_bar_->setRange(0, 100);
+    load_progress_bar_->setTextVisible(false);
+    load_progress_bar_->setFixedWidth(160);
+    load_progress_bar_->setMaximumHeight(14);
+
+    load_progress_label_->hide();
+    load_progress_bar_->hide();
+
+    statusBar()->addPermanentWidget(load_progress_label_);
+    statusBar()->addPermanentWidget(load_progress_bar_);
+}
+
+void MainWindow::onLoadProgressChanged(bool active, int percent, const QString& text)
+{
+    if (!load_progress_bar_ || !load_progress_label_)
+        return;
+
+    if (active)
+    {
+        load_progress_label_->setText(text);
+        load_progress_bar_->setValue(percent);
+        load_progress_label_->show();
+        load_progress_bar_->show();
+    }
+    else
+    {
+        load_progress_label_->hide();
+        load_progress_bar_->hide();
+    }
 }
 
 void MainWindow::setupUpdateChecker()

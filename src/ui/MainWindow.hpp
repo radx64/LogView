@@ -18,6 +18,8 @@ class FileViewer;
 class ThemeManager;
 class QActionGroup;
 class UpdateChecker;
+class QProgressBar;
+class QLabel;
 
 namespace Ui {
 class MainWindow;
@@ -50,6 +52,9 @@ private slots:
     void on_actionCheck_for_updates_triggered();
 
 private:
+    void setupLoadProgressUi();
+    void onLoadProgressChanged(bool active, int percent, const QString& text);
+
     void setupUpdateChecker();
     void checkForUpdates(bool silent);
     void onUpdateAvailable(const QString& version,
@@ -90,5 +95,7 @@ private:
     std::unique_ptr<UpdateChecker> update_checker_{};
     QActionGroup* theme_action_group_{nullptr};
     bool manual_update_check_{false};
+    QProgressBar* load_progress_bar_{nullptr};
+    QLabel* load_progress_label_{nullptr};
     Ui::MainWindow *ui{nullptr};
 };

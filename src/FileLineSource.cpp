@@ -34,6 +34,9 @@ QString expandTabs(const QString& in)
 FileLineSource::FileLineSource(const QString& filename)
     : filename_(filename), file_(filename)
 {
+    // Only open the read handle here (cheap). The expensive newline scan is
+    // performed later in buildIndex(), which is meant to run on a worker
+    // thread so the UI does not block while large files are loaded.
     if (!file_.open(QIODevice::ReadOnly))
     {
         QMessageBox msg;
@@ -45,14 +48,29 @@ FileLineSource::FileLineSource(const QString& filename)
     }
 
     file_size_ = file_.size();
-    buildIndex();
     valid_ = true;
 }
 
-void FileLineSource::buildIndex()
+bool FileLineSource::buildIndex(const ProgressCallback& on_progress)
 {
     line_offsets_.clear();
-    if (file_size_ <= 0) return;
+
+    if (!valid_ || file_size_ <= 0)
+    {
+        loaded_.store(true, std::memory_order_release);
+        if (on_progress) on_progress(file_size_, file_size_);
+        return true;
+    }
+
+    // Use a private read handle so the indexing thread never races with chunk
+    // reads happening on the GUI thread through file_.
+    QFile scan_file(filename_);
+    if (!scan_file.open(QIODevice::ReadOnly))
+    {
+        loaded_.store(true, std::memory_order_release);
+        if (on_progress) on_progress(file_size_, file_size_);
+        return true;
+    }
 
     line_offsets_.append(0);
 
@@ -60,10 +78,9 @@ void FileLineSource::buildIndex()
     QByteArray buffer;
     qint64 absolute = 0;
 
-    file_.seek(0);
-    while (!file_.atEnd())
+    while (!scan_file.atEnd())
     {
-        buffer = file_.read(kReadBuffer);
+        buffer = scan_file.read(kReadBuffer);
         const int size = buffer.size();
         const char* data = buffer.constData();
         for (int i = 0; i < size; ++i)
@@ -75,16 +92,28 @@ void FileLineSource::buildIndex()
             }
         }
         absolute += size;
+
+        if (on_progress && !on_progress(absolute, file_size_))
+        {
+            line_offsets_.clear();
+            return false;
+        }
     }
+
+    loaded_.store(true, std::memory_order_release);
+    if (on_progress) on_progress(file_size_, file_size_);
+    return true;
 }
 
 qint64 FileLineSource::count() const
 {
+    if (!loaded_.load(std::memory_order_acquire)) return 0;
     return line_offsets_.size();
 }
 
 uint32_t FileLineSource::maxLineNumber() const
 {
+    if (!loaded_.load(std::memory_order_acquire)) return 0;
     return static_cast<uint32_t>(line_offsets_.size());
 }
 
@@ -157,6 +186,7 @@ const QVector<QString>& FileLineSource::ensureChunk(int chunk) const
 
 Line FileLineSource::at(qint64 index) const
 {
+    if (!loaded_.load(std::memory_order_acquire)) return Line{0, QString()};
     if (index < 0 || index >= line_offsets_.size()) return Line{0, QString()};
 
     const int chunk = static_cast<int>(index / kChunkLines);
