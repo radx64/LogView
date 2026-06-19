@@ -34,8 +34,10 @@ void Logfile::spawnViews(LogViewer* parent_tab, const GrepNode* node)
     if (node == nullptr) return;
     for (GrepNode* child : node->getChildren())
     {
-        LogViewer* spawned_viewer = parent_tab->grep(child);
-        spawnViews(spawned_viewer, child);
+        parent_tab->grep(child, [child](LogViewer* spawned_viewer)
+        {
+            spawnViews(spawned_viewer, child);
+        });
     }
 }
 

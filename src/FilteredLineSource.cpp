@@ -7,70 +7,93 @@
 
 #include "GrepNode.hpp"
 
-FilteredLineSource::FilteredLineSource(std::shared_ptr<LineSource> parent,
-                                       QVector<qint64> indices,
-                                       uint32_t max_line_number)
+
+FilteredLineSource::FilteredLineSource(std::shared_ptr<LineSource> parent, const GrepNode* grep)
     : parent_(std::move(parent))
-    , indices_(std::move(indices))
-    , max_line_number_(max_line_number)
+    , pattern_(QString::fromStdString(grep->getPattern()))
+    , is_regex_(grep->isRegEx())
+    , is_case_sensitive_(grep->isCaseSensitive())
+    , is_inverted_(grep->isInverted())
 {
 }
 
-std::shared_ptr<FilteredLineSource> FilteredLineSource::create(
-    std::shared_ptr<LineSource> parent, const GrepNode* grep)
+bool FilteredLineSource::compute(const ProgressCallback& on_progress)
 {
-    QVector<qint64> indices;
-    uint32_t max_number = 0;
+    indices_.clear();
+    max_line_number_ = 0;
 
-    const QString pattern = QString::fromStdString(grep->getPattern());
-    const bool inverted = grep->isInverted();
-    const qint64 total = parent->count();
+    const qint64 total = parent_ ? parent_->count() : 0;
 
-    if (grep->isRegEx())
+
+    const qint64 stride = std::clamp<qint64>(total / 100, 1000, 1 << 16);
+    qint64 until_report = stride;
+
+    const auto keep_going = [&](qint64 scanned) -> bool
     {
-        const QRegularExpression expression(pattern);
+        if (--until_report > 0) return true;
+        until_report = stride;
+        return on_progress ? on_progress(scanned, total) : true;
+    };
+
+    if (is_regex_)
+    {
+        const QRegularExpression expression(pattern_);
         for (qint64 i = 0; i < total; ++i)
         {
-            const Line line = parent->at(i);
+            const Line line = parent_->at(i);
             const bool matched = expression.match(line.text).hasMatch();
-            if (matched != inverted)
+            if (matched != is_inverted_)
             {
-                indices.append(i);
-                max_number = std::max(max_number, line.number);
+                indices_.append(i);
+                max_line_number_ = std::max(max_line_number_, line.number);
             }
+            if (!keep_going(i)) { indices_.clear(); return false; }
         }
     }
     else
     {
         const Qt::CaseSensitivity sensitivity =
-            grep->isCaseSensitive() ? Qt::CaseSensitive : Qt::CaseInsensitive;
+            is_case_sensitive_ ? Qt::CaseSensitive : Qt::CaseInsensitive;
         for (qint64 i = 0; i < total; ++i)
         {
-            const Line line = parent->at(i);
-            const bool matched = line.text.contains(pattern, sensitivity);
-            if (matched != inverted)
+            const Line line = parent_->at(i);
+            const bool matched = line.text.contains(pattern_, sensitivity);
+            if (matched != is_inverted_)
             {
-                indices.append(i);
-                max_number = std::max(max_number, line.number);
+                indices_.append(i);
+                max_line_number_ = std::max(max_line_number_, line.number);
             }
+            if (!keep_going(i)) { indices_.clear(); return false; }
         }
     }
 
-    return std::make_shared<FilteredLineSource>(std::move(parent), std::move(indices), max_number);
+    loaded_.store(true, std::memory_order_release);
+    if (on_progress) on_progress(total, total);
+    return true;
 }
 
 qint64 FilteredLineSource::count() const
 {
+    if (!loaded_.load(std::memory_order_acquire)) return 0;
     return indices_.size();
 }
 
 uint32_t FilteredLineSource::maxLineNumber() const
 {
+    if (!loaded_.load(std::memory_order_acquire)) return 0;
     return max_line_number_;
 }
 
 Line FilteredLineSource::at(qint64 index) const
 {
+    if (!loaded_.load(std::memory_order_acquire)) return Line{0, QString()};
     if (index < 0 || index >= indices_.size()) return Line{0, QString()};
     return parent_->at(indices_.at(static_cast<int>(index)));
+}
+
+uint32_t FilteredLineSource::lineNumberAt(qint64 index) const
+{
+    if (!loaded_.load(std::memory_order_acquire)) return 0;
+    if (index < 0 || index >= indices_.size()) return 0;
+    return parent_->lineNumberAt(indices_.at(static_cast<int>(index)));
 }

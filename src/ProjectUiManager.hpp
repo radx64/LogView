@@ -18,7 +18,7 @@
 #include "serializer/SerializerProjectModel.hpp"
 
 class FileViewer;
-class FileLoader;
+class BackgroundTask;
 
 class ProjectUiManager : public QObject
 {
@@ -45,7 +45,7 @@ private slots:
 private:
     struct LoadEntry
     {
-        FileLoader* loader = nullptr;
+        BackgroundTask* loader = nullptr;
         QPointer<FileViewer> viewer;
         Logfile* lf = nullptr;
         QString name;
@@ -61,7 +61,7 @@ private:
 
     void present_logfile(Logfile* lf);
     void beginLoading(Logfile* lf, FileViewer* viewer);
-    void onLoaderFinished(FileLoader* loader, bool ok);
+    void onLoaderFinished(BackgroundTask* loader, bool ok);
     void setTabLoading(LoadEntry& entry, bool loading);
     void emitAggregateProgress();
 

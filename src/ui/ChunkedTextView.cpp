@@ -417,7 +417,7 @@ void ChunkedTextView::paintEvent(QPaintEvent* event)
         for (qint64 row = first; row < last; ++row)
         {
             const int y = static_cast<int>((row - first) * line_height_);
-            const QString number = QString::number(source_->at(row).number);
+            const QString number = QString::number(source_->lineNumberAt(row));
             painter.drawText(0, y, gutter - kGutterPadding, line_height_,
                 Qt::AlignRight | Qt::AlignVCenter, number);
         }

@@ -3,7 +3,7 @@
 #include "FileViewer.hpp"
 #include "FileLineSource.hpp"
 #include "Settings.hpp"
-#include "loader/FileLoader.hpp"
+#include "loader/BackgroundTask.hpp"
 
 #include <QDebug>
 #include <QFileInfo>
@@ -72,7 +72,9 @@ void ProjectUiManager::beginLoading(Logfile* lf, FileViewer* viewer)
     }
 
     LoadEntry entry;
-    entry.loader = new FileLoader(source, this);
+    entry.loader = new BackgroundTask(
+        [source](const BackgroundTask::ProgressFn& report) { return source->buildIndex(report); },
+        this);
     entry.viewer = viewer;
     entry.lf = lf;
     entry.name = lf->getFileName().split(QRegularExpression("[\\/]")).last();
@@ -80,12 +82,12 @@ void ProjectUiManager::beginLoading(Logfile* lf, FileViewer* viewer)
     setTabLoading(entry, true);
     active_loads_.append(entry);
 
-    FileLoader* loader = entry.loader;
+    BackgroundTask* loader = entry.loader;
 
     // Stop indexing if the user closes the tab before loading finishes.
     connect(viewer, &FileViewer::destroyed, loader, [loader]() { loader->cancel(); });
 
-    connect(loader, &FileLoader::progress, this,
+    connect(loader, &BackgroundTask::progress, this,
         [this, loader](qint64 done, qint64 total)
         {
             for (LoadEntry& e : active_loads_)
@@ -100,14 +102,14 @@ void ProjectUiManager::beginLoading(Logfile* lf, FileViewer* viewer)
             emitAggregateProgress();
         });
 
-    connect(loader, &FileLoader::finished, this,
+    connect(loader, &BackgroundTask::finished, this,
         [this, loader](bool ok) { onLoaderFinished(loader, ok); });
 
     emitAggregateProgress();
     loader->start();
 }
 
-void ProjectUiManager::onLoaderFinished(FileLoader* loader, bool ok)
+void ProjectUiManager::onLoaderFinished(BackgroundTask* loader, bool ok)
 {
     int index = -1;
     for (int i = 0; i < active_loads_.size(); ++i)

@@ -111,6 +111,14 @@ qint64 FileLineSource::count() const
     return line_offsets_.size();
 }
 
+uint32_t FileLineSource::lineNumberAt(qint64 index) const
+{
+    // The file line number is just the row index + 1; no chunk read required.
+    if (!loaded_.load(std::memory_order_acquire)) return 0;
+    if (index < 0 || index >= line_offsets_.size()) return 0;
+    return static_cast<uint32_t>(index + 1);
+}
+
 uint32_t FileLineSource::maxLineNumber() const
 {
     if (!loaded_.load(std::memory_order_acquire)) return 0;
@@ -191,8 +199,11 @@ Line FileLineSource::at(qint64 index) const
 
     const int chunk = static_cast<int>(index / kChunkLines);
     const int offset_in_chunk = static_cast<int>(index % kChunkLines);
-    const QVector<QString>& lines = ensureChunk(chunk);
 
+    // Hold the lock across the cache lookup and the copy out of the cached
+    // chunk: another thread may evict/replace the chunk we are referencing.
+    QMutexLocker lock(&read_mutex_);
+    const QVector<QString>& lines = ensureChunk(chunk);
     const QString text = (offset_in_chunk < lines.size()) ? lines.at(offset_in_chunk) : QString();
     return Line{static_cast<uint32_t>(index + 1), text};
 }

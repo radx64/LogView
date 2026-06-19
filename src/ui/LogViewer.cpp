@@ -12,6 +12,7 @@
 #include "FilteredLineSource.hpp"
 #include "GrepNode.hpp"
 #include "LineSource.hpp"
+#include "loader/BackgroundTask.hpp"
 
 LogViewer::LogViewer(QWidget* parent, GrepNode* grep_node, std::shared_ptr<LineSource> source,
                      MarkingsModel* markings)
@@ -46,16 +47,51 @@ QString generateTabName(const GrepNode* grep, const QString base_name)
     return tabName;
 }
 
-LogViewer* LogViewer::grep(GrepNode* grep)
+LogViewer* LogViewer::grep(GrepNode* grep, std::function<void(LogViewer*)> on_ready)
 {
     const QString pattern = QString::fromStdString(grep->getPattern());
+    const QString base_name = generateTabName(grep, pattern);
 
-    std::shared_ptr<LineSource> filtered = FilteredLineSource::create(source_, grep);
+    auto filtered = std::make_shared<FilteredLineSource>(source_, grep);
 
-    LogViewer* viewer = new LogViewer(this, grep, std::move(filtered), markings_);
-    const int new_index = tabs_->addTab(viewer, generateTabName(grep, pattern));
+    LogViewer* viewer = new LogViewer(this, grep, filtered, markings_);
+    const int new_index = tabs_->addTab(viewer, base_name);
     tabs_->setCurrentIndex(new_index);
+
+    startFilter(viewer, std::move(filtered), base_name, std::move(on_ready));
     return viewer;
+}
+
+void LogViewer::startFilter(LogViewer* child, std::shared_ptr<FilteredLineSource> source,
+                            const QString& base_name, std::function<void(LogViewer*)> on_ready)
+{
+    BackgroundTask* task = new BackgroundTask(
+        [source](const BackgroundTask::ProgressFn& report) { return source->compute(report); },
+        child);
+
+    connect(task, &BackgroundTask::progress, child,
+        [this, child, base_name](qint64 done, qint64 total)
+        {
+            const int idx = tabs_->indexOf(child);
+            if (idx < 0) return;
+            const int percent = (total > 0) ? static_cast<int>(done * 100 / total) : 0;
+            tabs_->setTabText(idx, QStringLiteral("%1 %2%").arg(base_name).arg(percent));
+        });
+
+    connect(task, &BackgroundTask::finished, child,
+        [this, child, base_name, on_ready, task](bool ok)
+        {
+            if (ok)
+            {
+                const int idx = tabs_->indexOf(child);
+                if (idx >= 0) tabs_->setTabText(idx, base_name);
+                child->refresh();
+                if (on_ready) on_ready(child);
+            }
+            task->deleteLater();
+        });
+
+    task->start();
 }
 void LogViewer::closeTab(const int index)
 {

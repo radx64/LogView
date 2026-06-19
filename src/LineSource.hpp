@@ -15,6 +15,9 @@ public:
 
     virtual Line at(qint64 index) const = 0;
 
+    // Returns the original line number for a row without fetching its text,
+    virtual uint32_t lineNumberAt(qint64 index) const;
+
     virtual uint32_t maxLineNumber() const = 0;
 
     virtual qint64 rowForLineNumber(uint32_t number) const;

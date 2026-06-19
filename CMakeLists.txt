@@ -50,7 +50,7 @@ set(SOURCES
     src/ui/SettingsDialog.cpp
     src/main.cpp
     src/ProjectModel.cpp
-    src/loader/FileLoader.cpp
+    src/loader/BackgroundTask.cpp
     src/loader/LoaderLogFile.cpp
     src/serializer/SerializerBookmark.cpp
     src/serializer/SerializerBookmarksModel.cpp
