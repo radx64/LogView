@@ -10,5 +10,8 @@
     <file alias="Gnome-Document-Open-32.png">img/Gnome-Document-Open-32.png</file>
     <file alias="Gnome-Document-Save-As-32.png">img/Gnome-Document-Save-As-32.png</file>
     <file alias="Gnome-Document-Save-32.png">img/Gnome-Document-Save-32.png</file>
+    <file alias="Gnome-Preferences-System-32.png">img/Gnome-Preferences-System-32.png</file>
+    <file alias="Gnome-Preferences-Desktop-Theme-32.png">img/Gnome-Preferences-Desktop-Theme-32.png</file>
+    <file alias="Gnome-Document-Send-32.png">img/Gnome-Document-Send-32.png</file>
 </qresource>
 </RCC>

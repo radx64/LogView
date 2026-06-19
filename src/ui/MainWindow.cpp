@@ -501,17 +501,11 @@ void MainWindow::setupThemeMenu()
 {
     theme_manager_ = std::make_unique<ThemeManager>(this);
 
-    QMenu* viewMenu = new QMenu(tr("View"), this);
-    menuBar()->insertMenu(ui->menuHelp->menuAction(), viewMenu);
-    QMenu* themeMenu = viewMenu->addMenu(tr("Theme"));
-
     theme_action_group_ = new QActionGroup(this);
     theme_action_group_->setExclusive(true);
 
-    const auto addThemeAction = [&](const QString& text, ThemeManager::Theme theme)
+    const auto registerThemeAction = [&](QAction* action, ThemeManager::Theme theme)
     {
-        QAction* action = themeMenu->addAction(text);
-        action->setCheckable(true);
         action->setData(static_cast<int>(theme));
         theme_action_group_->addAction(action);
         connect(action, &QAction::triggered, this, [this, theme]()
@@ -520,16 +514,14 @@ void MainWindow::setupThemeMenu()
         });
     };
 
-    addThemeAction(tr("System"), ThemeManager::Theme::System);
-    addThemeAction(tr("Light"), ThemeManager::Theme::Light);
-    addThemeAction(tr("Dark"), ThemeManager::Theme::Dark);
+    registerThemeAction(ui->actionTheme_System, ThemeManager::Theme::System);
+    registerThemeAction(ui->actionTheme_Light, ThemeManager::Theme::Light);
+    registerThemeAction(ui->actionTheme_Dark, ThemeManager::Theme::Dark);
 
     connect(theme_manager_.get(), &ThemeManager::themeChanged,
             this, &MainWindow::updateThemeMenu);
 
-    viewMenu->addSeparator();
-    QAction* optionsAction = viewMenu->addAction(tr("Options..."));
-    connect(optionsAction, &QAction::triggered, this, &MainWindow::openSettings);
+    connect(ui->actionOptions, &QAction::triggered, this, &MainWindow::openSettings);
 
     theme_manager_->loadAndApply();
     updateThemeMenu();
@@ -543,23 +535,6 @@ void MainWindow::openSettings()
 
 void MainWindow::setupRecentMenus()
 {
-    recent_files_menu_ = new QMenu(tr("Recent files"), this);
-    recent_projects_menu_ = new QMenu(tr("Recent projects"), this);
-    recent_files_menu_->setToolTipsVisible(true);
-    recent_projects_menu_->setToolTipsVisible(true);
-
-    const auto actionAfter = [this](QAction* anchor) -> QAction*
-    {
-        const QList<QAction*> acts = ui->menuTest->actions();
-        const int idx = acts.indexOf(anchor);
-        if (idx < 0 || idx + 1 >= acts.size())
-            return nullptr;
-        return acts.at(idx + 1);
-    };
-
-    ui->menuTest->insertMenu(actionAfter(ui->actionLoad_from_file), recent_files_menu_);
-    ui->menuTest->insertMenu(actionAfter(ui->actionSave_project_as), recent_projects_menu_);
-
     connect(&Settings::instance(), &Settings::changed,
             this, &MainWindow::updateRecentMenus);
 
@@ -568,7 +543,7 @@ void MainWindow::setupRecentMenus()
 
 void MainWindow::updateRecentMenus()
 {
-    if (!recent_files_menu_ || !recent_projects_menu_)
+    if (!ui->menuRecent_files || !ui->menuRecent_projects)
         return;
 
     const auto populate = [this](QMenu* menu, const QStringList& items, bool isProject)
@@ -597,8 +572,8 @@ void MainWindow::updateRecentMenus()
         }
     };
 
-    populate(recent_files_menu_, Settings::instance().recentFiles(), false);
-    populate(recent_projects_menu_, Settings::instance().recentProjects(), true);
+    populate(ui->menuRecent_files, Settings::instance().recentFiles(), false);
+    populate(ui->menuRecent_projects, Settings::instance().recentProjects(), true);
 }
 
 void MainWindow::openRecentFile(const QString& file_path)

@@ -87,8 +87,6 @@ private:
     std::unique_ptr<ThemeManager> theme_manager_{};
     std::unique_ptr<UpdateChecker> update_checker_{};
     QActionGroup* theme_action_group_{nullptr};
-    QMenu* recent_files_menu_{nullptr};
-    QMenu* recent_projects_menu_{nullptr};
     bool manual_update_check_{false};
     Ui::MainWindow *ui{nullptr};
 };

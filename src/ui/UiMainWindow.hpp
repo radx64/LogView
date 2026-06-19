@@ -26,6 +26,10 @@ public:
     QAction* actionLoad_project{nullptr};
     QAction* actionSave_project_as{nullptr};
     QAction* actionSave_project{nullptr};
+    QAction* actionOptions{nullptr};
+    QAction* actionTheme_System{nullptr};
+    QAction* actionTheme_Light{nullptr};
+    QAction* actionTheme_Dark{nullptr};
     QWidget* centralWidget{nullptr};
     QGridLayout* gridLayout_2{nullptr};
     QGridLayout* gridLayout{nullptr};
@@ -33,6 +37,10 @@ public:
     QMenuBar* menuBar{nullptr};
     QMenu* menuTest{nullptr};
     QMenu* menuFind{nullptr};
+    QMenu* menuView{nullptr};
+    QMenu* menuTheme{nullptr};
+    QMenu* menuRecent_files{nullptr};
+    QMenu* menuRecent_projects{nullptr};
     QMenu* menuHelp{nullptr};
     QToolBar* mainToolBar{nullptr};
     QStatusBar* statusBar{nullptr};

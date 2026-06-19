@@ -45,39 +45,60 @@ void MainWindow::setupUi(QMainWindow* MainWindow)
 
     actionExport_grep = new QAction(MainWindow);
     actionExport_grep->setObjectName("actionExport_grep");
+    QIcon icon3;
+    icon3.addFile(QStringLiteral(":/icon/Gnome-Document-Send-32.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
+    actionExport_grep->setIcon(icon3);
 
     actionBookmark_current_line = new QAction(MainWindow);
     actionBookmark_current_line->setObjectName("actionBookmark_current_line");
-    QIcon icon3;
-    icon3.addFile(QStringLiteral(":/icon/Gnome-Bookmark-New-32.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
-    actionBookmark_current_line->setIcon(icon3);
+    QIcon icon4;
+    icon4.addFile(QStringLiteral(":/icon/Gnome-Bookmark-New-32.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
+    actionBookmark_current_line->setIcon(icon4);
 
     actionAbout = new QAction(MainWindow);
     actionAbout->setObjectName("actionAbout");
-    QIcon icon4;
-    icon4.addFile(QStringLiteral(":/icon/Gnome-Dialog-Warning-32.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
-    actionAbout->setIcon(icon4);
+    QIcon icon5;
+    icon5.addFile(QStringLiteral(":/icon/Gnome-Dialog-Warning-32.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
+    actionAbout->setIcon(icon5);
 
     actionCheck_for_updates = new QAction(MainWindow);
     actionCheck_for_updates->setObjectName("actionCheck_for_updates");
 
     actionLoad_project = new QAction(MainWindow);
     actionLoad_project->setObjectName("actionLoad_project");
-    QIcon icon5;
-    icon5.addFile(QStringLiteral(":/icon/Gnome-Document-Open-32.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
-    actionLoad_project->setIcon(icon5);
+    QIcon icon6;
+    icon6.addFile(QStringLiteral(":/icon/Gnome-Document-Open-32.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
+    actionLoad_project->setIcon(icon6);
 
     actionSave_project_as = new QAction(MainWindow);
     actionSave_project_as->setObjectName("actionSave_project_as");
-    QIcon icon6;
-    icon6.addFile(QStringLiteral(":/icon/Gnome-Document-Save-As-32.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
-    actionSave_project_as->setIcon(icon6);
+    QIcon icon7;
+    icon7.addFile(QStringLiteral(":/icon/Gnome-Document-Save-As-32.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
+    actionSave_project_as->setIcon(icon7);
 
     actionSave_project = new QAction(MainWindow);
     actionSave_project->setObjectName("actionSave_project");
-    QIcon icon7;
-    icon7.addFile(QStringLiteral(":/icon/Gnome-Document-Save-32.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
-    actionSave_project->setIcon(icon7);
+    QIcon icon8;
+    icon8.addFile(QStringLiteral(":/icon/Gnome-Document-Save-32.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
+    actionSave_project->setIcon(icon8);
+
+    actionTheme_System = new QAction(MainWindow);
+    actionTheme_System->setObjectName("actionTheme_System");
+    actionTheme_System->setCheckable(true);
+
+    actionTheme_Light = new QAction(MainWindow);
+    actionTheme_Light->setObjectName("actionTheme_Light");
+    actionTheme_Light->setCheckable(true);
+
+    actionTheme_Dark = new QAction(MainWindow);
+    actionTheme_Dark->setObjectName("actionTheme_Dark");
+    actionTheme_Dark->setCheckable(true);
+
+    actionOptions = new QAction(MainWindow);
+    actionOptions->setObjectName("actionOptions");
+    QIcon icon9;
+    icon9.addFile(QStringLiteral(":/icon/Gnome-Preferences-System-32.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
+    actionOptions->setIcon(icon9);
 
     centralWidget = new QWidget(MainWindow);
     centralWidget->setObjectName("centralWidget");
@@ -105,8 +126,19 @@ void MainWindow::setupUi(QMainWindow* MainWindow)
     menuBar->setGeometry(QRect(0, 0, 631, 20));
     menuTest = new QMenu(menuBar);
     menuTest->setObjectName("menuTest");
+    menuRecent_files = new QMenu(menuTest);
+    menuRecent_files->setObjectName("menuRecent_files");
+    menuRecent_files->setToolTipsVisible(true);
+    menuRecent_projects = new QMenu(menuTest);
+    menuRecent_projects->setObjectName("menuRecent_projects");
+    menuRecent_projects->setToolTipsVisible(true);
     menuFind = new QMenu(menuBar);
     menuFind->setObjectName("menuFind");
+    menuView = new QMenu(menuBar);
+    menuView->setObjectName("menuView");
+    menuTheme = new QMenu(menuView);
+    menuTheme->setObjectName("menuTheme");
+    menuTheme->setIcon(QIcon(QStringLiteral(":/icon/Gnome-Preferences-Desktop-Theme-32.png")));
     menuHelp = new QMenu(menuBar);
     menuHelp->setObjectName("menuHelp");
     menuHelp->setLayoutDirection(Qt::LeftToRight);
@@ -122,13 +154,16 @@ void MainWindow::setupUi(QMainWindow* MainWindow)
 
     menuBar->addAction(menuTest->menuAction());
     menuBar->addAction(menuFind->menuAction());
+    menuBar->addAction(menuView->menuAction());
     menuBar->addAction(menuHelp->menuAction());
     menuTest->addSeparator();
     menuTest->addAction(actionLoad_from_file);
+    menuTest->addAction(menuRecent_files->menuAction());
     menuTest->addSeparator();
     menuTest->addAction(actionLoad_project);
     menuTest->addAction(actionSave_project);
     menuTest->addAction(actionSave_project_as);
+    menuTest->addAction(menuRecent_projects->menuAction());
     menuTest->addSeparator();
     menuTest->addAction(actionExport_grep);
     menuTest->addSeparator();
@@ -136,6 +171,12 @@ void MainWindow::setupUi(QMainWindow* MainWindow)
     menuTest->addSeparator();
     menuFind->addAction(actionGrep_current_view);
     menuFind->addAction(actionBookmark_current_line);
+    menuView->addAction(menuTheme->menuAction());
+    menuTheme->addAction(actionTheme_System);
+    menuTheme->addAction(actionTheme_Light);
+    menuTheme->addAction(actionTheme_Dark);
+    menuView->addSeparator();
+    menuView->addAction(actionOptions);
     menuHelp->addAction(actionCheck_for_updates);
     menuHelp->addSeparator();
     menuHelp->addAction(actionAbout);
@@ -158,25 +199,46 @@ void MainWindow::setupUi(QMainWindow* MainWindow)
 void MainWindow::retranslateUi(QMainWindow* MainWindow)
 {
     MainWindow->setWindowTitle(QCoreApplication::translate("MainWindow", "LogView", nullptr));
+    
     actionLoad_from_file->setText(QCoreApplication::translate("MainWindow", "Open file...", nullptr));
     actionLoad_from_file->setShortcut(QCoreApplication::translate("MainWindow", "Ctrl+O", nullptr));
+    
     exit_app->setText(QCoreApplication::translate("MainWindow", "Exit", nullptr));
     exit_app->setShortcut(QCoreApplication::translate("MainWindow", "Ctrl+Q", nullptr));
+    
     actionGrep_current_view->setText(QCoreApplication::translate("MainWindow", "Grep current view", nullptr));
     actionGrep_current_view->setShortcut(QCoreApplication::translate("MainWindow", "Ctrl+G", nullptr));
+    
     actionExport_grep->setText(QCoreApplication::translate("MainWindow", "Export grep...", nullptr));
+    actionExport_grep->setShortcut(QCoreApplication::translate("MainWindow", "Ctrl+E", nullptr));
+    
     actionBookmark_current_line->setText(QCoreApplication::translate("MainWindow", "Bookmark current line", nullptr));
     actionBookmark_current_line->setShortcut(QCoreApplication::translate("MainWindow", "Ctrl+B", nullptr));
+    
     actionAbout->setText(QCoreApplication::translate("MainWindow", "About", nullptr));
+    
     actionCheck_for_updates->setText(QCoreApplication::translate("MainWindow", "Check for updates...", nullptr));
+    
     actionLoad_project->setText(QCoreApplication::translate("MainWindow", "Load project ...", nullptr));
     actionLoad_project->setShortcut(QCoreApplication::translate("MainWindow", "Ctrl+L", nullptr));
+    
     actionSave_project_as->setText(QCoreApplication::translate("MainWindow", "Save project as...", nullptr));
     actionSave_project_as->setShortcut(QCoreApplication::translate("MainWindow", "Ctrl+Shift+S", nullptr));
+    
     actionSave_project->setText(QCoreApplication::translate("MainWindow", "Save project", nullptr));
     actionSave_project->setShortcut(QCoreApplication::translate("MainWindow", "Ctrl+S", nullptr));
+
+    actionTheme_System->setText(QCoreApplication::translate("MainWindow", "System", nullptr));
+    actionTheme_Light->setText(QCoreApplication::translate("MainWindow", "Light", nullptr));
+    actionTheme_Dark->setText(QCoreApplication::translate("MainWindow", "Dark", nullptr));
+    actionOptions->setText(QCoreApplication::translate("MainWindow", "Options...", nullptr));
+    
     menuTest->setTitle(QCoreApplication::translate("MainWindow", "File", nullptr));
     menuFind->setTitle(QCoreApplication::translate("MainWindow", "Edit", nullptr));
+    menuView->setTitle(QCoreApplication::translate("MainWindow", "View", nullptr));
+    menuTheme->setTitle(QCoreApplication::translate("MainWindow", "Theme", nullptr));
+    menuRecent_files->setTitle(QCoreApplication::translate("MainWindow", "Recent files", nullptr));
+    menuRecent_projects->setTitle(QCoreApplication::translate("MainWindow", "Recent projects", nullptr));
     menuHelp->setTitle(QCoreApplication::translate("MainWindow", "Help", nullptr));
     mainToolBar->setWindowTitle(QCoreApplication::translate("MainWindow", "Toolbar", nullptr));
 }
