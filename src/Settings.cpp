@@ -18,6 +18,9 @@ constexpr auto kSkippedVersionKey = "SkippedVersion";
 constexpr auto kRecentGroup = "Recent";
 constexpr auto kRecentFilesKey = "Files";
 constexpr auto kRecentProjectsKey = "Projects";
+constexpr auto kPathsGroup = "Paths";
+constexpr auto kLastFileDirKey = "LastFileDirectory";
+constexpr auto kLastProjectDirKey = "LastProjectDirectory";
 
 QString normalizePath(const QString& path)
 {
@@ -99,6 +102,24 @@ void Settings::setSkippedUpdateVersion(const QString& version)
     emit changed();
 }
 
+void Settings::setLastOpenedFileDirectory(const QString& directory)
+{
+    if (last_file_dir_ == directory)
+        return;
+    last_file_dir_ = directory;
+    save();
+    emit changed();
+}
+
+void Settings::setLastOpenedProjectDirectory(const QString& directory)
+{
+    if (last_project_dir_ == directory)
+        return;
+    last_project_dir_ = directory;
+    save();
+    emit changed();
+}
+
 void Settings::addRecentFile(const QString& path)
 {
     prependRecent(recent_files_, path);
@@ -165,6 +186,11 @@ void Settings::load()
     recent_projects_ = settings.value(kRecentProjectsKey).toStringList();
     settings.endGroup();
 
+    settings.beginGroup(kPathsGroup);
+    last_file_dir_ = settings.value(kLastFileDirKey).toString();
+    last_project_dir_ = settings.value(kLastProjectDirKey).toString();
+    settings.endGroup();
+
     while (recent_files_.size() > kMaxRecent)
         recent_files_.removeLast();
     while (recent_projects_.size() > kMaxRecent)
@@ -193,5 +219,10 @@ void Settings::save() const
     settings.beginGroup(kRecentGroup);
     settings.setValue(kRecentFilesKey, recent_files_);
     settings.setValue(kRecentProjectsKey, recent_projects_);
+    settings.endGroup();
+
+    settings.beginGroup(kPathsGroup);
+    settings.setValue(kLastFileDirKey, last_file_dir_);
+    settings.setValue(kLastProjectDirKey, last_project_dir_);
     settings.endGroup();
 }

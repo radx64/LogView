@@ -26,6 +26,12 @@ public:
 
     static constexpr int kMaxRecent = 10;
 
+    QString lastOpenedFileDirectory() const { return last_file_dir_; }
+    void setLastOpenedFileDirectory(const QString& directory);
+
+    QString lastOpenedProjectDirectory() const { return last_project_dir_; }
+    void setLastOpenedProjectDirectory(const QString& directory);
+
     QStringList recentFiles() const { return recent_files_; }
     QStringList recentProjects() const { return recent_projects_; }
 
@@ -53,6 +59,8 @@ private:
     QColor highlight_line_color_{};
     bool check_updates_on_startup_{true};
     QString skipped_update_version_{};
+    QString last_file_dir_{};
+    QString last_project_dir_{};
     QStringList recent_files_{};
     QStringList recent_projects_{};
 };

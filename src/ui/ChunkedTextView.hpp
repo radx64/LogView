@@ -26,6 +26,7 @@ protected:
     void mouseReleaseEvent(QMouseEvent* event) override;
     void mouseDoubleClickEvent(QMouseEvent* event) override;
     void keyPressEvent(QKeyEvent* event) override;
+    void wheelEvent(QWheelEvent* event) override;
     void scrollContentsBy(int dx, int dy) override;
     void changeEvent(QEvent* event) override;
 

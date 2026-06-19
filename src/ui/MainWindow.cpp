@@ -324,10 +324,14 @@ void MainWindow::bookmark_current_line()
 void MainWindow::on_actionLoad_from_file_triggered()
 {
     QStringList file_paths = QFileDialog::getOpenFileNames(this,
-        tr("Open log files"), "",
+        tr("Open log files"),
+        Settings::instance().lastOpenedFileDirectory(),
         tr("All Files (*)"));
     if (file_paths.isEmpty())
         return;
+
+    Settings::instance().setLastOpenedFileDirectory(
+        QFileInfo(file_paths.constFirst()).absolutePath());
 
     for (const QString& file_path : file_paths)
         load_log_file(file_path);

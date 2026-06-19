@@ -17,6 +17,7 @@
 #include <QRegularExpressionMatchIterator>
 #include <QResizeEvent>
 #include <QScrollBar>
+#include <QWheelEvent>
 #include <QtMath>
 
 #include "AutoMarkingsModel.hpp"
@@ -28,6 +29,8 @@ namespace
 {
 constexpr int kGutterPadding = 8;
 constexpr int kTextLeftPadding = 4;
+constexpr int kMinFontPointSize = 6;
+constexpr int kMaxFontPointSize = 72;
 }
 
 ChunkedTextView::ChunkedTextView(QWidget* parent, LineSource* source, MarkingsModel* markings)
@@ -114,6 +117,34 @@ void ChunkedTextView::resizeEvent(QResizeEvent* event)
 {
     QAbstractScrollArea::resizeEvent(event);
     updateScrollBars();
+}
+
+void ChunkedTextView::wheelEvent(QWheelEvent* event)
+{
+    if (!event->modifiers().testFlag(Qt::ControlModifier))
+    {
+        QAbstractScrollArea::wheelEvent(event);
+        return;
+    }
+
+    const int steps = event->angleDelta().y();
+    if (steps == 0)
+    {
+        event->accept();
+        return;
+    }
+
+    QFont font = Settings::instance().editorFont();
+    const int current_size = font.pointSize() > 0 ? font.pointSize() : 10;
+    const int new_size = std::clamp(current_size + (steps > 0 ? 1 : -1),
+                                    kMinFontPointSize, kMaxFontPointSize);
+
+    event->accept();
+    if (new_size == current_size)
+        return;
+
+    font.setPointSize(new_size);
+    Settings::instance().setEditorFont(font);
 }
 
 void ChunkedTextView::scrollContentsBy(int /*dx*/, int /*dy*/)

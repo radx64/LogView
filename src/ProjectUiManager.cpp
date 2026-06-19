@@ -1,8 +1,10 @@
 #include "ProjectUiManager.hpp"
 
 #include "FileViewer.hpp"
+#include "Settings.hpp"
 
 #include <QDebug>
+#include <QFileInfo>
 
 ProjectUiManager::ProjectUiManager(Ui::MainWindow* ui)
 : ui_(ui)
@@ -100,13 +102,17 @@ void ProjectUiManager::save_project()
     if (file_path.isEmpty())
     {
         file_path = QFileDialog::getSaveFileName(ui_->fileView->window(),
-            tr("Save project"), "",
+            tr("Save project"),
+            Settings::instance().lastOpenedProjectDirectory(),
             tr("Project file (*.json)"));
         qDebug() << "FP: " << file_path;
     }
 
     if (file_path.isEmpty())
         return;
+
+    Settings::instance().setLastOpenedProjectDirectory(
+        QFileInfo(file_path).absolutePath());
 
     QFile saveFile(file_path);
     if (!saveFile.open(QIODevice::WriteOnly)) {
@@ -129,11 +135,15 @@ QString ProjectUiManager::open_project(const QString& file_path)
     if (path.isEmpty())
     {
         path = QFileDialog::getOpenFileName(ui_->fileView->window(),
-                                            tr("Open project"), "",
+                                            tr("Open project"),
+                                            Settings::instance().lastOpenedProjectDirectory(),
                                             tr("Project file (*.json)"));
     }
     if (path.isEmpty())
         return QString();
+
+    Settings::instance().setLastOpenedProjectDirectory(
+        QFileInfo(path).absolutePath());
 
     QFile loadFile(path);
     if (!loadFile.open(QIODevice::ReadOnly)) {
