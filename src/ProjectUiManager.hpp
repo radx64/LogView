@@ -64,6 +64,7 @@ private:
     void onLoaderFinished(BackgroundTask* loader, bool ok);
     void setTabLoading(LoadEntry& entry, bool loading);
     void emitAggregateProgress();
+    void regenerateAutoBookmarks();
 
     std::unique_ptr<ProjectModel> pm_;
     Ui::MainWindow* ui_;

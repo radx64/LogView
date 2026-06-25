@@ -46,6 +46,12 @@ public:
     void removeRecentFile(const QString& path);
     void removeRecentProject(const QString& path);
 
+    QStringList disabledBookmarkTags() const { return disabled_bookmark_tags_; }
+    void setDisabledBookmarkTags(const QStringList& tags);
+
+    QStringList disabledBookmarkFiles() const { return disabled_bookmark_files_; }
+    void setDisabledBookmarkFiles(const QStringList& files);
+
     void load();
     void save() const;
 
@@ -71,4 +77,6 @@ private:
     QString last_project_dir_{};
     QStringList recent_files_{};
     QStringList recent_projects_{};
+    QStringList disabled_bookmark_tags_{};
+    QStringList disabled_bookmark_files_{};
 };

@@ -1,5 +1,6 @@
 #include "ProjectUiManager.hpp"
 
+#include "AutoBookmarksModel.hpp"
 #include "FileViewer.hpp"
 #include "FileLineSource.hpp"
 #include "Settings.hpp"
@@ -14,6 +15,9 @@ ProjectUiManager::ProjectUiManager(Ui::MainWindow* ui)
 {
     pm_ = std::make_unique<ProjectModel>();
     adoptProjectModel();
+
+    connect(&AutoBookmarksModel::instance(), &AutoBookmarksModel::changed,
+            this, &ProjectUiManager::regenerateAutoBookmarks);
 }
 
 void ProjectUiManager::create_new()
@@ -67,6 +71,7 @@ void ProjectUiManager::beginLoading(Logfile* lf, FileViewer* viewer)
     if (!source || source->isLoaded())
     {
         loader::Logfile::spawnViews(viewer->getDeepestActiveTab(), lf->grep_hierarchy_.get());
+        lf->generateAutoBookmarks();
         viewer->refreshAfterLoad();
         return;
     }
@@ -130,6 +135,7 @@ void ProjectUiManager::onLoaderFinished(BackgroundTask* loader, bool ok)
         setTabLoading(entry, false);
         loader::Logfile::spawnViews(entry.viewer->getDeepestActiveTab(),
                                     entry.lf->grep_hierarchy_.get());
+        entry.lf->generateAutoBookmarks();
         entry.viewer->refreshAfterLoad();
     }
 
@@ -215,6 +221,13 @@ void ProjectUiManager::on_logfile_wiget_close(Logfile* lf)
 {
     qDebug() << "Clean some projet resources here";
     pm_->remove_file_from_project(lf);
+}
+
+void ProjectUiManager::regenerateAutoBookmarks()
+{
+    for (const std::unique_ptr<Logfile>& lf : pm_->get_log_files())
+        if (lf)
+            lf->generateAutoBookmarks();
 }
 
 bool ProjectUiManager::is_empty()

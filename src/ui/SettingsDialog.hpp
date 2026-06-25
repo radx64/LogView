@@ -21,6 +21,7 @@ public:
 private:
     QWidget* createEditorPage();
     QWidget* createAutoMarkingsPage();
+    QWidget* createAutoBookmarksPage();
     QWidget* createUpdatesPage();
     void addSection(const QString& title, QWidget* page);
     void loadValues();

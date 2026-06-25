@@ -8,6 +8,7 @@ class BookmarksModel;
 class QHBoxLayout;
 class Logfile;
 class QListView;
+class QToolButton;
 class LogViewer;
 
 class FileViewer: public QWidget
@@ -29,6 +30,7 @@ protected:
     bool eventFilter(QObject *obj, QEvent *event) override;
     QHBoxLayout* layout_;
     LogViewer* logViewer_;
+    QToolButton* bookmarks_filter_button_{nullptr};
 
 signals:
     void destroyed(Logfile* logfile);
@@ -36,6 +38,7 @@ signals:
 private slots:
     void bookmarksItemDoubleClicked(const QModelIndex& idx);
     void showBookmarksContextMenu(const QPoint& pos);
+    void showBookmarksFilterMenu();
     void markingsItemDoubleClicked(const QModelIndex& idx);
     void showMarkingsContextMenu(const QPoint& pos);
 };

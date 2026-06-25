@@ -14,6 +14,7 @@ namespace serializer { class Logfile; }
 
 class FileLineSource;
 class LineSource;
+class BackgroundTask;
 
 class Logfile : public QObject
 {
@@ -24,6 +25,7 @@ public:
     BookmarksModel* getBookmarksModel();
     MarkingsModel* getMarkingsModel();
     void reload();
+    void generateAutoBookmarks();
 
     std::shared_ptr<LineSource> getLineSource() const;
     std::shared_ptr<FileLineSource> getFileSource() const;
@@ -35,6 +37,7 @@ public:
 protected:
     std::shared_ptr<FileLineSource> source_;
     QString filename_;
+    BackgroundTask* auto_bookmark_task_{nullptr};
 
     void connect_events();
 
@@ -42,4 +45,6 @@ protected:
 
 signals:
     void changed();
+    void autoBookmarksStarted();
+    void autoBookmarksFinished();
 };

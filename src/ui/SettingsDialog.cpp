@@ -14,6 +14,7 @@
 #include <QVBoxLayout>
 
 #include "AutoMarkingsWidget.hpp"
+#include "AutoBookmarksWidget.hpp"
 #include "Settings.hpp"
 
 namespace
@@ -44,7 +45,8 @@ SettingsDialog::SettingsDialog(QWidget* parent)
             });
 
     addSection(tr("Editor"), createEditorPage());
-    addSection(tr("Automatic markings"), createAutoMarkingsPage());
+    addSection(tr("Auto markings"), createAutoMarkingsPage());
+    addSection(tr("Auto bookmarks"), createAutoBookmarksPage());
     addSection(tr("Updates"), createUpdatesPage());
 
     QHBoxLayout* contentLayout = new QHBoxLayout();
@@ -161,6 +163,11 @@ QWidget* SettingsDialog::createEditorPage()
 QWidget* SettingsDialog::createAutoMarkingsPage()
 {
     return new AutoMarkingsWidget(this);
+}
+
+QWidget* SettingsDialog::createAutoBookmarksPage()
+{
+    return new AutoBookmarksWidget(this);
 }
 
 QWidget* SettingsDialog::createUpdatesPage()

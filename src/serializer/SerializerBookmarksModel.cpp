@@ -13,6 +13,8 @@ void BookmarksModel::serialize(const ::BookmarksModel& bmodel, QJsonObject &json
     QJsonArray array;
     for (const auto& bookmark : bmodel.bookmarks_)
     {
+        if (bookmark.is_auto_)
+            continue;
         QJsonObject jsonBookmark;
         Bookmark::serialize(bookmark, jsonBookmark);
         array.append(jsonBookmark);

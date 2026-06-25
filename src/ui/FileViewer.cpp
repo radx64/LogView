@@ -12,6 +12,8 @@
 #include <QTextBlock>
 #include <QMenu>
 #include <QAction>
+#include <QToolButton>
+#include <QCursor>
 
 #include "LogViewer.hpp"
 #include "ProjectModel.hpp"
@@ -24,6 +26,7 @@
 #include "Logfile.hpp"
 #include "Bookmark.hpp"
 #include "Marking.hpp"
+#include "AutoBookmarksModel.hpp"
 #include "BookmarkDialogWindow.hpp"
 #include "MarkingDialogWindow.hpp"
 
@@ -46,7 +49,22 @@ FileViewer::FileViewer(QWidget* parent, Logfile* logfile)
     QWidget* bookmarks_section = new QWidget();
     QVBoxLayout* bookmarks_layout = new QVBoxLayout(bookmarks_section);
     bookmarks_layout->setContentsMargins(0, 0, 0, 0);
-    bookmarks_layout->addWidget(new QLabel(tr("Bookmarks")));
+
+    QToolButton* bookmarks_filter_button = new QToolButton();
+    bookmarks_filter_button->setText(tr("Filter"));
+    bookmarks_filter_button->setToolTip(tr("Filter automatic bookmarks"));
+    bookmarks_filter_button->setPopupMode(QToolButton::InstantPopup);
+    connect(bookmarks_filter_button, &QToolButton::clicked,
+            this, &FileViewer::showBookmarksFilterMenu);
+    bookmarks_filter_button_ = bookmarks_filter_button;
+
+    QHBoxLayout* bookmarks_header = new QHBoxLayout();
+    bookmarks_header->setContentsMargins(0, 0, 0, 0);
+    bookmarks_header->addWidget(new QLabel(tr("Bookmarks")));
+    bookmarks_header->addStretch();
+    bookmarks_header->addWidget(bookmarks_filter_button);
+
+    bookmarks_layout->addLayout(bookmarks_header);
     bookmarks_layout->addWidget(bookmarks_widget_, 1);
 
     QWidget* markings_section = new QWidget();
@@ -80,6 +98,15 @@ FileViewer::FileViewer(QWidget* parent, Logfile* logfile)
     markings_widget_->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(markings_widget_, &QListView::doubleClicked, this, &FileViewer::markingsItemDoubleClicked);
     connect(markings_widget_, &QListView::customContextMenuRequested, this, &FileViewer::showMarkingsContextMenu);
+
+    connect(logfile_, &Logfile::autoBookmarksStarted, this, [this]()
+    {
+        bookmarks_filter_button_->setText(tr("Scanning…"));
+    });
+    connect(logfile_, &Logfile::autoBookmarksFinished, this, [this]()
+    {
+        bookmarks_filter_button_->setText(tr("Filter"));
+    });
 }
 
 FileViewer::~FileViewer()
@@ -162,6 +189,52 @@ void FileViewer::showBookmarksContextMenu(const QPoint& pos)
         const auto result = dialog.getResult();
         model->update_bookmark(row, result.icon, result.name);
     }
+}
+
+void FileViewer::showBookmarksFilterMenu()
+{
+    AutoBookmarksModel& model = AutoBookmarksModel::instance();
+
+    QMenu menu;
+
+    const QStringList files = model.files();
+    if (!files.isEmpty())
+    {
+        QAction* files_header = menu.addAction(tr("Rule files"));
+        files_header->setEnabled(false);
+        for (const QString& file : files)
+        {
+            QAction* action = menu.addAction(file);
+            action->setCheckable(true);
+            action->setChecked(model.isFileEnabled(file));
+            connect(action, &QAction::toggled, this,
+                    [&model, file](bool checked) { model.setFileEnabled(file, checked); });
+        }
+    }
+
+    const QStringList tags = model.allTags();
+    if (!tags.isEmpty())
+    {
+        menu.addSeparator();
+        QAction* tags_header = menu.addAction(tr("Tags"));
+        tags_header->setEnabled(false);
+        for (const QString& tag : tags)
+        {
+            QAction* action = menu.addAction(tag);
+            action->setCheckable(true);
+            action->setChecked(model.isTagEnabled(tag));
+            connect(action, &QAction::toggled, this,
+                    [&model, tag](bool checked) { model.setTagEnabled(tag, checked); });
+        }
+    }
+
+    if (files.isEmpty() && tags.isEmpty())
+    {
+        QAction* empty = menu.addAction(tr("No automatic bookmark rules"));
+        empty->setEnabled(false);
+    }
+
+    menu.exec(QCursor::pos());
 }
 
 void FileViewer::markingsItemDoubleClicked(const QModelIndex& idx)

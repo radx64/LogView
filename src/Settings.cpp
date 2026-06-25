@@ -23,6 +23,9 @@ constexpr auto kRecentProjectsKey = "Projects";
 constexpr auto kPathsGroup = "Paths";
 constexpr auto kLastFileDirKey = "LastFileDirectory";
 constexpr auto kLastProjectDirKey = "LastProjectDirectory";
+constexpr auto kBookmarksGroup = "Bookmarks";
+constexpr auto kDisabledTagsKey = "DisabledTags";
+constexpr auto kDisabledFilesKey = "DisabledFiles";
 
 QString normalizePath(const QString& path)
 {
@@ -172,6 +175,24 @@ void Settings::removeRecentProject(const QString& path)
     }
 }
 
+void Settings::setDisabledBookmarkTags(const QStringList& tags)
+{
+    if (disabled_bookmark_tags_ == tags)
+        return;
+    disabled_bookmark_tags_ = tags;
+    save();
+    emit changed();
+}
+
+void Settings::setDisabledBookmarkFiles(const QStringList& files)
+{
+    if (disabled_bookmark_files_ == files)
+        return;
+    disabled_bookmark_files_ = files;
+    save();
+    emit changed();
+}
+
 void Settings::load()
 {
     QSettings settings(filePath(), QSettings::IniFormat);
@@ -218,6 +239,11 @@ void Settings::load()
     last_project_dir_ = settings.value(kLastProjectDirKey).toString();
     settings.endGroup();
 
+    settings.beginGroup(kBookmarksGroup);
+    disabled_bookmark_tags_ = settings.value(kDisabledTagsKey).toStringList();
+    disabled_bookmark_files_ = settings.value(kDisabledFilesKey).toStringList();
+    settings.endGroup();
+
     while (recent_files_.size() > kMaxRecent)
         recent_files_.removeLast();
     while (recent_projects_.size() > kMaxRecent)
@@ -259,5 +285,10 @@ void Settings::save() const
     settings.beginGroup(kPathsGroup);
     settings.setValue(kLastFileDirKey, last_file_dir_);
     settings.setValue(kLastProjectDirKey, last_project_dir_);
+    settings.endGroup();
+
+    settings.beginGroup(kBookmarksGroup);
+    settings.setValue(kDisabledTagsKey, disabled_bookmark_tags_);
+    settings.setValue(kDisabledFilesKey, disabled_bookmark_files_);
     settings.endGroup();
 }

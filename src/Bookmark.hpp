@@ -3,6 +3,7 @@
 #include <cstdint>
 
 #include <QString>
+#include <QStringList>
 #include <QPixmap>
 
 namespace serializer { class Bookmark; }
@@ -16,6 +17,8 @@ public:
     uint32_t line_number_{};
     QString text_{};
     QString icon_{};
+    bool is_auto_{false};
+    QStringList tags_{};
 
     bool operator < (const Bookmark& b) const;
 
