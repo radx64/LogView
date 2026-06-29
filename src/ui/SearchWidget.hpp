@@ -23,6 +23,7 @@ public:
     // total < 0 clears the label, total == 0 shows "No results",
     // current < 0 shows the match count, otherwise shows "current/total".
     void setMatchInfo(int current, int total);
+    void setSearching(int percent);
     void setPatternValid(bool valid);
 
 signals:

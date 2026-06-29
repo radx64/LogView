@@ -120,6 +120,14 @@ void SearchWidget::setMatchInfo(int current, int total)
     info_label_->setPalette(pal);
 }
 
+void SearchWidget::setSearching(int percent)
+{
+    QPalette pal = info_label_->palette();
+    pal.setColor(QPalette::WindowText, palette().color(QPalette::WindowText));
+    info_label_->setText(tr("Searching… %1%").arg(percent));
+    info_label_->setPalette(pal);
+}
+
 void SearchWidget::setPatternValid(bool valid)
 {
     if (!regex_button_->isChecked())

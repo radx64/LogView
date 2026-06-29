@@ -18,7 +18,7 @@ LogViewer::LogViewer(QWidget* parent, GrepNode* grep_node, std::shared_ptr<LineS
                      MarkingsModel* markings)
     : source_(std::move(source)), grep_node_(grep_node), markings_(markings)
 {
-    text_ = new ChunkedTextView(parent, source_.get(), markings_);
+    text_ = new ChunkedTextView(parent, source_, markings_);
     tabs_ = new QTabWidget();
     tabs_->addTab(text_,"Base");
     tabs_->setTabsClosable(true);

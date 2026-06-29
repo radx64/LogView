@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <memory>
 
 #include <QAbstractScrollArea>
 #include <QFont>
@@ -9,13 +10,14 @@
 class LineSource;
 class MarkingsModel;
 class SearchWidget;
+class BackgroundTask;
 class QTimer;
 
 class ChunkedTextView : public QAbstractScrollArea
 {
     Q_OBJECT
 public:
-    ChunkedTextView(QWidget* parent, LineSource* source, MarkingsModel* markings = nullptr);
+    ChunkedTextView(QWidget* parent, std::shared_ptr<LineSource> source, MarkingsModel* markings = nullptr);
 
     qint64 currentLine() const { return caret_line_; }
 
@@ -74,6 +76,7 @@ private:
     void positionSearchWidget();
     void onSearchQueryChanged();
     void runSearch();
+    void cancelSearch();
     void flushPendingSearch();
     void findNext();
     void findPrevious();
@@ -81,6 +84,7 @@ private:
     void updateSearchInfo();
 
     LineSource* source_;
+    std::weak_ptr<LineSource> source_ref_;
     MarkingsModel* markings_ = nullptr;
     QFont font_;
     int line_height_ = 1;
@@ -96,8 +100,12 @@ private:
 
     mutable int max_line_width_chars_ = 0;
 
+    enum class PendingNav { None, Next, Previous };
+
     SearchWidget* search_widget_ = nullptr;
     QTimer* search_debounce_ = nullptr;
+    BackgroundTask* search_task_ = nullptr;
+    PendingNav pending_nav_ = PendingNav::None;
     QString search_pattern_;
     bool search_regex_ = false;
     bool search_case_ = false;

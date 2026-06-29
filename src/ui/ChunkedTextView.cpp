@@ -26,6 +26,7 @@
 #include "MarkingsModel.hpp"
 #include "SearchWidget.hpp"
 #include "Settings.hpp"
+#include "loader/BackgroundTask.hpp"
 
 namespace
 {
@@ -38,8 +39,8 @@ const QColor kDefaultSearchHighlightColor(255, 215, 0, 120);
 const QColor kDefaultSearchCurrentMatchColor(255, 140, 0, 200);
 }
 
-ChunkedTextView::ChunkedTextView(QWidget* parent, LineSource* source, MarkingsModel* markings)
-    : QAbstractScrollArea(parent), source_(source), markings_(markings)
+ChunkedTextView::ChunkedTextView(QWidget* parent, std::shared_ptr<LineSource> source, MarkingsModel* markings)
+    : QAbstractScrollArea(parent), source_(source.get()), source_ref_(source), markings_(markings)
 {
     if (markings_)
     {
@@ -671,12 +672,23 @@ void ChunkedTextView::showSearch()
 void ChunkedTextView::hideSearch()
 {
     if (search_debounce_) search_debounce_->stop();
+    cancelSearch();
     if (search_widget_) search_widget_->hide();
     search_active_ = false;
     matches_.clear();
     current_match_ = -1;
     viewport()->update();
     setFocus();
+}
+
+void ChunkedTextView::cancelSearch()
+{
+    pending_nav_ = PendingNav::None;
+    if (search_task_)
+    {
+        search_task_->cancel();
+        search_task_ = nullptr;
+    }
 }
 
 void ChunkedTextView::positionSearchWidget()
@@ -708,6 +720,8 @@ void ChunkedTextView::flushPendingSearch()
 
 void ChunkedTextView::runSearch()
 {
+    cancelSearch();
+
     matches_.clear();
     current_match_ = -1;
 
@@ -716,8 +730,10 @@ void ChunkedTextView::runSearch()
     if (!search_active_ || search_pattern_.isEmpty() || total <= 0)
     {
         if (search_widget_)
+        {
             search_widget_->setMatchInfo(-1, search_pattern_.isEmpty() ? -1 : 0);
-        if (search_widget_) search_widget_->setPatternValid(true);
+            search_widget_->setPatternValid(true);
+        }
         viewport()->update();
         return;
     }
@@ -736,49 +752,119 @@ void ChunkedTextView::runSearch()
             viewport()->update();
             return;
         }
-        if (search_widget_) search_widget_->setPatternValid(true);
-
-        for (qint64 row = 0; row < total; ++row)
-        {
-            const QString text = source_->at(row).text;
-            QRegularExpressionMatchIterator it = expression.globalMatch(text);
-            while (it.hasNext())
-            {
-                const QRegularExpressionMatch match = it.next();
-                if (match.capturedLength() <= 0) continue;
-                matches_.append({row,
-                    static_cast<int>(match.capturedStart()),
-                    static_cast<int>(match.capturedLength())});
-            }
-        }
     }
-    else
-    {
-        if (search_widget_) search_widget_->setPatternValid(true);
-        const Qt::CaseSensitivity sensitivity =
-            search_case_ ? Qt::CaseSensitive : Qt::CaseInsensitive;
-        const int len = static_cast<int>(search_pattern_.length());
+    if (search_widget_) search_widget_->setPatternValid(true);
 
-        for (qint64 row = 0; row < total; ++row)
+    std::shared_ptr<LineSource> source = source_ref_.lock();
+    if (!source) return;
+
+    const QString pattern = search_pattern_;
+    const bool regex = search_regex_;
+    const bool case_sensitive = search_case_;
+    auto results = std::make_shared<QVector<Match>>();
+
+    BackgroundTask* task = new BackgroundTask(
+        [source, pattern, regex, case_sensitive, results](const BackgroundTask::ProgressFn& report) -> bool
         {
-            const QString text = source_->at(row).text;
-            int from = 0;
-            while (true)
-            {
-                const int idx = text.indexOf(search_pattern_, from, sensitivity);
-                if (idx < 0) break;
-                matches_.append({row, idx, len});
-                from = idx + len;
-            }
-        }
-    }
+            const qint64 total = source->count();
+            const qint64 stride = std::clamp<qint64>(total / 100, 1000, 1 << 16);
+            qint64 until_report = stride;
 
-    updateSearchInfo();
-    viewport()->update();
+            const auto keep_going = [&](qint64 scanned) -> bool
+            {
+                if (--until_report > 0) return true;
+                until_report = stride;
+                return report(scanned, total);
+            };
+
+            if (regex)
+            {
+                QRegularExpression::PatternOptions options = QRegularExpression::NoPatternOption;
+                if (!case_sensitive)
+                    options |= QRegularExpression::CaseInsensitiveOption;
+                const QRegularExpression expression(pattern, options);
+
+                for (qint64 row = 0; row < total; ++row)
+                {
+                    const QString text = source->at(row).text;
+                    QRegularExpressionMatchIterator it = expression.globalMatch(text);
+                    while (it.hasNext())
+                    {
+                        const QRegularExpressionMatch match = it.next();
+                        if (match.capturedLength() <= 0) continue;
+                        results->append({row,
+                            static_cast<int>(match.capturedStart()),
+                            static_cast<int>(match.capturedLength())});
+                    }
+                    if (!keep_going(row)) return false;
+                }
+            }
+            else
+            {
+                const Qt::CaseSensitivity sensitivity =
+                    case_sensitive ? Qt::CaseSensitive : Qt::CaseInsensitive;
+                const int len = static_cast<int>(pattern.length());
+
+                for (qint64 row = 0; row < total; ++row)
+                {
+                    const QString text = source->at(row).text;
+                    int from = 0;
+                    while (true)
+                    {
+                        const int idx = text.indexOf(pattern, from, sensitivity);
+                        if (idx < 0) break;
+                        results->append({row, idx, len});
+                        from = idx + len;
+                    }
+                    if (!keep_going(row)) return false;
+                }
+            }
+
+            report(total, total);
+            return true;
+        },
+        this);
+    search_task_ = task;
+
+    connect(task, &BackgroundTask::progress, this,
+        [this, task](qint64 done, qint64 total)
+        {
+            if (search_task_ == task && search_widget_)
+            {
+                const int percent = (total > 0) ? static_cast<int>(done * 100 / total) : 0;
+                search_widget_->setSearching(percent);
+            }
+        });
+
+    connect(task, &BackgroundTask::finished, this,
+        [this, task, results](bool ok)
+        {
+            if (search_task_ == task)
+            {
+                search_task_ = nullptr;
+                if (ok)
+                {
+                    matches_ = std::move(*results);
+                    current_match_ = -1;
+                    updateSearchInfo();
+                    viewport()->update();
+
+                    const PendingNav nav = pending_nav_;
+                    pending_nav_ = PendingNav::None;
+                    if (nav == PendingNav::Next) findNext();
+                    else if (nav == PendingNav::Previous) findPrevious();
+                }
+            }
+            task->deleteLater();
+        });
+
+    if (search_widget_) search_widget_->setSearching(0);
+    task->start();
 }
 
 void ChunkedTextView::findNext()
 {
+    if (search_task_) { pending_nav_ = PendingNav::Next; return; }
     if (matches_.isEmpty()) return;
 
     if (current_match_ < 0)
@@ -803,6 +889,7 @@ void ChunkedTextView::findNext()
 
 void ChunkedTextView::findPrevious()
 {
+    if (search_task_) { pending_nav_ = PendingNav::Previous; return; }
     if (matches_.isEmpty()) return;
 
     if (current_match_ < 0)
