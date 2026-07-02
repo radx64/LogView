@@ -32,6 +32,8 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    void openCommandLinePaths(const QStringList& paths);
+
 protected:
     bool eventFilter(QObject* watched, QEvent* event) override;
 

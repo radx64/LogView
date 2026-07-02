@@ -290,8 +290,9 @@ void MainWindow::dropEvent(QDropEvent* event)
 
 void MainWindow::dragEnterEvent(QDragEnterEvent* event)
 {
-  // if some actions should not be usable, like move, this code must be adopted
-  event->acceptProposedAction();
+  // Only accept drops that carry file URLs so the cursor gives correct feedback.
+  if (event->mimeData()->hasUrls())
+    event->acceptProposedAction();
 }
 
 MainWindow::~MainWindow()
@@ -303,6 +304,32 @@ void MainWindow::load_log_file(QString file_path)
 {
    pm_->load_log_file(file_path);
    Settings::instance().addRecentFile(file_path);
+}
+
+void MainWindow::openCommandLinePaths(const QStringList& paths)
+{
+    for (const QString& raw_path : paths)
+    {
+        const QString file_path = QFileInfo(raw_path).absoluteFilePath();
+        if (!QFileInfo::exists(file_path))
+        {
+            QMessageBox::warning(this, tr("Open file"),
+                tr("File does not exist:\n%1").arg(file_path));
+            continue;
+        }
+
+        if (QFileInfo(file_path).suffix().compare("json", Qt::CaseInsensitive) == 0)
+        {
+            const QString opened = pm_->open_project(file_path);
+            if (!opened.isEmpty())
+                Settings::instance().addRecentProject(opened);
+        }
+        else
+        {
+            load_log_file(file_path);
+        }
+    }
+    updateUi();
 }
 
 FileViewer* MainWindow::get_active_viewer_widget()
