@@ -23,6 +23,8 @@ constexpr auto kRecentProjectsKey = "Projects";
 constexpr auto kPathsGroup = "Paths";
 constexpr auto kLastFileDirKey = "LastFileDirectory";
 constexpr auto kLastProjectDirKey = "LastProjectDirectory";
+constexpr auto kGeneralGroup = "General";
+constexpr auto kPromptSaveOnExitKey = "PromptSaveOnExit";
 constexpr auto kBookmarksGroup = "Bookmarks";
 constexpr auto kDisabledTagsKey = "DisabledTags";
 constexpr auto kDisabledFilesKey = "DisabledFiles";
@@ -112,6 +114,15 @@ void Settings::setCheckForUpdatesOnStartup(bool enabled)
     if (check_updates_on_startup_ == enabled)
         return;
     check_updates_on_startup_ = enabled;
+    save();
+    emit changed();
+}
+
+void Settings::setPromptSaveOnExit(bool enabled)
+{
+    if (prompt_save_on_exit_ == enabled)
+        return;
+    prompt_save_on_exit_ = enabled;
     save();
     emit changed();
 }
@@ -229,6 +240,11 @@ void Settings::load()
         settings.value(kSkippedVersionKey).toString();
     settings.endGroup();
 
+    settings.beginGroup(kGeneralGroup);
+    prompt_save_on_exit_ =
+        settings.value(kPromptSaveOnExitKey, true).toBool();
+    settings.endGroup();
+
     settings.beginGroup(kRecentGroup);
     recent_files_ = settings.value(kRecentFilesKey).toStringList();
     recent_projects_ = settings.value(kRecentProjectsKey).toStringList();
@@ -275,6 +291,10 @@ void Settings::save() const
     settings.beginGroup(kUpdatesGroup);
     settings.setValue(kCheckOnStartupKey, check_updates_on_startup_);
     settings.setValue(kSkippedVersionKey, skipped_update_version_);
+    settings.endGroup();
+
+    settings.beginGroup(kGeneralGroup);
+    settings.setValue(kPromptSaveOnExitKey, prompt_save_on_exit_);
     settings.endGroup();
 
     settings.beginGroup(kRecentGroup);

@@ -44,6 +44,7 @@ SettingsDialog::SettingsDialog(QWidget* parent)
                 pages_->setCurrentIndex(index);
             });
 
+    addSection(tr("General"), createGeneralPage());
     addSection(tr("Editor"), createEditorPage());
     addSection(tr("Auto markings"), createAutoMarkingsPage());
     addSection(tr("Auto bookmarks"), createAutoBookmarksPage());
@@ -81,6 +82,26 @@ void SettingsDialog::addSection(const QString& title, QWidget* page)
     QTreeWidgetItem* item = new QTreeWidgetItem(section_tree_);
     item->setText(0, title);
     item->setData(0, Qt::UserRole, index);
+}
+
+QWidget* SettingsDialog::createGeneralPage()
+{
+    QWidget* page = new QWidget(this);
+    QFormLayout* form = new QFormLayout(page);
+
+    prompt_save_on_exit_checkbox_ = new QCheckBox(
+        tr("Ask to save unsaved project before closing"), page);
+
+    QLabel* hint = new QLabel(
+        tr("When enabled, LogView asks whether to save unsaved changes\n"
+           "before the application is closed."),
+        page);
+    hint->setWordWrap(true);
+
+    form->addRow(prompt_save_on_exit_checkbox_);
+    form->addRow(hint);
+
+    return page;
 }
 
 QWidget* SettingsDialog::createEditorPage()
@@ -203,6 +224,9 @@ void SettingsDialog::loadValues()
 
     check_updates_checkbox_->setChecked(
         Settings::instance().checkForUpdatesOnStartup());
+
+    prompt_save_on_exit_checkbox_->setChecked(
+        Settings::instance().promptSaveOnExit());
 }
 
 void SettingsDialog::applyColorButtonStyle(QPushButton* button, const QColor& color)
@@ -257,4 +281,6 @@ void SettingsDialog::applyChanges()
     Settings::instance().setSearchCurrentMatchColor(search_current_color_);
     Settings::instance().setCheckForUpdatesOnStartup(
         check_updates_checkbox_->isChecked());
+    Settings::instance().setPromptSaveOnExit(
+        prompt_save_on_exit_checkbox_->isChecked());
 }

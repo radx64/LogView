@@ -20,6 +20,7 @@ class QActionGroup;
 class UpdateChecker;
 class QProgressBar;
 class QLabel;
+class QCloseEvent;
 
 namespace Ui {
 class MainWindow;
@@ -36,6 +37,7 @@ public:
 
 protected:
     bool eventFilter(QObject* watched, QEvent* event) override;
+    void closeEvent(QCloseEvent* event) override;
 
 private slots:
     void on_actionLoad_from_file_triggered();
@@ -82,6 +84,7 @@ private:
     void newProject();
     void saveProject();
     void openProject();
+    bool confirmDiscardChanges();
 
     void setupThemeMenu();
     void updateThemeMenu();

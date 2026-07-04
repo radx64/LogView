@@ -19,6 +19,7 @@ public:
     explicit SettingsDialog(QWidget* parent = nullptr);
 
 private:
+    QWidget* createGeneralPage();
     QWidget* createEditorPage();
     QWidget* createAutoMarkingsPage();
     QWidget* createAutoBookmarksPage();
@@ -43,6 +44,7 @@ private:
     QPushButton* search_current_color_button_{nullptr};
     QPushButton* search_current_color_reset_{nullptr};
     QCheckBox* check_updates_checkbox_{nullptr};
+    QCheckBox* prompt_save_on_exit_checkbox_{nullptr};
 
     QColor highlight_color_{};
     QColor search_color_{};

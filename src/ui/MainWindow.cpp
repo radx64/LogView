@@ -8,6 +8,7 @@
 #include <QActionGroup>
 #include <QApplication>
 #include <QClipboard>
+#include <QCloseEvent>
 #include <QDebug>
 #include <QDesktopServices>
 #include <QDir>
@@ -484,22 +485,37 @@ void MainWindow::on_actionBookmark_current_line_triggered()
     bookmark_current_line();
 }
 
+bool MainWindow::confirmDiscardChanges()
+{
+    if (!pm_->has_changed())
+        return true;
+
+    QMessageBox msgBox(this);
+    msgBox.setText(tr("The document has been modified."));
+    msgBox.setInformativeText(tr("Do you want to save changes you made in current project? "
+                                 "All changes will be lost if you don't save them."));
+    msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+    msgBox.setDefaultButton(QMessageBox::Save);
+    const int ret = msgBox.exec();
+
+    if (ret == QMessageBox::Cancel) return false;
+    if (ret == QMessageBox::Save) saveProject();
+    return true;
+}
+
+void MainWindow::closeEvent(QCloseEvent* event)
+{
+    if (Settings::instance().promptSaveOnExit() && !confirmDiscardChanges())
+    {
+        event->ignore();
+        return;
+    }
+    event->accept();
+}
+
 void MainWindow::on_exit_app_triggered()
 {
-    if (pm_->has_changed())
-    {
-        QMessageBox msgBox(this);
-        msgBox.setText("The document has been modified.");
-        msgBox.setInformativeText("Do you want to save changes you made in current project? All changes will be lost if you don't save them.");
-        msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
-        msgBox.setDefaultButton(QMessageBox::Save);
-        int ret = msgBox.exec();
-
-        if (ret == QMessageBox::Cancel) return;
-        if (ret == QMessageBox::Save) saveProject();
-    }   //duplicate code (move it to separate function later)
-
-    QApplication::exit();
+    close();
 }
 
 void MainWindow::on_actionAbout_triggered()
@@ -526,18 +542,8 @@ void MainWindow::on_actionSave_project_as_triggered()
 
 void MainWindow::on_actionLoad_project_triggered()
 {
-    if (pm_->has_changed())
-    {
-        QMessageBox msgBox(this);
-        msgBox.setText("The document has been modified.");
-        msgBox.setInformativeText("Do you want to save changes you made in current project? All changes will be lost if you don't save them.");
-        msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
-        msgBox.setDefaultButton(QMessageBox::Save);
-        int ret = msgBox.exec();
-
-        if (ret == QMessageBox::Cancel) return;
-        if (ret == QMessageBox::Save) saveProject();
-    }
+    if (!confirmDiscardChanges())
+        return;
 
     openProject();
     updateUi();
@@ -691,18 +697,8 @@ void MainWindow::openRecentProject(const QString& file_path)
         return;
     }
 
-    if (pm_->has_changed())
-    {
-        QMessageBox msgBox(this);
-        msgBox.setText("The document has been modified.");
-        msgBox.setInformativeText("Do you want to save changes you made in current project? All changes will be lost if you don't save them.");
-        msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
-        msgBox.setDefaultButton(QMessageBox::Save);
-        int ret = msgBox.exec();
-
-        if (ret == QMessageBox::Cancel) return;
-        if (ret == QMessageBox::Save) saveProject();
-    }
+    if (!confirmDiscardChanges())
+        return;
 
     const QString opened = pm_->open_project(file_path);
     if (!opened.isEmpty())
