@@ -149,12 +149,20 @@ void ChunkedTextView::wheelEvent(QWheelEvent* event)
         return;
     }
 
+    event->accept();
+    adjustFontSize(steps > 0 ? 1 : -1);
+}
+
+void ChunkedTextView::adjustFontSize(int delta)
+{
+    if (delta == 0)
+        return;
+
     QFont font = Settings::instance().editorFont();
     const int current_size = font.pointSize() > 0 ? font.pointSize() : 10;
-    const int new_size = std::clamp(current_size + (steps > 0 ? 1 : -1),
+    const int new_size = std::clamp(current_size + delta,
                                     kMinFontPointSize, kMaxFontPointSize);
 
-    event->accept();
     if (new_size == current_size)
         return;
 
@@ -525,6 +533,16 @@ void ChunkedTextView::keyPressEvent(QKeyEvent* event)
     if (ctrl && event->key() == Qt::Key_C) { copySelection(); return; }
     if (ctrl && event->key() == Qt::Key_M) { markSelection(); return; }
     if (ctrl && event->key() == Qt::Key_F) { showSearch(); return; }
+    if (ctrl && (event->key() == Qt::Key_Plus || event->key() == Qt::Key_Equal))
+    {
+        adjustFontSize(1);
+        return;
+    }
+    if (ctrl && (event->key() == Qt::Key_Minus || event->key() == Qt::Key_Underscore))
+    {
+        adjustFontSize(-1);
+        return;
+    }
     if (event->key() == Qt::Key_Escape && search_active_) { hideSearch(); return; }
     if (event->key() == Qt::Key_F3)
     {
