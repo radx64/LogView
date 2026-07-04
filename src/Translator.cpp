@@ -109,7 +109,7 @@ QStringList Translator::availableLanguageCodes()
 QString Translator::displayName(const QString& code)
 {
     if (code == kSystem || code.isEmpty())
-        return instance().text(QStringLiteral("settings.language.system"));
+        return Lang::tr(QStringLiteral("settings.language.system"));
 
     const QHash<QString, QString> catalog = loadCatalog(code);
     const QString name = catalog.value(QLatin1String(kLanguageNameKey));
@@ -149,6 +149,7 @@ void Translator::setLanguage(const QString& code)
 
     active_ = (effective == QLatin1String(kEnglish)) ? english_
                                                      : loadCatalog(effective);
+    warned_keys_.clear();
 
     notifyLanguageChanged();
 }
@@ -159,10 +160,27 @@ QString Translator::text(const QString& key) const
     if (it != active_.constEnd())
         return it.value();
 
+    // Not translated in the active catalog. Warn once per key, then fall back.
+    const bool first_time = !warned_keys_.contains(key);
+    if (first_time)
+        warned_keys_.insert(key);
+
+    // Reaching here means the active catalog is a non-English one that lacks the
+    // key (when English is active, active_ is a copy of english_).
     it = english_.constFind(key);
     if (it != english_.constEnd())
+    {
+        if (first_time)
+            qWarning("Translator: missing '%s' translation for key \"%s\"; "
+                     "using English fallback.",
+                     qUtf8Printable(language_), qUtf8Printable(key));
         return it.value();
+    }
 
+    if (first_time)
+        qWarning("Translator: no translation found for key \"%s\"; "
+                 "using the key as-is.",
+                 qUtf8Printable(key));
     return key;
 }
 

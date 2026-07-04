@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QHash>
+#include <QSet>
 #include <QString>
 #include <QStringList>
 
@@ -35,7 +36,8 @@ public:
     QString language() const { return language_; }
 
     // Looks up a key in the active catalog, falling back to English and finally
-    // to the key itself (so missing translations are obvious in the UI).
+    // to the key itself (so missing translations are obvious in the UI). Missing
+    // keys are logged once as a warning on the console.
     QString text(const QString& key) const;
 
 private:
@@ -53,6 +55,7 @@ private:
     QString language_;
     QHash<QString, QString> active_;
     QHash<QString, QString> english_;
+    mutable QSet<QString> warned_keys_;
 };
 
 // Convenience lookup used throughout the UI: Lang::tr("menu.file").
