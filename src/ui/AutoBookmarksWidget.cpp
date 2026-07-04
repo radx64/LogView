@@ -23,6 +23,7 @@
 
 #include "AutoBookmark.hpp"
 #include "AutoBookmarksModel.hpp"
+#include "Translator.hpp"
 
 namespace
 {
@@ -50,17 +51,17 @@ public:
     explicit AutoBookmarkRuleDialog(QWidget* parent = nullptr)
         : QDialog(parent)
     {
-        setWindowTitle(tr("Automatic bookmark"));
+        setWindowTitle(Lang::tr("autobm.dialog.title"));
         resize(480, 320);
 
         name_edit_ = new QLineEdit(this);
-        name_edit_->setPlaceholderText(tr("Example: Errors"));
+        name_edit_->setPlaceholderText(Lang::tr("autobm.name_placeholder"));
 
         description_edit_ = new QPlainTextEdit(this);
         description_edit_->setMaximumHeight(60);
 
         pattern_edit_ = new QLineEdit(this);
-        pattern_edit_->setPlaceholderText(tr("Example: \\bERROR\\b"));
+        pattern_edit_->setPlaceholderText(Lang::tr("autobm.pattern_placeholder"));
         connect(pattern_edit_, &QLineEdit::textEdited, this,
                 [this](const QString&) { updatePatternPalette(); });
 
@@ -72,20 +73,20 @@ public:
         }
 
         tags_edit_ = new QLineEdit(this);
-        tags_edit_->setPlaceholderText(tr("Comma separated, e.g. severity, network"));
+        tags_edit_->setPlaceholderText(Lang::tr("autobm.tags_placeholder"));
 
-        enabled_check_ = new QCheckBox(tr("Enabled"), this);
+        enabled_check_ = new QCheckBox(Lang::tr("common.enabled"), this);
         enabled_check_->setChecked(true);
 
-        case_sensitive_check_ = new QCheckBox(tr("Case sensitive"), this);
+        case_sensitive_check_ = new QCheckBox(Lang::tr("common.case_sensitive"), this);
         case_sensitive_check_->setChecked(true);
 
         QFormLayout* form = new QFormLayout();
-        form->addRow(tr("Name:"), name_edit_);
-        form->addRow(tr("Description:"), description_edit_);
-        form->addRow(tr("Regex:"), pattern_edit_);
-        form->addRow(tr("Icon:"), icon_combo_);
-        form->addRow(tr("Tags:"), tags_edit_);
+        form->addRow(Lang::tr("common.name_label"), name_edit_);
+        form->addRow(Lang::tr("autobm.description_label"), description_edit_);
+        form->addRow(Lang::tr("common.regex_label"), pattern_edit_);
+        form->addRow(Lang::tr("common.icon_label"), icon_combo_);
+        form->addRow(Lang::tr("common.tags_label"), tags_edit_);
         form->addRow(enabled_check_);
         form->addRow(case_sensitive_check_);
 
@@ -148,14 +149,14 @@ private:
     {
         if (name_edit_->text().trimmed().isEmpty())
         {
-            error_label_->setText(tr("Name cannot be empty."));
+            error_label_->setText(Lang::tr("common.name_empty"));
             return;
         }
 
         const QString pattern = pattern_edit_->text();
         if (pattern.isEmpty())
         {
-            error_label_->setText(tr("Regex cannot be empty."));
+            error_label_->setText(Lang::tr("common.regex_empty"));
             return;
         }
 
@@ -163,7 +164,7 @@ private:
         if (!expression.isValid())
         {
             error_label_->setText(
-                tr("Invalid regex: %1").arg(expression.errorString()));
+                Lang::tr("common.invalid_regex").arg(expression.errorString()));
             return;
         }
 
@@ -202,8 +203,7 @@ AutoBookmarksWidget::AutoBookmarksWidget(QWidget* parent)
     : QWidget(parent)
 {
     QLabel* hint = new QLabel(
-        tr("These rules are stored as JSON files in the \"bookmarks\" folder. "
-           "Matching lines are bookmarked automatically in every opened log file."),
+        Lang::tr("autobm.hint"),
         this);
     hint->setWordWrap(true);
 
@@ -212,8 +212,8 @@ AutoBookmarksWidget::AutoBookmarksWidget(QWidget* parent)
     connect(file_list_, &QListWidget::currentRowChanged, this,
             [this](int) { refreshRuleTable(); updateButtonState(); });
 
-    QPushButton* add_file_button = new QPushButton(tr("New file..."), this);
-    remove_file_button_ = new QPushButton(tr("Delete file"), this);
+    QPushButton* add_file_button = new QPushButton(Lang::tr("autobm.new_file"), this);
+    remove_file_button_ = new QPushButton(Lang::tr("autobm.delete_file"), this);
     connect(add_file_button, &QPushButton::clicked, this, [this]() { addFile(); });
     connect(remove_file_button_, &QPushButton::clicked, this,
             [this]() { removeSelectedFile(); });
@@ -223,7 +223,7 @@ AutoBookmarksWidget::AutoBookmarksWidget(QWidget* parent)
     file_buttons->addWidget(remove_file_button_);
 
     QVBoxLayout* file_column = new QVBoxLayout();
-    file_column->addWidget(new QLabel(tr("Rule files:"), this));
+    file_column->addWidget(new QLabel(Lang::tr("autobm.rule_files_label"), this));
     file_column->addWidget(file_list_, 1);
     file_column->addLayout(file_buttons);
 
@@ -238,9 +238,9 @@ AutoBookmarksWidget::AutoBookmarksWidget(QWidget* parent)
     connect(rule_table_, &QTableView::doubleClicked, this,
             [this](const QModelIndex&) { editSelectedRule(); });
 
-    add_rule_button_ = new QPushButton(tr("Add..."), this);
-    edit_rule_button_ = new QPushButton(tr("Edit..."), this);
-    remove_rule_button_ = new QPushButton(tr("Delete"), this);
+    add_rule_button_ = new QPushButton(Lang::tr("common.add_ellipsis"), this);
+    edit_rule_button_ = new QPushButton(Lang::tr("common.edit_ellipsis"), this);
+    remove_rule_button_ = new QPushButton(Lang::tr("common.delete"), this);
     connect(add_rule_button_, &QPushButton::clicked, this, [this]() { addRule(); });
     connect(edit_rule_button_, &QPushButton::clicked, this,
             [this]() { editSelectedRule(); });
@@ -254,7 +254,7 @@ AutoBookmarksWidget::AutoBookmarksWidget(QWidget* parent)
     rule_buttons->addStretch();
 
     QVBoxLayout* rule_column = new QVBoxLayout();
-    rule_column->addWidget(new QLabel(tr("Rules:"), this));
+    rule_column->addWidget(new QLabel(Lang::tr("autobm.rules_label"), this));
     rule_column->addWidget(rule_table_, 1);
     rule_column->addLayout(rule_buttons);
 
@@ -304,8 +304,8 @@ void AutoBookmarksWidget::refreshRuleTable()
 {
     rule_model_->clear();
     rule_model_->setHorizontalHeaderLabels(
-        {tr("Enabled"), tr("Name"), tr("Regex"), tr("Icon"),
-         tr("Tags"), tr("Case sensitive")});
+        {Lang::tr("common.enabled"), Lang::tr("common.name"), Lang::tr("common.regex"),
+         Lang::tr("common.icon"), Lang::tr("common.tags"), Lang::tr("common.case_sensitive")});
 
     const QString file = currentFile();
     if (file.isEmpty()) return;
@@ -314,13 +314,13 @@ void AutoBookmarksWidget::refreshRuleTable()
     for (const AutoBookmark& rule : rules)
     {
         QList<QStandardItem*> row;
-        row.append(new QStandardItem(rule.enabled_ ? tr("Yes") : tr("No")));
+        row.append(new QStandardItem(rule.enabled_ ? Lang::tr("common.yes") : Lang::tr("common.no")));
         QStandardItem* name_item = new QStandardItem(QIcon(rule.icon_), rule.name_);
         row.append(name_item);
         row.append(new QStandardItem(rule.pattern_));
         row.append(new QStandardItem(rule.icon_));
         row.append(new QStandardItem(rule.tags_.join(QStringLiteral(", "))));
-        row.append(new QStandardItem(rule.case_sensitive_ ? tr("Yes") : tr("No")));
+        row.append(new QStandardItem(rule.case_sensitive_ ? Lang::tr("common.yes") : Lang::tr("common.no")));
         rule_model_->appendRow(row);
     }
 }
@@ -329,15 +329,15 @@ void AutoBookmarksWidget::addFile()
 {
     bool ok = false;
     const QString name = QInputDialog::getText(
-        this, tr("New rule file"), tr("File name:"), QLineEdit::Normal,
+        this, Lang::tr("autobm.new_rule_file"), Lang::tr("autobm.file_name"), QLineEdit::Normal,
         QString(), &ok);
     if (!ok || name.trimmed().isEmpty()) return;
 
     const QString created = AutoBookmarksModel::instance().createFile(name);
     if (created.isEmpty())
     {
-        QMessageBox::warning(this, tr("New rule file"),
-                             tr("A file with that name already exists or the name is invalid."));
+        QMessageBox::warning(this, Lang::tr("autobm.new_rule_file"),
+                             Lang::tr("autobm.file_exists"));
         return;
     }
 
@@ -352,8 +352,8 @@ void AutoBookmarksWidget::removeSelectedFile()
     if (file.isEmpty()) return;
 
     if (QMessageBox::question(
-            this, tr("Delete rule file"),
-            tr("Delete \"%1\" and all of its rules?").arg(file)) != QMessageBox::Yes)
+            this, Lang::tr("autobm.delete_rule_file"),
+            Lang::tr("autobm.delete_confirm").arg(file)) != QMessageBox::Yes)
         return;
 
     AutoBookmarksModel::instance().deleteFile(file);
@@ -378,7 +378,7 @@ void AutoBookmarksWidget::editSelectedRule()
     if (file.isEmpty() || row < 0) return;
 
     AutoBookmarkRuleDialog dialog(this);
-    dialog.setWindowTitle(tr("Edit automatic bookmark"));
+    dialog.setWindowTitle(Lang::tr("autobm.edit_title"));
     dialog.setRule(AutoBookmarksModel::instance().rule(file, row));
     if (dialog.exec() != QDialog::Accepted) return;
     AutoBookmarksModel::instance().updateRule(file, row, dialog.rule());

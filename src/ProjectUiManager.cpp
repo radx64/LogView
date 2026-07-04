@@ -4,6 +4,7 @@
 #include "FileViewer.hpp"
 #include "FileLineSource.hpp"
 #include "Settings.hpp"
+#include "Translator.hpp"
 #include "loader/BackgroundTask.hpp"
 
 #include <QDebug>
@@ -155,7 +156,7 @@ void ProjectUiManager::setTabLoading(LoadEntry& entry, bool loading)
     if (loading)
     {
         entry.tab_base = ui_->fileView->tabText(idx);
-        ui_->fileView->setTabText(idx, entry.tab_base + tr(" (loading…)"));
+        ui_->fileView->setTabText(idx, entry.tab_base + Lang::tr("tab.loading_suffix"));
     }
     else
     {
@@ -185,9 +186,9 @@ void ProjectUiManager::emitAggregateProgress()
 
     QString text;
     if (active_loads_.size() == 1)
-        text = tr("Loading %1… %2%").arg(active_loads_.first().name).arg(percent);
+        text = Lang::tr("status.loading_one").arg(active_loads_.first().name).arg(percent);
     else
-        text = tr("Loading %1 files… %2%").arg(active_loads_.size()).arg(percent);
+        text = Lang::tr("status.loading_many").arg(active_loads_.size()).arg(percent);
 
     emit loadProgressChanged(true, percent, text);
 }
@@ -251,9 +252,9 @@ void ProjectUiManager::save_project()
     if (file_path.isEmpty())
     {
         file_path = QFileDialog::getSaveFileName(ui_->fileView->window(),
-            tr("Save project"),
+            Lang::tr("dialog.save_project.title"),
             Settings::instance().lastOpenedProjectDirectory(),
-            tr("Project file (*.json)"));
+            Lang::tr("filter.project_file"));
         qDebug() << "FP: " << file_path;
     }
 
@@ -284,9 +285,9 @@ QString ProjectUiManager::open_project(const QString& file_path)
     if (path.isEmpty())
     {
         path = QFileDialog::getOpenFileName(ui_->fileView->window(),
-                                            tr("Open project"),
+                                            Lang::tr("dialog.open_project.title"),
                                             Settings::instance().lastOpenedProjectDirectory(),
-                                            tr("Project file (*.json)"));
+                                            Lang::tr("filter.project_file"));
     }
     if (path.isEmpty())
         return QString();

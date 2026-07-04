@@ -57,6 +57,11 @@ BIN="${BUILD_DIR}/LogView"
 [ -f "${BIN}" ] || die "Build finished but binary not found at ${BIN}"
 cp "${BIN}" "${APP}/Contents/MacOS/LogView"
 
+# Ship the translation catalogs next to the executable inside the bundle so
+# they are found at runtime (Translator looks for a "lang" dir next to the exe).
+rm -rf "${APP}/Contents/MacOS/lang"
+cp -r "${PROJECT_ROOT}/lang" "${APP}/Contents/MacOS/lang"
+
 cat > "${APP}/Contents/Info.plist" <<'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">

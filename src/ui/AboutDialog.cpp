@@ -1,5 +1,7 @@
 #include "AboutDialog.hpp"
 
+#include "Translator.hpp"
+
 #include <algorithm>
 
 #include <QDialogButtonBox>
@@ -27,7 +29,7 @@ constexpr int kPaletteMax = static_cast<int>(sizeof(kFirePalette) / sizeof(kFire
 AboutDialog::AboutDialog(const QString& text, QWidget *parent)
     : QDialog(parent), text_(text)
 {
-    setWindowTitle(tr("About application"));
+    setWindowTitle(Lang::tr("dialog.about.title"));
     setFixedSize(440, 320);
 
     auto* buttons = new QDialogButtonBox(QDialogButtonBox::Ok, this);

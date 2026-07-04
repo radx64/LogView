@@ -30,6 +30,9 @@ public:
     bool promptSaveOnExit() const { return prompt_save_on_exit_; }
     void setPromptSaveOnExit(bool enabled);
 
+    QString language() const { return language_; }
+    void setLanguage(const QString& code);
+
     QString skippedUpdateVersion() const { return skipped_update_version_; }
     void setSkippedUpdateVersion(const QString& version);
 
@@ -76,6 +79,7 @@ private:
     QColor search_current_match_color_{};
     bool check_updates_on_startup_{true};
     bool prompt_save_on_exit_{true};
+    QString language_{QStringLiteral("system")};
     QString skipped_update_version_{};
     QString last_file_dir_{};
     QString last_project_dir_{};

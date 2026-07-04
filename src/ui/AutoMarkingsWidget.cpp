@@ -18,6 +18,7 @@
 #include <QVBoxLayout>
 
 #include "AutoMarkingsModel.hpp"
+#include "Translator.hpp"
 
 namespace
 {
@@ -27,18 +28,18 @@ public:
     explicit AutoMarkingRuleDialog(QWidget* parent = nullptr)
         : QDialog(parent)
     {
-        setWindowTitle(tr("Automatic marking"));
+        setWindowTitle(Lang::tr("automark.dialog.title"));
         resize(460, 180);
 
         pattern_edit_ = new QLineEdit(this);
-        pattern_edit_->setPlaceholderText(tr("Example: ERR/.*"));
+        pattern_edit_->setPlaceholderText(Lang::tr("automark.pattern_placeholder"));
         connect(pattern_edit_, &QLineEdit::textEdited, this,
                 [this](const QString&) { updatePatternPalette(); });
 
-        enabled_check_ = new QCheckBox(tr("Enabled"), this);
+        enabled_check_ = new QCheckBox(Lang::tr("common.enabled"), this);
         enabled_check_->setChecked(true);
 
-        case_sensitive_check_ = new QCheckBox(tr("Case sensitive"), this);
+        case_sensitive_check_ = new QCheckBox(Lang::tr("common.case_sensitive"), this);
         case_sensitive_check_->setChecked(true);
 
         text_color_button_ = new QPushButton(this);
@@ -51,7 +52,7 @@ public:
         connect(background_color_button_, &QPushButton::clicked, this,
                 [this]() { pickBackgroundColor(); });
 
-        clear_background_button_ = new QPushButton(tr("None"), this);
+        clear_background_button_ = new QPushButton(Lang::tr("common.none"), this);
         connect(clear_background_button_, &QPushButton::clicked, this,
                 [this]()
                 {
@@ -65,9 +66,9 @@ public:
         background_layout->addWidget(clear_background_button_);
 
         QFormLayout* form = new QFormLayout();
-        form->addRow(tr("Regex:"), pattern_edit_);
-        form->addRow(tr("Font color:"), text_color_button_);
-        form->addRow(tr("Background:"), background_layout);
+        form->addRow(Lang::tr("common.regex_label"), pattern_edit_);
+        form->addRow(Lang::tr("common.font_color_label"), text_color_button_);
+        form->addRow(Lang::tr("common.background_label"), background_layout);
         form->addRow(enabled_check_);
         form->addRow(case_sensitive_check_);
 
@@ -120,7 +121,7 @@ private:
     {
         const QColor chosen = QColorDialog::getColor(
             text_color_.isValid() ? text_color_ : QColor(Qt::blue),
-            this, tr("Select font color"));
+            this, Lang::tr("dialog.select_font_color"));
         if (chosen.isValid())
         {
             text_color_ = chosen;
@@ -132,7 +133,7 @@ private:
     {
         const QColor chosen = QColorDialog::getColor(
             background_color_.isValid() ? background_color_ : QColor(Qt::yellow),
-            this, tr("Select background color"));
+            this, Lang::tr("dialog.select_background_color"));
         if (chosen.isValid())
         {
             background_color_ = chosen;
@@ -160,8 +161,8 @@ private:
             button->setText(color.name());
         };
 
-        setButton(text_color_button_, text_color_, tr("Pick font color"));
-        setButton(background_color_button_, background_color_, tr("No background"));
+        setButton(text_color_button_, text_color_, Lang::tr("automark.pick_font_color"));
+        setButton(background_color_button_, background_color_, Lang::tr("automark.no_background"));
     }
 
     void validateAndAccept()
@@ -169,7 +170,7 @@ private:
         const QString pattern = pattern_edit_->text();
         if (pattern.isEmpty())
         {
-            error_label_->setText(tr("Regex cannot be empty."));
+            error_label_->setText(Lang::tr("common.regex_empty"));
             return;
         }
 
@@ -177,7 +178,7 @@ private:
         if (!expression.isValid())
         {
             error_label_->setText(
-                tr("Invalid regex: %1").arg(expression.errorString()));
+                Lang::tr("common.invalid_regex").arg(expression.errorString()));
             return;
         }
 
@@ -217,7 +218,7 @@ AutoMarkingsWidget::AutoMarkingsWidget(QWidget* parent)
     : QWidget(parent)
 {
     QLabel* hint = new QLabel(
-        tr("These regex templates are saved in %1 and are applied to every opened log file.")
+        Lang::tr("automark.hint")
             .arg(QFileInfo(AutoMarkingsModel::filePath()).fileName()),
         this);
     hint->setWordWrap(true);
@@ -237,9 +238,9 @@ AutoMarkingsWidget::AutoMarkingsWidget(QWidget* parent)
     connect(table_, &QTableView::doubleClicked,
             this, [this](const QModelIndex&) { editSelectedMarking(); });
 
-    QPushButton* add_button = new QPushButton(tr("Add..."), this);
-    edit_button_ = new QPushButton(tr("Edit..."), this);
-    remove_button_ = new QPushButton(tr("Delete"), this);
+    QPushButton* add_button = new QPushButton(Lang::tr("common.add_ellipsis"), this);
+    edit_button_ = new QPushButton(Lang::tr("common.edit_ellipsis"), this);
+    remove_button_ = new QPushButton(Lang::tr("common.delete"), this);
 
     connect(add_button, &QPushButton::clicked, this,
             [this]() { addMarking(); });
@@ -282,7 +283,7 @@ void AutoMarkingsWidget::editSelectedMarking()
     if (row < 0) return;
 
     AutoMarkingRuleDialog dialog(this);
-    dialog.setWindowTitle(tr("Edit automatic marking"));
+    dialog.setWindowTitle(Lang::tr("automark.edit_title"));
     dialog.setMarking(AutoMarkingsModel::instance().get_marking(row));
     if (dialog.exec() != QDialog::Accepted) return;
 

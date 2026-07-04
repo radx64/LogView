@@ -50,7 +50,12 @@ mkdir -p "${OUT_DIR}"
 BIN="${BUILD_DIR}/LogView"
 [ -f "${BIN}" ] || die "Build finished but binary not found at ${BIN}"
 cp "${BIN}" "${OUT_DIR}/"
-ok "Linux binary -> ${OUT_DIR}/LogView"
+
+# Ship the translation catalogs alongside the binary so they are found at
+# runtime (Translator looks for a "lang" directory next to the executable).
+rm -rf "${OUT_DIR}/lang"
+cp -r "${PROJECT_ROOT}/lang" "${OUT_DIR}/lang"
+ok "Linux binary -> ${OUT_DIR}/LogView (+ lang/)"
 
 # Optional AppImage packaging.
 if [ "${APPIMAGE:-0}" = "1" ]; then
@@ -66,7 +71,15 @@ if [ "${APPIMAGE:-0}" = "1" ]; then
 
         # linuxdeploy needs a desktop entry + icon to build an AppImage; the icon
         # is deployed as LogView.png so it matches the desktop's Icon=LogView.
+        #
+        # Pre-seed the AppDir with the translation catalogs next to where the
+        # executable will land (usr/bin) so they ship inside the AppImage and are
+        # found at runtime. linuxdeploy adds to an existing AppDir, it does not
+        # wipe it.
         rm -f "${OUT_DIR}"/*.AppImage
+        rm -rf "${OUT_DIR}/AppDir"
+        mkdir -p "${OUT_DIR}/AppDir/usr/bin"
+        cp -r "${PROJECT_ROOT}/lang" "${OUT_DIR}/AppDir/usr/bin/lang"
         ( cd "${OUT_DIR}" && \
           linuxdeploy --appdir AppDir -e LogView \
               -d "${DESKTOP_FILE}" \

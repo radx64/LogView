@@ -27,6 +27,7 @@
 #include "Bookmark.hpp"
 #include "Marking.hpp"
 #include "AutoBookmarksModel.hpp"
+#include "Translator.hpp"
 #include "BookmarkDialogWindow.hpp"
 #include "MarkingDialogWindow.hpp"
 
@@ -51,8 +52,8 @@ FileViewer::FileViewer(QWidget* parent, Logfile* logfile)
     bookmarks_layout->setContentsMargins(0, 0, 0, 0);
 
     QToolButton* bookmarks_filter_button = new QToolButton();
-    bookmarks_filter_button->setText(tr("Filter"));
-    bookmarks_filter_button->setToolTip(tr("Filter automatic bookmarks"));
+    bookmarks_filter_button->setText(Lang::tr("common.filter"));
+    bookmarks_filter_button->setToolTip(Lang::tr("fileviewer.filter_tooltip"));
     bookmarks_filter_button->setPopupMode(QToolButton::InstantPopup);
     connect(bookmarks_filter_button, &QToolButton::clicked,
             this, &FileViewer::showBookmarksFilterMenu);
@@ -60,7 +61,7 @@ FileViewer::FileViewer(QWidget* parent, Logfile* logfile)
 
     QHBoxLayout* bookmarks_header = new QHBoxLayout();
     bookmarks_header->setContentsMargins(0, 0, 0, 0);
-    bookmarks_header->addWidget(new QLabel(tr("Bookmarks")));
+    bookmarks_header->addWidget(new QLabel(Lang::tr("fileviewer.bookmarks")));
     bookmarks_header->addStretch();
     bookmarks_header->addWidget(bookmarks_filter_button);
 
@@ -70,7 +71,7 @@ FileViewer::FileViewer(QWidget* parent, Logfile* logfile)
     QWidget* markings_section = new QWidget();
     QVBoxLayout* markings_layout = new QVBoxLayout(markings_section);
     markings_layout->setContentsMargins(0, 0, 0, 0);
-    markings_layout->addWidget(new QLabel(tr("Markings")));
+    markings_layout->addWidget(new QLabel(Lang::tr("fileviewer.markings")));
     markings_layout->addWidget(markings_widget_, 1);
 
     QSplitter* side_panel = new QSplitter(Qt::Vertical);
@@ -101,11 +102,11 @@ FileViewer::FileViewer(QWidget* parent, Logfile* logfile)
 
     connect(logfile_, &Logfile::autoBookmarksStarted, this, [this]()
     {
-        bookmarks_filter_button_->setText(tr("Scanning…"));
+        bookmarks_filter_button_->setText(Lang::tr("fileviewer.scanning"));
     });
     connect(logfile_, &Logfile::autoBookmarksFinished, this, [this]()
     {
-        bookmarks_filter_button_->setText(tr("Filter"));
+        bookmarks_filter_button_->setText(Lang::tr("common.filter"));
     });
 }
 
@@ -164,8 +165,8 @@ void FileViewer::showBookmarksContextMenu(const QPoint& pos)
     const uint32_t row = static_cast<uint32_t>(index.row());
 
     QMenu menu;
-    QAction* edit_action = menu.addAction(tr("Edit..."));
-    QAction* delete_action = menu.addAction(tr("Delete"));
+    QAction* edit_action = menu.addAction(Lang::tr("common.edit_ellipsis"));
+    QAction* delete_action = menu.addAction(Lang::tr("common.delete"));
     QAction* chosen = menu.exec(bookmarks_widget_->viewport()->mapToGlobal(pos));
     if (chosen == nullptr) return;
 
@@ -181,7 +182,7 @@ void FileViewer::showBookmarksContextMenu(const QPoint& pos)
     {
         const Bookmark bookmark = model->get_bookmark(row);
         BookmarkDialogWindow dialog(this);
-        dialog.setWindowTitle(tr("Edit bookmark"));
+        dialog.setWindowTitle(Lang::tr("fileviewer.edit_bookmark"));
         dialog.setName(bookmark.text_);
         dialog.setIcon(bookmark.icon_);
         if (dialog.exec() != QDialog::Accepted) return;
@@ -200,7 +201,7 @@ void FileViewer::showBookmarksFilterMenu()
     const QStringList files = model.files();
     if (!files.isEmpty())
     {
-        QAction* files_header = menu.addAction(tr("Rule files"));
+        QAction* files_header = menu.addAction(Lang::tr("fileviewer.rule_files"));
         files_header->setEnabled(false);
         for (const QString& file : files)
         {
@@ -216,7 +217,7 @@ void FileViewer::showBookmarksFilterMenu()
     if (!tags.isEmpty())
     {
         menu.addSeparator();
-        QAction* tags_header = menu.addAction(tr("Tags"));
+        QAction* tags_header = menu.addAction(Lang::tr("common.tags"));
         tags_header->setEnabled(false);
         for (const QString& tag : tags)
         {
@@ -230,7 +231,7 @@ void FileViewer::showBookmarksFilterMenu()
 
     if (files.isEmpty() && tags.isEmpty())
     {
-        QAction* empty = menu.addAction(tr("No automatic bookmark rules"));
+        QAction* empty = menu.addAction(Lang::tr("fileviewer.no_rules"));
         empty->setEnabled(false);
     }
 
@@ -246,7 +247,7 @@ void FileViewer::markingsItemDoubleClicked(const QModelIndex& idx)
     const Marking marking = model->get_marking(row);
 
     MarkingDialogWindow dialog(this);
-    dialog.setWindowTitle(tr("Edit marking"));
+    dialog.setWindowTitle(Lang::tr("fileviewer.edit_marking"));
     dialog.setText(marking.text_);
     dialog.setColor(marking.color_);
     dialog.setTextColor(marking.text_color_);
@@ -263,8 +264,8 @@ void FileViewer::showMarkingsContextMenu(const QPoint& pos)
     const uint32_t row = static_cast<uint32_t>(index.row());
 
     QMenu menu;
-    QAction* edit_action = menu.addAction(tr("Edit..."));
-    QAction* delete_action = menu.addAction(tr("Delete"));
+    QAction* edit_action = menu.addAction(Lang::tr("common.edit_ellipsis"));
+    QAction* delete_action = menu.addAction(Lang::tr("common.delete"));
     QAction* chosen = menu.exec(markings_widget_->viewport()->mapToGlobal(pos));
     if (chosen == nullptr) return;
 
@@ -280,7 +281,7 @@ void FileViewer::showMarkingsContextMenu(const QPoint& pos)
     {
         const Marking marking = model->get_marking(row);
         MarkingDialogWindow dialog(this);
-        dialog.setWindowTitle(tr("Edit marking"));
+        dialog.setWindowTitle(Lang::tr("fileviewer.edit_marking"));
         dialog.setText(marking.text_);
         dialog.setColor(marking.color_);
         dialog.setTextColor(marking.text_color_);

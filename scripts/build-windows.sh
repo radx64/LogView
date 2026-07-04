@@ -205,10 +205,14 @@ build_cross() {
     [ -f "${bin}" ] || die "Build finished but LogView.exe not found at ${bin}"
     cp "${bin}" "${OUT_DIR}/"
 
+    # Ship the translation catalogs next to LogView.exe (found at runtime).
+    rm -rf "${OUT_DIR}/lang"
+    cp -r "${PROJECT_ROOT}/lang" "${OUT_DIR}/lang"
+
     # A static Qt build bakes Qt, its plugins and the runtime into the .exe, so
-    # there is nothing to bundle - ship the single self-contained executable.
+    # there is nothing else to bundle - ship the executable plus lang/.
     if [ "${qt_is_static}" = "1" ]; then
-        ok "Static Windows binary -> ${OUT_DIR}/LogView.exe (self-contained, no DLLs)"
+        ok "Static Windows binary -> ${OUT_DIR}/LogView.exe (self-contained, no DLLs; + lang/)"
         return
     fi
 
@@ -261,6 +265,10 @@ build_native() {
     bin="$(find "${BUILD_DIR}" -name LogView.exe -print -quit)"
     [ -n "${bin}" ] || die "Build finished but LogView.exe not found."
     cp "${bin}" "${OUT_DIR}/"
+
+    # Ship the translation catalogs next to LogView.exe (found at runtime).
+    rm -rf "${OUT_DIR}/lang"
+    cp -r "${PROJECT_ROOT}/lang" "${OUT_DIR}/lang"
 
     if command -v windeployqt6 >/dev/null 2>&1; then
         windeployqt6 --release --dir "${OUT_DIR}" "${OUT_DIR}/LogView.exe"

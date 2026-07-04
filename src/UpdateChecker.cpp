@@ -1,5 +1,7 @@
 #include "UpdateChecker.hpp"
 
+#include "Translator.hpp"
+
 #include <algorithm>
 
 #include <QDateTime>
@@ -148,18 +150,15 @@ void UpdateChecker::onReplyFinished(QNetworkReply* reply)
                         (QDateTime::currentDateTime().secsTo(reset) + 59) / 60;
                     emit checkFailed(
                         minutes > 1
-                            ? tr("GitHub API rate limit exceeded. Try again in "
-                                 "about %1 minutes (at %2).")
+                            ? Lang::tr("update.rate_limit_minutes")
                                   .arg(minutes)
                                   .arg(reset.toString(QStringLiteral("HH:mm")))
-                            : tr("GitHub API rate limit exceeded. Try again at "
-                                 "%1.")
+                            : Lang::tr("update.rate_limit_at")
                                   .arg(reset.toString(QStringLiteral("HH:mm"))));
                 }
                 else
                 {
-                    emit checkFailed(tr("GitHub API rate limit exceeded. "
-                                        "Please try again later."));
+                    emit checkFailed(Lang::tr("update.rate_limit_later"));
                 }
             }
             else
@@ -174,8 +173,8 @@ void UpdateChecker::onReplyFinished(QNetworkReply* reply)
         const QString msg = githubMessage(payload);
         if (status > 0)
             emit checkFailed(msg.isEmpty()
-                                 ? tr("GitHub returned HTTP %1.").arg(status)
-                                 : tr("GitHub returned HTTP %1: %2")
+                                 ? Lang::tr("update.http_status").arg(status)
+                                 : Lang::tr("update.http_status_msg")
                                        .arg(status)
                                        .arg(msg));
         else
@@ -187,7 +186,7 @@ void UpdateChecker::onReplyFinished(QNetworkReply* reply)
     const QJsonDocument doc = QJsonDocument::fromJson(payload, &parseError);
     if (parseError.error != QJsonParseError::NoError || !doc.isObject())
     {
-        emit checkFailed(tr("Could not parse update information from GitHub."));
+        emit checkFailed(Lang::tr("update.parse_failed"));
         return;
     }
 
@@ -199,7 +198,7 @@ void UpdateChecker::onReplyFinished(QNetworkReply* reply)
 
     if (tag.isEmpty())
     {
-        emit checkFailed(tr("No release information is available yet."));
+        emit checkFailed(Lang::tr("update.no_release"));
         return;
     }
 

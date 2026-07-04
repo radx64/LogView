@@ -11,6 +11,7 @@ class QFontComboBox;
 class QSpinBox;
 class QPushButton;
 class QCheckBox;
+class QComboBox;
 
 class SettingsDialog : public QDialog
 {
@@ -45,6 +46,7 @@ private:
     QPushButton* search_current_color_reset_{nullptr};
     QCheckBox* check_updates_checkbox_{nullptr};
     QCheckBox* prompt_save_on_exit_checkbox_{nullptr};
+    QComboBox* language_combo_{nullptr};
 
     QColor highlight_color_{};
     QColor search_color_{};

@@ -25,6 +25,7 @@ constexpr auto kLastFileDirKey = "LastFileDirectory";
 constexpr auto kLastProjectDirKey = "LastProjectDirectory";
 constexpr auto kGeneralGroup = "General";
 constexpr auto kPromptSaveOnExitKey = "PromptSaveOnExit";
+constexpr auto kLanguageKey = "Language";
 constexpr auto kBookmarksGroup = "Bookmarks";
 constexpr auto kDisabledTagsKey = "DisabledTags";
 constexpr auto kDisabledFilesKey = "DisabledFiles";
@@ -123,6 +124,15 @@ void Settings::setPromptSaveOnExit(bool enabled)
     if (prompt_save_on_exit_ == enabled)
         return;
     prompt_save_on_exit_ = enabled;
+    save();
+    emit changed();
+}
+
+void Settings::setLanguage(const QString& code)
+{
+    if (language_ == code)
+        return;
+    language_ = code;
     save();
     emit changed();
 }
@@ -243,6 +253,8 @@ void Settings::load()
     settings.beginGroup(kGeneralGroup);
     prompt_save_on_exit_ =
         settings.value(kPromptSaveOnExitKey, true).toBool();
+    language_ =
+        settings.value(kLanguageKey, QStringLiteral("system")).toString();
     settings.endGroup();
 
     settings.beginGroup(kRecentGroup);
@@ -295,6 +307,7 @@ void Settings::save() const
 
     settings.beginGroup(kGeneralGroup);
     settings.setValue(kPromptSaveOnExitKey, prompt_save_on_exit_);
+    settings.setValue(kLanguageKey, language_);
     settings.endGroup();
 
     settings.beginGroup(kRecentGroup);

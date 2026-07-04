@@ -1,5 +1,7 @@
 #include "UpdateDialog.hpp"
 
+#include "Translator.hpp"
+
 #include <QDesktopServices>
 #include <QDialogButtonBox>
 #include <QLabel>
@@ -16,7 +18,7 @@ UpdateDialog::UpdateDialog(const QString& currentVersion,
                            QWidget* parent)
     : QDialog(parent), url_(url), latestVersion_(latestVersion)
 {
-    setWindowTitle(tr("Update available"));
+    setWindowTitle(Lang::tr("updatedlg.title"));
     resize(520, 420);
 
     auto* layout = new QVBoxLayout(this);
@@ -24,28 +26,28 @@ UpdateDialog::UpdateDialog(const QString& currentVersion,
     auto* heading = new QLabel(this);
     heading->setTextFormat(Qt::RichText);
     heading->setText(QStringLiteral("<h3>%1</h3>")
-                         .arg(title.isEmpty() ? tr("A new version is available")
+                         .arg(title.isEmpty() ? Lang::tr("updatedlg.new_version")
                                               : title.toHtmlEscaped()));
     layout->addWidget(heading);
 
     auto* versions = new QLabel(this);
-    versions->setText(tr("Installed version: %1\nLatest version: %2")
+    versions->setText(Lang::tr("updatedlg.versions")
                           .arg(currentVersion, latestVersion));
     layout->addWidget(versions);
 
     auto* notesView = new QTextBrowser(this);
     notesView->setOpenExternalLinks(true);
     if (notes.trimmed().isEmpty())
-        notesView->setPlainText(tr("No release notes were provided."));
+        notesView->setPlainText(Lang::tr("updatedlg.no_notes"));
     else
         notesView->setMarkdown(notes);
     layout->addWidget(notesView, 1);
 
     auto* buttons = new QDialogButtonBox(this);
     auto* downloadButton =
-        buttons->addButton(tr("Download"), QDialogButtonBox::AcceptRole);
+        buttons->addButton(Lang::tr("updatedlg.download"), QDialogButtonBox::AcceptRole);
     auto* skipButton =
-        buttons->addButton(tr("Skip this version"), QDialogButtonBox::DestructiveRole);
+        buttons->addButton(Lang::tr("updatedlg.skip"), QDialogButtonBox::DestructiveRole);
     buttons->addButton(QDialogButtonBox::Close);
     layout->addWidget(buttons);
 

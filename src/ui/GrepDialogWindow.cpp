@@ -1,5 +1,7 @@
 #include "GrepDialogWindow.hpp"
 
+#include "Translator.hpp"
+
 #include <QCheckBox>
 #include <QColor>
 #include <QGridLayout>
@@ -17,7 +19,7 @@ bool GrepDialogWindow::last_inverted_ = false;
 GrepDialogWindow::GrepDialogWindow(QWidget *parent) :
     QDialog(parent)
 {
-    setWindowTitle(tr("Grep"));
+    setWindowTitle(Lang::tr("grep.title"));
     resize(400, 121);
 
     QGridLayout* outer = new QGridLayout(this);
@@ -25,17 +27,17 @@ GrepDialogWindow::GrepDialogWindow(QWidget *parent) :
 
     QGridLayout* patternLayout = new QGridLayout();
     patternLayout->setSpacing(1);
-    QLabel* label = new QLabel(tr("Pattern"), this);
+    QLabel* label = new QLabel(Lang::tr("grep.pattern"), this);
     label->setMinimumSize(QSize(50, 0));
     pattern_ = new QLineEdit(this);
     patternLayout->addWidget(label, 0, 0, 1, 1);
     patternLayout->addWidget(pattern_, 0, 1, 1, 1);
 
-    regex_check_ = new QCheckBox(tr("Regex"), this);
-    case_sensitive_check_ = new QCheckBox(tr("Case sensitive"), this);
-    inverted_check_ = new QCheckBox(tr("Inverted"), this);
+    regex_check_ = new QCheckBox(Lang::tr("common.regex"), this);
+    case_sensitive_check_ = new QCheckBox(Lang::tr("common.case_sensitive"), this);
+    inverted_check_ = new QCheckBox(Lang::tr("grep.inverted"), this);
     inverted_check_->setFocusPolicy(Qt::StrongFocus);
-    button_ = new QPushButton(tr("Grep"), this);
+    button_ = new QPushButton(Lang::tr("grep.title"), this);
 
     inner->addLayout(patternLayout, 0, 0, 1, 1);
     inner->addWidget(regex_check_, 1, 0, 1, 1);

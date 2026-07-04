@@ -1,5 +1,7 @@
 #include "LogViewer.hpp"
 
+#include "Translator.hpp"
+
 #include "QLayout"
 #include "QTabWidget"
 #include "QTabBar"
@@ -132,8 +134,8 @@ void LogViewer::showTabContextMenu(const QPoint& pos)
         return;
 
     QMenu menu;
-    QAction* close_action = menu.addAction(tr("Close tab (MMB)"));
-    QAction* copy_action = menu.addAction(tr("Copy grep"));
+    QAction* close_action = menu.addAction(Lang::tr("tab.close"));
+    QAction* copy_action = menu.addAction(Lang::tr("logviewer.copy_grep"));
     QAction* chosen = menu.exec(bar->mapToGlobal(pos));
     if (chosen == close_action)
     {

@@ -1,5 +1,7 @@
 #include "FileLineSource.hpp"
 
+#include "Translator.hpp"
+
 #include <QMessageBox>
 
 namespace
@@ -40,7 +42,7 @@ FileLineSource::FileLineSource(const QString& filename)
     if (!file_.open(QIODevice::ReadOnly))
     {
         QMessageBox msg;
-        msg.setText("Unable to open file " + file_.errorString());
+        msg.setText(Lang::tr("file.open_failed").arg(file_.errorString()));
         msg.setStandardButtons(QMessageBox::Ok);
         msg.setIcon(QMessageBox::Critical);
         msg.exec();

@@ -1,5 +1,7 @@
 #include "MergerDialogWindow.hpp"
 
+#include "Translator.hpp"
+
 #include <QAbstractItemModel>
 #include <QCheckBox>
 #include <QDir>
@@ -31,14 +33,14 @@ constexpr qint64 kCopyChunkSize = 64 * 1024;
 MergerDialogWindow::MergerDialogWindow(QWidget* parent) :
     QDialog(parent)
 {
-    setWindowTitle(tr("Merger tool"));
+    setWindowTitle(Lang::tr("merger.title"));
     setWindowIcon(QIcon(QStringLiteral(":/icon/Add-Files-To-Archive-32.png")));
     setAcceptDrops(true);
     resize(420, 520);
 
     QVBoxLayout* outer = new QVBoxLayout(this);
 
-    QGroupBox* files_box = new QGroupBox(tr("Files"), this);
+    QGroupBox* files_box = new QGroupBox(Lang::tr("merger.files"), this);
     QVBoxLayout* files_layout = new QVBoxLayout(files_box);
 
     QHBoxLayout* list_row = new QHBoxLayout();
@@ -46,16 +48,16 @@ MergerDialogWindow::MergerDialogWindow(QWidget* parent) :
     file_list_ = new QListWidget(files_box);
     file_list_->setSelectionMode(QAbstractItemView::ExtendedSelection);
     file_list_->setDragDropMode(QAbstractItemView::InternalMove);
-    file_list_->setToolTip(tr("Files are merged top to bottom"));
+    file_list_->setToolTip(Lang::tr("merger.files_tooltip"));
     list_row->addWidget(file_list_);
 
     QVBoxLayout* arrows = new QVBoxLayout();
     move_up_ = new QToolButton(files_box);
     move_up_->setIcon(QIcon(QStringLiteral(":/icon/Gnome-Go-Up-32.png")));
-    move_up_->setToolTip(tr("Move selected up"));
+    move_up_->setToolTip(Lang::tr("merger.move_up"));
     move_down_ = new QToolButton(files_box);
     move_down_->setIcon(QIcon(QStringLiteral(":/icon/Gnome-Go-Down-32.png")));
-    move_down_->setToolTip(tr("Move selected down"));
+    move_down_->setToolTip(Lang::tr("merger.move_down"));
     arrows->addStretch();
     arrows->addWidget(move_up_);
     arrows->addWidget(move_down_);
@@ -64,16 +66,16 @@ MergerDialogWindow::MergerDialogWindow(QWidget* parent) :
 
     files_layout->addLayout(list_row);
 
-    QLabel* hint = new QLabel(tr("(Note: you can drag&drop files here)"), files_box);
+    QLabel* hint = new QLabel(Lang::tr("merger.drag_hint"), files_box);
     hint->setAlignment(Qt::AlignHCenter);
     files_layout->addWidget(hint);
 
     QHBoxLayout* buttons_row = new QHBoxLayout();
-    add_button_ = new QPushButton(tr("Add"), files_box);
+    add_button_ = new QPushButton(Lang::tr("common.add"), files_box);
     add_button_->setIcon(QIcon(QStringLiteral(":/icon/Gnome-List-Add-32.png")));
-    delete_button_ = new QPushButton(tr("Delete"), files_box);
+    delete_button_ = new QPushButton(Lang::tr("common.delete"), files_box);
     delete_button_->setIcon(QIcon(QStringLiteral(":/icon/Gnome-List-Remove-32.png")));
-    clear_button_ = new QPushButton(tr("Clear"), files_box);
+    clear_button_ = new QPushButton(Lang::tr("merger.clear"), files_box);
     clear_button_->setIcon(QIcon(QStringLiteral(":/icon/Gnome-Edit-Clear-32.png")));
     buttons_row->addWidget(add_button_);
     buttons_row->addWidget(delete_button_);
@@ -81,12 +83,12 @@ MergerDialogWindow::MergerDialogWindow(QWidget* parent) :
     buttons_row->addStretch();
     files_layout->addLayout(buttons_row);
 
-    recycle_check_ = new QCheckBox(tr("Move to recycle bin after merge"), files_box);
+    recycle_check_ = new QCheckBox(Lang::tr("merger.recycle"), files_box);
     files_layout->addWidget(recycle_check_);
 
     outer->addWidget(files_box);
 
-    QLabel* result_label = new QLabel(tr("Merge result as:"), this);
+    QLabel* result_label = new QLabel(Lang::tr("merger.result_as_label"), this);
     outer->addWidget(result_label);
 
     QHBoxLayout* output_row = new QHBoxLayout();
@@ -98,12 +100,12 @@ MergerDialogWindow::MergerDialogWindow(QWidget* parent) :
     outer->addLayout(output_row);
 
     QHBoxLayout* bottom_row = new QHBoxLayout();
-    open_result_check_ = new QCheckBox(tr("Open resulting file"), this);
+    open_result_check_ = new QCheckBox(Lang::tr("merger.open_result"), this);
     open_result_check_->setChecked(true);
-    save_button_ = new QPushButton(tr("Save and open"), this);
+    save_button_ = new QPushButton(Lang::tr("merger.save_open"), this);
     save_button_->setIcon(QIcon(QStringLiteral(":/icon/Gnome-Document-Save-32.png")));
     save_button_->setDefault(true);
-    cancel_button_ = new QPushButton(tr("Cancel"), this);
+    cancel_button_ = new QPushButton(Lang::tr("common.cancel"), this);
     bottom_row->addWidget(open_result_check_);
     bottom_row->addStretch();
     bottom_row->addWidget(save_button_);
@@ -167,9 +169,9 @@ QStringList MergerDialogWindow::collectFiles() const
 void MergerDialogWindow::onAddClicked()
 {
     const QStringList paths = QFileDialog::getOpenFileNames(this,
-        tr("Add log files"),
+        Lang::tr("merger.add_files_title"),
         Settings::instance().lastOpenedFileDirectory(),
-        tr("All Files (*)"));
+        Lang::tr("filter.all_files"));
     if (paths.isEmpty())
         return;
 
@@ -218,9 +220,9 @@ void MergerDialogWindow::onBrowseClicked()
         start_dir = QFileInfo(output_path_->text()).absolutePath();
 
     const QString path = QFileDialog::getSaveFileName(this,
-        tr("Merge result as"),
+        Lang::tr("merger.result_as_title"),
         start_dir,
-        tr("Log files (*.log);;Text files (*.txt);;All Files (*)"));
+        Lang::tr("filter.log_files"));
     if (path.isEmpty())
         return;
 
@@ -265,16 +267,16 @@ void MergerDialogWindow::onSaveClicked()
     const QStringList inputs = collectFiles();
     if (inputs.isEmpty())
     {
-        QMessageBox::warning(this, tr("Merger tool"),
-            tr("Add at least one file to merge."));
+        QMessageBox::warning(this, Lang::tr("merger.title"),
+            Lang::tr("merger.need_file"));
         return;
     }
 
     const QString output = output_path_->text().trimmed();
     if (output.isEmpty())
     {
-        QMessageBox::warning(this, tr("Merger tool"),
-            tr("Choose a destination file for the merge result."));
+        QMessageBox::warning(this, Lang::tr("merger.title"),
+            Lang::tr("merger.need_dest"));
         return;
     }
 
@@ -283,8 +285,8 @@ void MergerDialogWindow::onSaveClicked()
     {
         if (QFileInfo(input).absoluteFilePath() == output_absolute)
         {
-            QMessageBox::warning(this, tr("Merger tool"),
-                tr("The destination file cannot be one of the source files."));
+            QMessageBox::warning(this, Lang::tr("merger.title"),
+                Lang::tr("merger.dest_is_source"));
             return;
         }
     }
@@ -310,8 +312,8 @@ bool MergerDialogWindow::mergeFiles(const QStringList& inputs, const QString& ou
     QFile out_file(output);
     if (!out_file.open(QIODevice::WriteOnly | QIODevice::Truncate))
     {
-        QMessageBox::warning(this, tr("Merger tool"),
-            tr("Could not open %1 for writing.").arg(output));
+        QMessageBox::warning(this, Lang::tr("merger.title"),
+            Lang::tr("file.write_failed").arg(output));
         return false;
     }
 
@@ -320,8 +322,8 @@ bool MergerDialogWindow::mergeFiles(const QStringList& inputs, const QString& ou
         QFile in_file(input);
         if (!in_file.open(QIODevice::ReadOnly))
         {
-            QMessageBox::warning(this, tr("Merger tool"),
-                tr("Could not open %1 for reading.").arg(input));
+            QMessageBox::warning(this, Lang::tr("merger.title"),
+                Lang::tr("file.read_failed").arg(input));
             return false;
         }
 
@@ -333,8 +335,8 @@ bool MergerDialogWindow::mergeFiles(const QStringList& inputs, const QString& ou
                 break;
             if (out_file.write(chunk) != chunk.size())
             {
-                QMessageBox::warning(this, tr("Merger tool"),
-                    tr("Failed while writing to %1.").arg(output));
+                QMessageBox::warning(this, Lang::tr("merger.title"),
+                    Lang::tr("merger.write_error").arg(output));
                 return false;
             }
             last_byte = chunk.at(chunk.size() - 1);

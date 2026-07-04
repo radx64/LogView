@@ -38,6 +38,7 @@ public:
 protected:
     bool eventFilter(QObject* watched, QEvent* event) override;
     void closeEvent(QCloseEvent* event) override;
+    void changeEvent(QEvent* event) override;
 
 private slots:
     void on_actionLoad_from_file_triggered();

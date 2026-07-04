@@ -2,6 +2,7 @@
 
 #include <QCheckBox>
 #include <QColorDialog>
+#include <QComboBox>
 #include <QDialogButtonBox>
 #include <QFontComboBox>
 #include <QFormLayout>
@@ -16,6 +17,7 @@
 #include "AutoMarkingsWidget.hpp"
 #include "AutoBookmarksWidget.hpp"
 #include "Settings.hpp"
+#include "Translator.hpp"
 
 namespace
 {
@@ -26,7 +28,7 @@ const QColor kDefaultSearchCurrentMatchColor(255, 140, 0, 200);
 SettingsDialog::SettingsDialog(QWidget* parent)
     : QDialog(parent)
 {
-    setWindowTitle(tr("Options"));
+    setWindowTitle(Lang::tr("dialog.options.title"));
     resize(640, 420);
 
     section_tree_ = new QTreeWidget(this);
@@ -44,11 +46,11 @@ SettingsDialog::SettingsDialog(QWidget* parent)
                 pages_->setCurrentIndex(index);
             });
 
-    addSection(tr("General"), createGeneralPage());
-    addSection(tr("Editor"), createEditorPage());
-    addSection(tr("Auto markings"), createAutoMarkingsPage());
-    addSection(tr("Auto bookmarks"), createAutoBookmarksPage());
-    addSection(tr("Updates"), createUpdatesPage());
+    addSection(Lang::tr("section.general"), createGeneralPage());
+    addSection(Lang::tr("section.editor"), createEditorPage());
+    addSection(Lang::tr("section.auto_markings"), createAutoMarkingsPage());
+    addSection(Lang::tr("section.auto_bookmarks"), createAutoBookmarksPage());
+    addSection(Lang::tr("section.updates"), createUpdatesPage());
 
     QHBoxLayout* contentLayout = new QHBoxLayout();
     contentLayout->addWidget(section_tree_);
@@ -89,15 +91,17 @@ QWidget* SettingsDialog::createGeneralPage()
     QWidget* page = new QWidget(this);
     QFormLayout* form = new QFormLayout(page);
 
-    prompt_save_on_exit_checkbox_ = new QCheckBox(
-        tr("Ask to save unsaved project before closing"), page);
+    language_combo_ = new QComboBox(page);
+    for (const QString& code : Translator::availableLanguageCodes())
+        language_combo_->addItem(Translator::displayName(code), code);
 
-    QLabel* hint = new QLabel(
-        tr("When enabled, LogView asks whether to save unsaved changes\n"
-           "before the application is closed."),
-        page);
+    prompt_save_on_exit_checkbox_ = new QCheckBox(
+        Lang::tr("settings.prompt_save"), page);
+
+    QLabel* hint = new QLabel(Lang::tr("settings.prompt_save.hint"), page);
     hint->setWordWrap(true);
 
+    form->addRow(Lang::tr("settings.language"), language_combo_);
     form->addRow(prompt_save_on_exit_checkbox_);
     form->addRow(hint);
 
@@ -113,15 +117,15 @@ QWidget* SettingsDialog::createEditorPage()
 
     font_size_spin_ = new QSpinBox(page);
     font_size_spin_->setRange(6, 72);
-    font_size_spin_->setSuffix(tr(" pt"));
+    font_size_spin_->setSuffix(QStringLiteral(" pt"));
 
     highlight_color_button_ = new QPushButton(page);
     highlight_color_button_->setAutoFillBackground(true);
     connect(highlight_color_button_, &QPushButton::clicked,
             this, &SettingsDialog::pickHighlightColor);
 
-    highlight_color_reset_ = new QPushButton(tr("Auto"), page);
-    highlight_color_reset_->setToolTip(tr("Derive the highlight color from the active theme"));
+    highlight_color_reset_ = new QPushButton(Lang::tr("color.auto"), page);
+    highlight_color_reset_->setToolTip(Lang::tr("settings.derive_highlight"));
     connect(highlight_color_reset_, &QPushButton::clicked, this, [this]()
             {
                 highlight_color_ = QColor();
@@ -136,12 +140,12 @@ QWidget* SettingsDialog::createEditorPage()
     search_color_button_->setAutoFillBackground(true);
     connect(search_color_button_, &QPushButton::clicked, this, [this]()
             {
-                pickColor(search_color_, tr("Select search highlight color"),
+                pickColor(search_color_, Lang::tr("dialog.select_search_highlight"),
                           kDefaultSearchHighlightColor);
             });
 
-    search_color_reset_ = new QPushButton(tr("Auto"), page);
-    search_color_reset_->setToolTip(tr("Use the default search highlight color"));
+    search_color_reset_ = new QPushButton(Lang::tr("color.auto"), page);
+    search_color_reset_->setToolTip(Lang::tr("settings.search_highlight_auto_tip"));
     connect(search_color_reset_, &QPushButton::clicked, this, [this]()
             {
                 search_color_ = QColor();
@@ -156,12 +160,12 @@ QWidget* SettingsDialog::createEditorPage()
     search_current_color_button_->setAutoFillBackground(true);
     connect(search_current_color_button_, &QPushButton::clicked, this, [this]()
             {
-                pickColor(search_current_color_, tr("Select current match color"),
+                pickColor(search_current_color_, Lang::tr("dialog.select_current_match"),
                           kDefaultSearchCurrentMatchColor);
             });
 
-    search_current_color_reset_ = new QPushButton(tr("Auto"), page);
-    search_current_color_reset_->setToolTip(tr("Use the default current match color"));
+    search_current_color_reset_ = new QPushButton(Lang::tr("color.auto"), page);
+    search_current_color_reset_->setToolTip(Lang::tr("settings.current_match_auto_tip"));
     connect(search_current_color_reset_, &QPushButton::clicked, this, [this]()
             {
                 search_current_color_ = QColor();
@@ -172,11 +176,11 @@ QWidget* SettingsDialog::createEditorPage()
     searchCurrentColorLayout->addWidget(search_current_color_button_, 1);
     searchCurrentColorLayout->addWidget(search_current_color_reset_);
 
-    form->addRow(tr("Font:"), font_combo_);
-    form->addRow(tr("Size:"), font_size_spin_);
-    form->addRow(tr("Current line color:"), colorLayout);
-    form->addRow(tr("Search highlight color:"), searchColorLayout);
-    form->addRow(tr("Current match color:"), searchCurrentColorLayout);
+    form->addRow(Lang::tr("settings.font"), font_combo_);
+    form->addRow(Lang::tr("settings.size"), font_size_spin_);
+    form->addRow(Lang::tr("settings.current_line_color"), colorLayout);
+    form->addRow(Lang::tr("settings.search_highlight_color"), searchColorLayout);
+    form->addRow(Lang::tr("settings.current_match_color"), searchCurrentColorLayout);
 
     return page;
 }
@@ -197,12 +201,9 @@ QWidget* SettingsDialog::createUpdatesPage()
     QFormLayout* form = new QFormLayout(page);
 
     check_updates_checkbox_ = new QCheckBox(
-        tr("Check for updates on startup"), page);
+        Lang::tr("settings.check_updates"), page);
 
-    QLabel* hint = new QLabel(
-        tr("LogView can check GitHub for new releases. You can also check\n"
-           "manually from Help \u2192 Check for updates..."),
-        page);
+    QLabel* hint = new QLabel(Lang::tr("settings.updates_hint"), page);
     hint->setWordWrap(true);
 
     form->addRow(check_updates_checkbox_);
@@ -227,6 +228,10 @@ void SettingsDialog::loadValues()
 
     prompt_save_on_exit_checkbox_->setChecked(
         Settings::instance().promptSaveOnExit());
+
+    const int lang_index =
+        language_combo_->findData(Settings::instance().language());
+    language_combo_->setCurrentIndex(lang_index >= 0 ? lang_index : 0);
 }
 
 void SettingsDialog::applyColorButtonStyle(QPushButton* button, const QColor& color)
@@ -242,7 +247,7 @@ void SettingsDialog::applyColorButtonStyle(QPushButton* button, const QColor& co
     else
     {
         button->setStyleSheet(QString());
-        button->setText(tr("Automatic"));
+        button->setText(Lang::tr("color.automatic"));
     }
 }
 
@@ -267,7 +272,7 @@ void SettingsDialog::pickColor(QColor& target, const QString& title, const QColo
 
 void SettingsDialog::pickHighlightColor()
 {
-    pickColor(highlight_color_, tr("Select current line color"), QColor(Qt::yellow));
+    pickColor(highlight_color_, Lang::tr("dialog.select_current_line"), QColor(Qt::yellow));
 }
 
 void SettingsDialog::applyChanges()
@@ -283,4 +288,11 @@ void SettingsDialog::applyChanges()
         check_updates_checkbox_->isChecked());
     Settings::instance().setPromptSaveOnExit(
         prompt_save_on_exit_checkbox_->isChecked());
+
+    const QString language = language_combo_->currentData().toString();
+    if (language != Settings::instance().language())
+    {
+        Settings::instance().setLanguage(language);
+        Translator::instance().setLanguage(language);
+    }
 }

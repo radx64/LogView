@@ -1,0 +1,259 @@
+# LogView language catalog (Polish)
+#
+# Format: <key>=<value> (see en.lang for the full format description).
+# The file must be saved as UTF-8.
+
+# Language metadata (shown in the language selector).
+language.name=Polski
+settings.language.system=Systemowy
+
+# Application
+app.title=LogView
+
+# Menus
+menu.file=Plik
+menu.edit=Edycja
+menu.view=Widok
+menu.theme=Motyw
+menu.recent_files=Ostatnie pliki
+menu.recent_projects=Ostatnie projekty
+menu.help=Pomoc
+menu.empty=(puste)
+toolbar.title=Pasek narzędzi
+
+# Actions
+action.open_file=Otwórz plik...
+action.merge_files=Scal pliki...
+action.exit=Zakończ
+action.find=Znajdź...
+action.grep_current_view=Grep bieżącego widoku
+action.export_grep=Eksportuj grep...
+action.bookmark_line=Dodaj zakładkę do bieżącej linii
+action.about=O programie
+action.check_updates=Sprawdź aktualizacje...
+action.load_project=Wczytaj projekt...
+action.save_project_as=Zapisz projekt jako...
+action.save_project=Zapisz projekt
+action.options=Opcje...
+
+# Themes
+theme.system=Systemowy
+theme.light=Jasny
+theme.dark=Ciemny
+
+# File tab context menu
+tab.copy_file_name=Kopiuj nazwę pliku
+tab.copy_file_path=Kopiuj ścieżkę pliku
+tab.open_folder=Otwórz folder zawierający
+tab.reload=Przeładuj
+tab.close=Zamknij kartę (środkowy przycisk myszy)
+tab.loading_suffix= (ładowanie…)
+
+# Status bar
+status.get_started=Użyj menu wczytywania pliku lub przeciągnij pliki do tego okna, aby rozpocząć.
+status.checking_updates=Sprawdzanie aktualizacji...
+status.loading_one=Ładowanie %1… %2%
+status.loading_many=Ładowanie plików: %1… %2%
+
+# Common labels
+common.warning=Ostrzeżenie!
+common.enabled=Włączone
+common.case_sensitive=Uwzględniaj wielkość liter
+common.regex=Wyrażenie regularne
+common.regex_label=Wyrażenie regularne:
+common.font_color=Kolor czcionki
+common.font_color_label=Kolor czcionki:
+common.background=Tło
+common.background_label=Tło:
+common.none=Brak
+common.none_paren=(brak)
+common.yes=Tak
+common.no=Nie
+common.name=Nazwa
+common.name_label=Nazwa:
+common.icon=Ikona
+common.icon_label=Ikona:
+common.tags=Tagi
+common.tags_label=Tagi:
+common.add=Dodaj
+common.add_ellipsis=Dodaj...
+common.edit_ellipsis=Edytuj...
+common.delete=Usuń
+common.cancel=Anuluj
+common.save=Zapisz
+common.filter=Filtruj
+common.invalid_regex=Nieprawidłowe wyrażenie regularne: %1
+common.regex_empty=Wyrażenie regularne nie może być puste.
+common.name_empty=Nazwa nie może być pusta.
+
+# Common filters and file errors
+filter.all_files=Wszystkie pliki (*)
+filter.text_files=Pliki tekstowe (*.txt);;Wszystkie pliki (*)
+filter.project_file=Plik projektu (*.json)
+filter.log_files=Pliki dziennika (*.log);;Pliki tekstowe (*.txt);;Wszystkie pliki (*)
+file.write_failed=Nie udało się otworzyć %1 do zapisu.
+file.read_failed=Nie udało się otworzyć %1 do odczytu.
+file.open_failed=Nie udało się otworzyć pliku %1
+file.not_exist=Plik nie istnieje:\n%1
+file.no_longer_exists=Plik już nie istnieje:\n%1
+
+# Project handling
+project.modified=Dokument został zmodyfikowany.
+project.save_prompt=Czy chcesz zapisać zmiany wprowadzone w bieżącym projekcie? Wszystkie zmiany zostaną utracone, jeśli ich nie zapiszesz.
+project.nothing_to_save=Nie ma nic do zapisania.\nNajpierw wczytaj plik lub projekt.
+project.no_longer_exists=Projekt już nie istnieje:\n%1
+
+# Dialog titles
+dialog.check_updates.title=Sprawdź aktualizacje
+dialog.open_file.title=Otwórz plik
+dialog.add_bookmark.title=Dodaj zakładkę
+dialog.open_log_files.title=Otwórz pliki dziennika
+dialog.export_grep.title=Eksportuj grep
+dialog.open_recent_file.title=Otwórz ostatni plik
+dialog.open_recent_project.title=Otwórz ostatni projekt
+dialog.save_project.title=Zapisz projekt
+dialog.open_project.title=Otwórz projekt
+dialog.about.title=O programie
+dialog.options.title=Opcje
+dialog.select_font_color=Wybierz kolor czcionki
+dialog.select_background_color=Wybierz kolor tła
+dialog.select_marking_color=Wybierz kolor oznaczenia
+dialog.select_current_line=Wybierz kolor bieżącej linii
+dialog.select_search_highlight=Wybierz kolor podświetlenia wyszukiwania
+dialog.select_current_match=Wybierz kolor bieżącego dopasowania
+
+# Updates
+update.latest=Używasz najnowszej wersji (%1).
+update.check_failed=Nie udało się sprawdzić aktualizacji:\n%1
+update.rate_limit_minutes=Przekroczono limit zapytań API GitHub. Spróbuj ponownie za około %1 min (o %2).
+update.rate_limit_at=Przekroczono limit zapytań API GitHub. Spróbuj ponownie o %1.
+update.rate_limit_later=Przekroczono limit zapytań API GitHub. Spróbuj ponownie później.
+update.http_status=GitHub zwrócił HTTP %1.
+update.http_status_msg=GitHub zwrócił HTTP %1: %2
+update.parse_failed=Nie udało się odczytać informacji o aktualizacji z serwisu GitHub.
+update.no_release=Brak dostępnych informacji o wydaniu.
+
+# Update dialog
+updatedlg.title=Dostępna aktualizacja
+updatedlg.new_version=Dostępna jest nowa wersja
+updatedlg.versions=Zainstalowana wersja: %1\nNajnowsza wersja: %2
+updatedlg.no_notes=Nie podano informacji o wydaniu.
+updatedlg.download=Pobierz
+updatedlg.skip=Pomiń tę wersję
+
+# Export
+export.open_first=Otwórz plik przed eksportem.
+export.no_content=Aktywny widok nie zawiera treści do eksportu.
+
+# About dialog body
+about.text=Wersja %1\nKompilacja: %2 %3\n\nradX64 © 2026\nUdostępniono na licencji\nGNU GENERAL PUBLIC LICENSE
+
+# Settings dialog
+section.general=Ogólne
+section.editor=Edytor
+section.auto_markings=Automatyczne oznaczenia
+section.auto_bookmarks=Automatyczne zakładki
+section.updates=Aktualizacje
+settings.language=Język:
+settings.prompt_save=Pytaj o zapis niezapisanego projektu przed zamknięciem
+settings.prompt_save.hint=Gdy włączone, LogView pyta o zapisanie niezapisanych zmian\nprzed zamknięciem aplikacji.
+settings.font=Czcionka:
+settings.size=Rozmiar:
+settings.current_line_color=Kolor bieżącej linii:
+settings.search_highlight_color=Kolor podświetlenia wyszukiwania:
+settings.current_match_color=Kolor bieżącego dopasowania:
+settings.derive_highlight=Ustal kolor podświetlenia na podstawie aktywnego motywu
+settings.search_highlight_auto_tip=Użyj domyślnego koloru podświetlenia wyszukiwania
+settings.current_match_auto_tip=Użyj domyślnego koloru bieżącego dopasowania
+settings.check_updates=Sprawdzaj aktualizacje przy uruchomieniu
+settings.updates_hint=LogView może sprawdzać nowe wydania w serwisie GitHub. Możesz też sprawdzić\nręcznie w menu Pomoc → Sprawdź aktualizacje...
+color.auto=Auto
+color.automatic=Automatyczny
+
+# Grep dialog
+grep.title=Grep
+grep.pattern=Wzorzec
+grep.inverted=Odwrócony
+
+# File viewer
+fileviewer.filter_tooltip=Filtruj automatyczne zakładki
+fileviewer.bookmarks=Zakładki
+fileviewer.markings=Oznaczenia
+fileviewer.scanning=Skanowanie…
+fileviewer.edit_bookmark=Edytuj zakładkę
+fileviewer.rule_files=Pliki reguł
+fileviewer.no_rules=Brak automatycznych reguł zakładek
+fileviewer.edit_marking=Edytuj oznaczenie
+
+# Log viewer
+logviewer.copy_grep=Kopiuj grep
+
+# Auto markings
+automark.dialog.title=Automatyczne oznaczenie
+automark.pattern_placeholder=Przykład: ERR/.*
+automark.pick_font_color=Wybierz kolor czcionki
+automark.no_background=Bez tła
+automark.hint=Te szablony wyrażeń regularnych są zapisywane w %1 i stosowane do każdego otwartego pliku dziennika.
+automark.edit_title=Edytuj automatyczne oznaczenie
+
+# Auto bookmarks
+autobm.dialog.title=Automatyczna zakładka
+autobm.name_placeholder=Przykład: Błędy
+autobm.pattern_placeholder=Przykład: \bERROR\b
+autobm.tags_placeholder=Oddzielone przecinkami, np. severity, network
+autobm.description_label=Opis:
+autobm.hint=Te reguły są przechowywane jako pliki JSON w folderze "bookmarks". Pasujące linie są automatycznie dodawane do zakładek w każdym otwartym pliku dziennika.
+autobm.new_file=Nowy plik...
+autobm.delete_file=Usuń plik
+autobm.rule_files_label=Pliki reguł:
+autobm.rules_label=Reguły:
+autobm.new_rule_file=Nowy plik reguł
+autobm.file_name=Nazwa pliku:
+autobm.file_exists=Plik o tej nazwie już istnieje lub nazwa jest nieprawidłowa.
+autobm.delete_rule_file=Usuń plik reguł
+autobm.delete_confirm=Usunąć "%1" wraz ze wszystkimi regułami?
+autobm.edit_title=Edytuj automatyczną zakładkę
+
+# Search widget
+search.find=Znajdź
+search.regex_tooltip=Wyrażenie regularne
+search.prev_tooltip=Poprzednie dopasowanie (Shift+F3)
+search.next_tooltip=Następne dopasowanie (F3)
+search.close_tooltip=Zamknij (Esc)
+search.no_results=Brak wyników
+search.matches=Liczba dopasowań: %1
+search.searching=Wyszukiwanie… %1%
+
+# Marking dialog
+marking.dialog.title=Oznaczenie
+marking.auto_tooltip=Wybierz czytelny kolor czcionki na podstawie koloru oznaczenia
+marking.text=Tekst
+marking.color=Kolor
+marking.auto_value=Auto (%1)
+
+# Bookmark dialog
+bookmark.dialog.title=Zakładka
+
+# Merger dialog
+merger.title=Narzędzie scalania
+merger.files=Pliki
+merger.files_tooltip=Pliki są scalane od góry do dołu
+merger.move_up=Przenieś zaznaczone w górę
+merger.move_down=Przenieś zaznaczone w dół
+merger.drag_hint=(Uwaga: możesz przeciągać i upuszczać pliki tutaj)
+merger.clear=Wyczyść
+merger.recycle=Przenieś do kosza po scaleniu
+merger.result_as_label=Zapisz wynik scalania jako:
+merger.open_result=Otwórz plik wynikowy
+merger.save_open=Zapisz i otwórz
+merger.add_files_title=Dodaj pliki dziennika
+merger.result_as_title=Zapisz wynik scalania jako
+merger.need_file=Dodaj co najmniej jeden plik do scalenia.
+merger.need_dest=Wybierz plik docelowy dla wyniku scalania.
+merger.dest_is_source=Plik docelowy nie może być jednym z plików źródłowych.
+merger.write_error=Błąd podczas zapisu do %1.
+
+# Command line
+cli.description=Przeglądarka plików dziennika.
+cli.files_arg=pliki
+cli.files_desc=Plik(i) dziennika lub projekt (.json) do otwarcia.

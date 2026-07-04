@@ -51,6 +51,7 @@
 #include "ThemeManager.hpp"
 #include "SettingsDialog.hpp"
 #include "Settings.hpp"
+#include "Translator.hpp"
 #include "UpdateChecker.hpp"
 #include "UpdateDialog.hpp"
 
@@ -71,13 +72,13 @@ void MainWindow::showFileTabContextMenu(const QPoint& pos)
         return;
 
     QMenu menu;
-    QAction* copy_name_action = menu.addAction(tr("Copy file name"));
-    QAction* copy_path_action = menu.addAction(tr("Copy file path"));
-    QAction* open_folder_action = menu.addAction(tr("Open containing folder"));
+    QAction* copy_name_action = menu.addAction(Lang::tr("tab.copy_file_name"));
+    QAction* copy_path_action = menu.addAction(Lang::tr("tab.copy_file_path"));
+    QAction* open_folder_action = menu.addAction(Lang::tr("tab.open_folder"));
     menu.addSeparator();
-    QAction* reload_action = menu.addAction(tr("Reload"));
+    QAction* reload_action = menu.addAction(Lang::tr("tab.reload"));
     menu.addSeparator();
-    QAction* close_action = menu.addAction(tr("Close tab (MMB)"));
+    QAction* close_action = menu.addAction(Lang::tr("tab.close"));
 
     const QString file_path = filePathForTab(index);
     const bool has_path = !file_path.isEmpty();
@@ -149,7 +150,7 @@ MainWindow::MainWindow(QWidget* parent) :
     setAcceptDrops(true);
     ui->setupUi(this);
     ui->fileView->setTabsClosable(true);
-    statusBar()->showMessage(tr("Use load from file menu or drop files in this window to begin."));
+    statusBar()->showMessage(Lang::tr("status.get_started"));
     connect_signals();
     setupThemeMenu();
     setupRecentMenus();
@@ -218,7 +219,7 @@ void MainWindow::checkForUpdates(bool silent)
 {
     manual_update_check_ = !silent;
     if (!silent)
-        statusBar()->showMessage(tr("Checking for updates..."));
+        statusBar()->showMessage(Lang::tr("status.checking_updates"));
     update_checker_->checkForUpdates();
 }
 
@@ -257,8 +258,8 @@ void MainWindow::onUpToDate(const QString& currentVersion)
         return;
 
     QMessageBox::information(
-        this, tr("Check for updates"),
-        tr("You are running the latest version (%1).").arg(currentVersion));
+        this, Lang::tr("dialog.check_updates.title"),
+        Lang::tr("update.latest").arg(currentVersion));
 }
 
 void MainWindow::onUpdateCheckFailed(const QString& error)
@@ -268,8 +269,8 @@ void MainWindow::onUpdateCheckFailed(const QString& error)
         return;
 
     QMessageBox::warning(
-        this, tr("Check for updates"),
-        tr("Could not check for updates:\n%1").arg(error));
+        this, Lang::tr("dialog.check_updates.title"),
+        Lang::tr("update.check_failed").arg(error));
 }
 
 void MainWindow::dropEvent(QDropEvent* event)
@@ -314,8 +315,8 @@ void MainWindow::openCommandLinePaths(const QStringList& paths)
         const QString file_path = QFileInfo(raw_path).absoluteFilePath();
         if (!QFileInfo::exists(file_path))
         {
-            QMessageBox::warning(this, tr("Open file"),
-                tr("File does not exist:\n%1").arg(file_path));
+            QMessageBox::warning(this, Lang::tr("dialog.open_file.title"),
+                Lang::tr("file.not_exist").arg(file_path));
             continue;
         }
 
@@ -378,7 +379,7 @@ void MainWindow::bookmark_current_line()
     const uint32_t absolute_line_index = current_line.number;
 
     BookmarkDialogWindow dialog(this);
-    dialog.setWindowTitle(tr("Add bookmark"));
+    dialog.setWindowTitle(Lang::tr("dialog.add_bookmark.title"));
     dialog.setName(current_line.text);
     dialog.setIcon(QString(":/icon/Gnome-Bookmark-New-32.png"));
 
@@ -393,9 +394,9 @@ void MainWindow::bookmark_current_line()
 void MainWindow::on_actionLoad_from_file_triggered()
 {
     QStringList file_paths = QFileDialog::getOpenFileNames(this,
-        tr("Open log files"),
+        Lang::tr("dialog.open_log_files.title"),
         Settings::instance().lastOpenedFileDirectory(),
-        tr("All Files (*)"));
+        Lang::tr("filter.all_files"));
     if (file_paths.isEmpty())
         return;
 
@@ -443,8 +444,8 @@ void MainWindow::on_actionExport_grep_triggered()
     FileViewer* viewerWidget = get_active_viewer_widget();
     if (!viewerWidget)
     {
-        QMessageBox::information(this, tr("Export grep"),
-            tr("Open a file before exporting."));
+        QMessageBox::information(this, Lang::tr("dialog.export_grep.title"),
+            Lang::tr("export.open_first"));
         return;
     }
 
@@ -452,23 +453,23 @@ void MainWindow::on_actionExport_grep_triggered()
     LineSource* source = deepest_tab ? deepest_tab->source() : nullptr;
     if (!source || source->count() <= 0)
     {
-        QMessageBox::information(this, tr("Export grep"),
-            tr("The active view has no content to export."));
+        QMessageBox::information(this, Lang::tr("dialog.export_grep.title"),
+            Lang::tr("export.no_content"));
         return;
     }
 
     const QString file_path = QFileDialog::getSaveFileName(this,
-        tr("Export grep"),
+        Lang::tr("dialog.export_grep.title"),
         Settings::instance().lastOpenedFileDirectory(),
-        tr("Text files (*.txt);;All Files (*)"));
+        Lang::tr("filter.text_files"));
     if (file_path.isEmpty())
         return;
 
     QFile out_file(file_path);
     if (!out_file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate))
     {
-        QMessageBox::warning(this, tr("Export grep"),
-            tr("Could not open %1 for writing.").arg(file_path));
+        QMessageBox::warning(this, Lang::tr("dialog.export_grep.title"),
+            Lang::tr("file.write_failed").arg(file_path));
         return;
     }
 
@@ -491,9 +492,8 @@ bool MainWindow::confirmDiscardChanges()
         return true;
 
     QMessageBox msgBox(this);
-    msgBox.setText(tr("The document has been modified."));
-    msgBox.setInformativeText(tr("Do you want to save changes you made in current project? "
-                                 "All changes will be lost if you don't save them."));
+    msgBox.setText(Lang::tr("project.modified"));
+    msgBox.setInformativeText(Lang::tr("project.save_prompt"));
     msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
     msgBox.setDefaultButton(QMessageBox::Save);
     const int ret = msgBox.exec();
@@ -501,6 +501,17 @@ bool MainWindow::confirmDiscardChanges()
     if (ret == QMessageBox::Cancel) return false;
     if (ret == QMessageBox::Save) saveProject();
     return true;
+}
+
+void MainWindow::changeEvent(QEvent* event)
+{
+    QMainWindow::changeEvent(event);
+    if (event->type() == QEvent::LanguageChange)
+    {
+        ui->retranslateUi(this);
+        updateRecentMenus();
+        updateUi();
+    }
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)
@@ -520,9 +531,9 @@ void MainWindow::on_exit_app_triggered()
 
 void MainWindow::on_actionAbout_triggered()
 {
-    const QString text = QString("Version ") + QString(APP_VERSION) +
-        "\nBuild: " + __DATE__ + " " + __TIME__ +
-        "\n\nradX64 © 2026\nReleased under\nGNU GENERAL PUBLIC LICENSE";
+    const QString text =
+        Lang::tr("about.text")
+            .arg(QString(APP_VERSION), QString(__DATE__), QString(__TIME__));
 
     AboutDialog dialog(text, this);
     dialog.exec();
@@ -532,7 +543,8 @@ void MainWindow::on_actionSave_project_as_triggered()
 {
     if (pm_->is_empty())
     {
-      QMessageBox::warning(this,"Warning!","Nothing to save.\nLoad file or project first.");
+      QMessageBox::warning(this, Lang::tr("common.warning"),
+          Lang::tr("project.nothing_to_save"));
       return;
     }
 
@@ -650,7 +662,7 @@ void MainWindow::updateRecentMenus()
         menu->clear();
         if (items.isEmpty())
         {
-            QAction* empty = menu->addAction(tr("(empty)"));
+            QAction* empty = menu->addAction(Lang::tr("menu.empty"));
             empty->setEnabled(false);
             return;
         }
@@ -679,8 +691,8 @@ void MainWindow::openRecentFile(const QString& file_path)
 {
     if (!QFileInfo::exists(file_path))
     {
-        QMessageBox::warning(this, tr("Open recent file"),
-            tr("File no longer exists:\n%1").arg(file_path));
+        QMessageBox::warning(this, Lang::tr("dialog.open_recent_file.title"),
+            Lang::tr("file.no_longer_exists").arg(file_path));
         Settings::instance().removeRecentFile(file_path);
         return;
     }
@@ -691,8 +703,8 @@ void MainWindow::openRecentProject(const QString& file_path)
 {
     if (!QFileInfo::exists(file_path))
     {
-        QMessageBox::warning(this, tr("Open recent project"),
-            tr("Project no longer exists:\n%1").arg(file_path));
+        QMessageBox::warning(this, Lang::tr("dialog.open_recent_project.title"),
+            Lang::tr("project.no_longer_exists").arg(file_path));
         Settings::instance().removeRecentProject(file_path);
         return;
     }

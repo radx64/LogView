@@ -9,6 +9,7 @@
 #include <QJsonObject>
 
 #include "Marking.hpp"
+#include "Translator.hpp"
 
 namespace
 {
@@ -101,17 +102,17 @@ QVariant AutoMarkingsModel::data(const QModelIndex& index, int role) const
         switch (index.column())
         {
             case EnabledColumn:
-                return marking.enabled_ ? tr("Yes") : tr("No");
+                return marking.enabled_ ? Lang::tr("common.yes") : Lang::tr("common.no");
             case PatternColumn:
                 return marking.pattern_;
             case TextColorColumn:
                 return marking.text_color_;
             case BackgroundColorColumn:
                 return marking.background_color_.isEmpty()
-                           ? tr("(none)")
+                           ? Lang::tr("common.none_paren")
                            : marking.background_color_;
             case CaseSensitiveColumn:
-                return marking.case_sensitive_ ? tr("Yes") : tr("No");
+                return marking.case_sensitive_ ? Lang::tr("common.yes") : Lang::tr("common.no");
             default:
                 return QVariant();
         }
@@ -129,15 +130,15 @@ QVariant AutoMarkingsModel::headerData(int section, Qt::Orientation orientation,
     switch (section)
     {
         case EnabledColumn:
-            return tr("Enabled");
+            return Lang::tr("common.enabled");
         case PatternColumn:
-            return tr("Regex");
+            return Lang::tr("common.regex");
         case TextColorColumn:
-            return tr("Font color");
+            return Lang::tr("common.font_color");
         case BackgroundColorColumn:
-            return tr("Background");
+            return Lang::tr("common.background");
         case CaseSensitiveColumn:
-            return tr("Case sensitive");
+            return Lang::tr("common.case_sensitive");
         default:
             return QVariant();
     }

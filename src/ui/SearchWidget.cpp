@@ -1,5 +1,7 @@
 #include "SearchWidget.hpp"
 
+#include "Translator.hpp"
+
 #include <QEvent>
 #include <QHBoxLayout>
 #include <QIcon>
@@ -22,7 +24,7 @@ SearchWidget::SearchWidget(QWidget* parent) :
     layout->setSpacing(4);
 
     input_ = new QLineEdit(this);
-    input_->setPlaceholderText(tr("Find"));
+    input_->setPlaceholderText(Lang::tr("search.find"));
     input_->setClearButtonEnabled(true);
     input_->setMinimumWidth(260);
     input_->installEventFilter(this);
@@ -36,28 +38,28 @@ SearchWidget::SearchWidget(QWidget* parent) :
     regex_button_ = new QToolButton(this);
     regex_button_->setText(QStringLiteral(".*"));
     regex_button_->setCheckable(true);
-    regex_button_->setToolTip(tr("Regular expression"));
+    regex_button_->setToolTip(Lang::tr("search.regex_tooltip"));
     layout->addWidget(regex_button_);
 
     case_button_ = new QToolButton(this);
     case_button_->setText(QStringLiteral("Aa"));
     case_button_->setCheckable(true);
-    case_button_->setToolTip(tr("Case sensitive"));
+    case_button_->setToolTip(Lang::tr("common.case_sensitive"));
     layout->addWidget(case_button_);
 
     prev_button_ = new QToolButton(this);
     prev_button_->setIcon(QIcon(QStringLiteral(":/icon/Gnome-Go-Up-32.png")));
-    prev_button_->setToolTip(tr("Previous match (Shift+F3)"));
+    prev_button_->setToolTip(Lang::tr("search.prev_tooltip"));
     layout->addWidget(prev_button_);
 
     next_button_ = new QToolButton(this);
     next_button_->setIcon(QIcon(QStringLiteral(":/icon/Gnome-Go-Down-32.png")));
-    next_button_->setToolTip(tr("Next match (F3)"));
+    next_button_->setToolTip(Lang::tr("search.next_tooltip"));
     layout->addWidget(next_button_);
 
     close_button_ = new QToolButton(this);
     close_button_->setIcon(QIcon(QStringLiteral(":/icon/Gnome-Window-Close-32.png")));
-    close_button_->setToolTip(tr("Close (Esc)"));
+    close_button_->setToolTip(Lang::tr("search.close_tooltip"));
     layout->addWidget(close_button_);
 
     connect(input_, &QLineEdit::textChanged, this, &SearchWidget::queryChanged);
@@ -107,11 +109,11 @@ void SearchWidget::setMatchInfo(int current, int total)
     else if (total == 0)
     {
         pal.setColor(QPalette::WindowText, QColor(200, 60, 60));
-        info_label_->setText(tr("No results"));
+        info_label_->setText(Lang::tr("search.no_results"));
     }
     else if (current < 0)
     {
-        info_label_->setText(tr("%n match(es)", nullptr, total));
+        info_label_->setText(Lang::tr("search.matches").arg(total));
     }
     else
     {
@@ -124,7 +126,7 @@ void SearchWidget::setSearching(int percent)
 {
     QPalette pal = info_label_->palette();
     pal.setColor(QPalette::WindowText, palette().color(QPalette::WindowText));
-    info_label_->setText(tr("Searching… %1%").arg(percent));
+    info_label_->setText(Lang::tr("search.searching").arg(percent));
     info_label_->setPalette(pal);
 }
 

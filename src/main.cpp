@@ -1,4 +1,6 @@
 #include "MainWindow.hpp"
+#include "Settings.hpp"
+#include "Translator.hpp"
 #include <QApplication>
 #include <QCommandLineParser>
 
@@ -8,16 +10,16 @@ int main(int argc, char *argv[])
     QApplication::setApplicationName("LogView");
     QApplication::setApplicationVersion(APP_VERSION);
 
+    Translator::instance().setLanguage(Settings::instance().language());
+
     QCommandLineParser parser;
-    parser.setApplicationDescription(
-        QCoreApplication::translate("main", "Log file viewer."));
+    parser.setApplicationDescription(Lang::tr("cli.description"));
     parser.addHelpOption();
     parser.addVersionOption();
     parser.addPositionalArgument(
-        QCoreApplication::translate("main", "files"),
-        QCoreApplication::translate("main",
-            "Log file(s) or project (.json) to open."),
-        QCoreApplication::translate("main", "[files...]"));
+        Lang::tr("cli.files_arg"),
+        Lang::tr("cli.files_desc"),
+        QStringLiteral("[files...]"));
     parser.process(a);
 
     MainWindow mainWindow;

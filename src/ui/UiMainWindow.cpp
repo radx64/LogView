@@ -1,5 +1,7 @@
 #include "UiMainWindow.hpp"
 
+#include "Translator.hpp"
+
 #include <QAction>
 #include <QCoreApplication>
 #include <QCursor>
@@ -214,54 +216,54 @@ void MainWindow::setupUi(QMainWindow* MainWindow)
 
 void MainWindow::retranslateUi(QMainWindow* MainWindow)
 {
-    MainWindow->setWindowTitle(QCoreApplication::translate("MainWindow", "LogView", nullptr));
-    
-    actionLoad_from_file->setText(QCoreApplication::translate("MainWindow", "Open file...", nullptr));
-    actionLoad_from_file->setShortcut(QCoreApplication::translate("MainWindow", "Ctrl+O", nullptr));
+    MainWindow->setWindowTitle(Lang::tr("app.title"));
 
-    actionMerge_files->setText(QCoreApplication::translate("MainWindow", "Merge files...", nullptr));
-    
-    exit_app->setText(QCoreApplication::translate("MainWindow", "Exit", nullptr));
-    exit_app->setShortcut(QCoreApplication::translate("MainWindow", "Ctrl+Q", nullptr));
-    
-    actionFind->setText(QCoreApplication::translate("MainWindow", "Find...", nullptr));
-    actionFind->setShortcut(QCoreApplication::translate("MainWindow", "Ctrl+F", nullptr));
+    actionLoad_from_file->setText(Lang::tr("action.open_file"));
+    actionLoad_from_file->setShortcut(QStringLiteral("Ctrl+O"));
 
-    actionGrep_current_view->setText(QCoreApplication::translate("MainWindow", "Grep current view", nullptr));
-    actionGrep_current_view->setShortcut(QCoreApplication::translate("MainWindow", "Ctrl+G", nullptr));
-    
-    actionExport_grep->setText(QCoreApplication::translate("MainWindow", "Export grep...", nullptr));
-    actionExport_grep->setShortcut(QCoreApplication::translate("MainWindow", "Ctrl+E", nullptr));
-    
-    actionBookmark_current_line->setText(QCoreApplication::translate("MainWindow", "Bookmark current line", nullptr));
-    actionBookmark_current_line->setShortcut(QCoreApplication::translate("MainWindow", "Ctrl+B", nullptr));
-    
-    actionAbout->setText(QCoreApplication::translate("MainWindow", "About", nullptr));
-    
-    actionCheck_for_updates->setText(QCoreApplication::translate("MainWindow", "Check for updates...", nullptr));
-    
-    actionLoad_project->setText(QCoreApplication::translate("MainWindow", "Load project ...", nullptr));
-    actionLoad_project->setShortcut(QCoreApplication::translate("MainWindow", "Ctrl+L", nullptr));
-    
-    actionSave_project_as->setText(QCoreApplication::translate("MainWindow", "Save project as...", nullptr));
-    actionSave_project_as->setShortcut(QCoreApplication::translate("MainWindow", "Ctrl+Shift+S", nullptr));
-    
-    actionSave_project->setText(QCoreApplication::translate("MainWindow", "Save project", nullptr));
-    actionSave_project->setShortcut(QCoreApplication::translate("MainWindow", "Ctrl+S", nullptr));
+    actionMerge_files->setText(Lang::tr("action.merge_files"));
 
-    actionTheme_System->setText(QCoreApplication::translate("MainWindow", "System", nullptr));
-    actionTheme_Light->setText(QCoreApplication::translate("MainWindow", "Light", nullptr));
-    actionTheme_Dark->setText(QCoreApplication::translate("MainWindow", "Dark", nullptr));
-    actionOptions->setText(QCoreApplication::translate("MainWindow", "Options...", nullptr));
-    
-    menuTest->setTitle(QCoreApplication::translate("MainWindow", "File", nullptr));
-    menuFind->setTitle(QCoreApplication::translate("MainWindow", "Edit", nullptr));
-    menuView->setTitle(QCoreApplication::translate("MainWindow", "View", nullptr));
-    menuTheme->setTitle(QCoreApplication::translate("MainWindow", "Theme", nullptr));
-    menuRecent_files->setTitle(QCoreApplication::translate("MainWindow", "Recent files", nullptr));
-    menuRecent_projects->setTitle(QCoreApplication::translate("MainWindow", "Recent projects", nullptr));
-    menuHelp->setTitle(QCoreApplication::translate("MainWindow", "Help", nullptr));
-    mainToolBar->setWindowTitle(QCoreApplication::translate("MainWindow", "Toolbar", nullptr));
+    exit_app->setText(Lang::tr("action.exit"));
+    exit_app->setShortcut(QStringLiteral("Ctrl+Q"));
+
+    actionFind->setText(Lang::tr("action.find"));
+    actionFind->setShortcut(QStringLiteral("Ctrl+F"));
+
+    actionGrep_current_view->setText(Lang::tr("action.grep_current_view"));
+    actionGrep_current_view->setShortcut(QStringLiteral("Ctrl+G"));
+
+    actionExport_grep->setText(Lang::tr("action.export_grep"));
+    actionExport_grep->setShortcut(QStringLiteral("Ctrl+E"));
+
+    actionBookmark_current_line->setText(Lang::tr("action.bookmark_line"));
+    actionBookmark_current_line->setShortcut(QStringLiteral("Ctrl+B"));
+
+    actionAbout->setText(Lang::tr("action.about"));
+
+    actionCheck_for_updates->setText(Lang::tr("action.check_updates"));
+
+    actionLoad_project->setText(Lang::tr("action.load_project"));
+    actionLoad_project->setShortcut(QStringLiteral("Ctrl+L"));
+
+    actionSave_project_as->setText(Lang::tr("action.save_project_as"));
+    actionSave_project_as->setShortcut(QStringLiteral("Ctrl+Shift+S"));
+
+    actionSave_project->setText(Lang::tr("action.save_project"));
+    actionSave_project->setShortcut(QStringLiteral("Ctrl+S"));
+
+    actionTheme_System->setText(Lang::tr("theme.system"));
+    actionTheme_Light->setText(Lang::tr("theme.light"));
+    actionTheme_Dark->setText(Lang::tr("theme.dark"));
+    actionOptions->setText(Lang::tr("action.options"));
+
+    menuTest->setTitle(Lang::tr("menu.file"));
+    menuFind->setTitle(Lang::tr("menu.edit"));
+    menuView->setTitle(Lang::tr("menu.view"));
+    menuTheme->setTitle(Lang::tr("menu.theme"));
+    menuRecent_files->setTitle(Lang::tr("menu.recent_files"));
+    menuRecent_projects->setTitle(Lang::tr("menu.recent_projects"));
+    menuHelp->setTitle(Lang::tr("menu.help"));
+    mainToolBar->setWindowTitle(Lang::tr("toolbar.title"));
 }
 
 } // namespace Ui

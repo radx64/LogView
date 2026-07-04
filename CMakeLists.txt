@@ -50,6 +50,7 @@ set(SOURCES
     src/ui/FileViewer.cpp
     src/ui/ThemeManager.cpp
     src/Settings.cpp
+    src/Translator.cpp
     src/ui/SettingsDialog.cpp
     src/main.cpp
     src/ProjectModel.cpp
@@ -81,6 +82,14 @@ add_definitions(${Qt6Widgets_DEFINITIONS} ${QtQml_DEFINITIONS} ${${Qt6Quick_DEFI
 
 add_executable(${projectName} ${RESOURCES} ${RC_FILE} ${SOURCES})
 target_link_libraries(${projectName} PUBLIC Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Network)
+
+# Ship the translation catalogs (lang/*.lang) next to the executable so they can
+# be loaded at runtime relative to the binary.
+add_custom_command(TARGET ${projectName} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_CURRENT_SOURCE_DIR}/lang"
+        "$<TARGET_FILE_DIR:${projectName}>/lang"
+    COMMENT "Copying language catalogs")
 
 # ---------------------------------------------------------------------------
 # Static linking for release builds.

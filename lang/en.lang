@@ -1,0 +1,265 @@
+# LogView language catalog (English)
+#
+# Format: <key>=<value>
+#   - One entry per line, split on the FIRST '='.
+#   - Lines starting with '#' and empty lines are ignored.
+#   - Keys are semantic identifiers (e.g. "menu.file"); whitespace around the
+#     key is ignored.
+#   - Use '\n' to embed a newline in a value.
+#   - Placeholders %1, %2, ... are substituted at runtime.
+#   - The file must be saved as UTF-8.
+
+# Language metadata (shown in the language selector).
+language.name=English
+settings.language.system=System
+
+# Application
+app.title=LogView
+
+# Menus
+menu.file=File
+menu.edit=Edit
+menu.view=View
+menu.theme=Theme
+menu.recent_files=Recent files
+menu.recent_projects=Recent projects
+menu.help=Help
+menu.empty=(empty)
+toolbar.title=Toolbar
+
+# Actions
+action.open_file=Open file...
+action.merge_files=Merge files...
+action.exit=Exit
+action.find=Find...
+action.grep_current_view=Grep current view
+action.export_grep=Export grep...
+action.bookmark_line=Bookmark current line
+action.about=About
+action.check_updates=Check for updates...
+action.load_project=Load project ...
+action.save_project_as=Save project as...
+action.save_project=Save project
+action.options=Options...
+
+# Themes
+theme.system=System
+theme.light=Light
+theme.dark=Dark
+
+# File tab context menu
+tab.copy_file_name=Copy file name
+tab.copy_file_path=Copy file path
+tab.open_folder=Open containing folder
+tab.reload=Reload
+tab.close=Close tab (MMB)
+tab.loading_suffix= (loading…)
+
+# Status bar
+status.get_started=Use load from file menu or drop files in this window to begin.
+status.checking_updates=Checking for updates...
+status.loading_one=Loading %1… %2%
+status.loading_many=Loading %1 files… %2%
+
+# Common labels
+common.warning=Warning!
+common.enabled=Enabled
+common.case_sensitive=Case sensitive
+common.regex=Regex
+common.regex_label=Regex:
+common.font_color=Font color
+common.font_color_label=Font color:
+common.background=Background
+common.background_label=Background:
+common.none=None
+common.none_paren=(none)
+common.yes=Yes
+common.no=No
+common.name=Name
+common.name_label=Name:
+common.icon=Icon
+common.icon_label=Icon:
+common.tags=Tags
+common.tags_label=Tags:
+common.add=Add
+common.add_ellipsis=Add...
+common.edit_ellipsis=Edit...
+common.delete=Delete
+common.cancel=Cancel
+common.save=Save
+common.filter=Filter
+common.invalid_regex=Invalid regex: %1
+common.regex_empty=Regex cannot be empty.
+common.name_empty=Name cannot be empty.
+
+# Common filters and file errors
+filter.all_files=All Files (*)
+filter.text_files=Text files (*.txt);;All Files (*)
+filter.project_file=Project file (*.json)
+filter.log_files=Log files (*.log);;Text files (*.txt);;All Files (*)
+file.write_failed=Could not open %1 for writing.
+file.read_failed=Could not open %1 for reading.
+file.open_failed=Unable to open file %1
+file.not_exist=File does not exist:\n%1
+file.no_longer_exists=File no longer exists:\n%1
+
+# Project handling
+project.modified=The document has been modified.
+project.save_prompt=Do you want to save changes you made in current project? All changes will be lost if you don't save them.
+project.nothing_to_save=Nothing to save.\nLoad file or project first.
+project.no_longer_exists=Project no longer exists:\n%1
+
+# Dialog titles
+dialog.check_updates.title=Check for updates
+dialog.open_file.title=Open file
+dialog.add_bookmark.title=Add bookmark
+dialog.open_log_files.title=Open log files
+dialog.export_grep.title=Export grep
+dialog.open_recent_file.title=Open recent file
+dialog.open_recent_project.title=Open recent project
+dialog.save_project.title=Save project
+dialog.open_project.title=Open project
+dialog.about.title=About application
+dialog.options.title=Options
+dialog.select_font_color=Select font color
+dialog.select_background_color=Select background color
+dialog.select_marking_color=Select marking color
+dialog.select_current_line=Select current line color
+dialog.select_search_highlight=Select search highlight color
+dialog.select_current_match=Select current match color
+
+# Updates
+update.latest=You are running the latest version (%1).
+update.check_failed=Could not check for updates:\n%1
+update.rate_limit_minutes=GitHub API rate limit exceeded. Try again in about %1 minutes (at %2).
+update.rate_limit_at=GitHub API rate limit exceeded. Try again at %1.
+update.rate_limit_later=GitHub API rate limit exceeded. Please try again later.
+update.http_status=GitHub returned HTTP %1.
+update.http_status_msg=GitHub returned HTTP %1: %2
+update.parse_failed=Could not parse update information from GitHub.
+update.no_release=No release information is available yet.
+
+# Update dialog
+updatedlg.title=Update available
+updatedlg.new_version=A new version is available
+updatedlg.versions=Installed version: %1\nLatest version: %2
+updatedlg.no_notes=No release notes were provided.
+updatedlg.download=Download
+updatedlg.skip=Skip this version
+
+# Export
+export.open_first=Open a file before exporting.
+export.no_content=The active view has no content to export.
+
+# About dialog body
+about.text=Version %1\nBuild: %2 %3\n\nradX64 © 2026\nReleased under\nGNU GENERAL PUBLIC LICENSE
+
+# Settings dialog
+section.general=General
+section.editor=Editor
+section.auto_markings=Auto markings
+section.auto_bookmarks=Auto bookmarks
+section.updates=Updates
+settings.language=Language:
+settings.prompt_save=Ask to save unsaved project before closing
+settings.prompt_save.hint=When enabled, LogView asks whether to save unsaved changes\nbefore the application is closed.
+settings.font=Font:
+settings.size=Size:
+settings.current_line_color=Current line color:
+settings.search_highlight_color=Search highlight color:
+settings.current_match_color=Current match color:
+settings.derive_highlight=Derive the highlight color from the active theme
+settings.search_highlight_auto_tip=Use the default search highlight color
+settings.current_match_auto_tip=Use the default current match color
+settings.check_updates=Check for updates on startup
+settings.updates_hint=LogView can check GitHub for new releases. You can also check\nmanually from Help → Check for updates...
+color.auto=Auto
+color.automatic=Automatic
+
+# Grep dialog
+grep.title=Grep
+grep.pattern=Pattern
+grep.inverted=Inverted
+
+# File viewer
+fileviewer.filter_tooltip=Filter automatic bookmarks
+fileviewer.bookmarks=Bookmarks
+fileviewer.markings=Markings
+fileviewer.scanning=Scanning…
+fileviewer.edit_bookmark=Edit bookmark
+fileviewer.rule_files=Rule files
+fileviewer.no_rules=No automatic bookmark rules
+fileviewer.edit_marking=Edit marking
+
+# Log viewer
+logviewer.copy_grep=Copy grep
+
+# Auto markings
+automark.dialog.title=Automatic marking
+automark.pattern_placeholder=Example: ERR/.*
+automark.pick_font_color=Pick font color
+automark.no_background=No background
+automark.hint=These regex templates are saved in %1 and are applied to every opened log file.
+automark.edit_title=Edit automatic marking
+
+# Auto bookmarks
+autobm.dialog.title=Automatic bookmark
+autobm.name_placeholder=Example: Errors
+autobm.pattern_placeholder=Example: \bERROR\b
+autobm.tags_placeholder=Comma separated, e.g. severity, network
+autobm.description_label=Description:
+autobm.hint=These rules are stored as JSON files in the "bookmarks" folder. Matching lines are bookmarked automatically in every opened log file.
+autobm.new_file=New file...
+autobm.delete_file=Delete file
+autobm.rule_files_label=Rule files:
+autobm.rules_label=Rules:
+autobm.new_rule_file=New rule file
+autobm.file_name=File name:
+autobm.file_exists=A file with that name already exists or the name is invalid.
+autobm.delete_rule_file=Delete rule file
+autobm.delete_confirm=Delete "%1" and all of its rules?
+autobm.edit_title=Edit automatic bookmark
+
+# Search widget
+search.find=Find
+search.regex_tooltip=Regular expression
+search.prev_tooltip=Previous match (Shift+F3)
+search.next_tooltip=Next match (F3)
+search.close_tooltip=Close (Esc)
+search.no_results=No results
+search.matches=%1 match(es)
+search.searching=Searching… %1%
+
+# Marking dialog
+marking.dialog.title=Marking
+marking.auto_tooltip=Pick a readable font color based on the marking color
+marking.text=Text
+marking.color=Color
+marking.auto_value=Auto (%1)
+
+# Bookmark dialog
+bookmark.dialog.title=Bookmark
+
+# Merger dialog
+merger.title=Merger tool
+merger.files=Files
+merger.files_tooltip=Files are merged top to bottom
+merger.move_up=Move selected up
+merger.move_down=Move selected down
+merger.drag_hint=(Note: you can drag&drop files here)
+merger.clear=Clear
+merger.recycle=Move to recycle bin after merge
+merger.result_as_label=Merge result as:
+merger.open_result=Open resulting file
+merger.save_open=Save and open
+merger.add_files_title=Add log files
+merger.result_as_title=Merge result as
+merger.need_file=Add at least one file to merge.
+merger.need_dest=Choose a destination file for the merge result.
+merger.dest_is_source=The destination file cannot be one of the source files.
+merger.write_error=Failed while writing to %1.
+
+# Command line
+cli.description=Log file viewer.
+cli.files_arg=files
+cli.files_desc=Log file(s) or project (.json) to open.

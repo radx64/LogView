@@ -1,5 +1,7 @@
 #include "BookmarkDialogWindow.hpp"
 
+#include "Translator.hpp"
+
 #include <QComboBox>
 #include <QGridLayout>
 #include <QIcon>
@@ -32,17 +34,17 @@ const char* kDefaultIcon = ":/icon/Gnome-Bookmark-New-32.png";
 BookmarkDialogWindow::BookmarkDialogWindow(QWidget *parent) :
     QDialog(parent)
 {
-    setWindowTitle(tr("Bookmark"));
+    setWindowTitle(Lang::tr("bookmark.dialog.title"));
     resize(400, 120);
 
     QGridLayout* outer = new QGridLayout(this);
     QGridLayout* form = new QGridLayout();
     form->setSpacing(6);
 
-    QLabel* nameLabel = new QLabel(tr("Name"), this);
+    QLabel* nameLabel = new QLabel(Lang::tr("common.name"), this);
     nameLabel->setMinimumSize(QSize(50, 0));
     name_ = new QLineEdit(this);
-    QLabel* iconLabel = new QLabel(tr("Icon"), this);
+    QLabel* iconLabel = new QLabel(Lang::tr("common.icon"), this);
     icon_combo_ = new QComboBox(this);
 
     form->addWidget(nameLabel, 0, 0, 1, 1);
@@ -50,7 +52,7 @@ BookmarkDialogWindow::BookmarkDialogWindow(QWidget *parent) :
     form->addWidget(iconLabel, 1, 0, 1, 1);
     form->addWidget(icon_combo_, 1, 1, 1, 1);
 
-    button_ = new QPushButton(tr("Save"), this);
+    button_ = new QPushButton(Lang::tr("common.save"), this);
 
     outer->addLayout(form, 0, 0, 1, 1);
     outer->addWidget(button_, 1, 0, 1, 1);

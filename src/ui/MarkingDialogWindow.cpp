@@ -1,6 +1,7 @@
 #include "MarkingDialogWindow.hpp"
 
 #include "Marking.hpp"
+#include "Translator.hpp"
 
 #include <QCheckBox>
 #include <QColorDialog>
@@ -15,7 +16,7 @@
 MarkingDialogWindow::MarkingDialogWindow(QWidget *parent)
     : QDialog(parent)
 {
-    setWindowTitle(tr("Marking"));
+    setWindowTitle(Lang::tr("marking.dialog.title"));
     resize(400, 120);
 
     text_edit_ = new QLineEdit(this);
@@ -31,9 +32,9 @@ MarkingDialogWindow::MarkingDialogWindow(QWidget *parent)
     text_color_button_->setAutoFillBackground(true);
     connect(text_color_button_, &QPushButton::clicked, this, &MarkingDialogWindow::pickTextColor);
 
-    auto_text_color_ = new QCheckBox(tr("Automatic"), this);
+    auto_text_color_ = new QCheckBox(Lang::tr("color.automatic"), this);
     auto_text_color_->setChecked(true);
-    auto_text_color_->setToolTip(tr("Pick a readable font color based on the marking color"));
+    auto_text_color_->setToolTip(Lang::tr("marking.auto_tooltip"));
     connect(auto_text_color_, &QCheckBox::toggled, this, &MarkingDialogWindow::updateTextColorButton);
 
     updateTextColorButton();
@@ -46,9 +47,9 @@ MarkingDialogWindow::MarkingDialogWindow(QWidget *parent)
     text_color_row->setLayout(text_color_layout);
 
     QFormLayout* form = new QFormLayout();
-    form->addRow(new QLabel(tr("Text"), this), text_edit_);
-    form->addRow(new QLabel(tr("Color"), this), color_button_);
-    form->addRow(new QLabel(tr("Font color"), this), text_color_row);
+    form->addRow(new QLabel(Lang::tr("marking.text"), this), text_edit_);
+    form->addRow(new QLabel(Lang::tr("marking.color"), this), color_button_);
+    form->addRow(new QLabel(Lang::tr("common.font_color"), this), text_color_row);
 
     QDialogButtonBox* buttons = new QDialogButtonBox(
         QDialogButtonBox::Save | QDialogButtonBox::Cancel, this);
@@ -66,7 +67,7 @@ void MarkingDialogWindow::pickColor()
 {
     const QColor chosen = QColorDialog::getColor(
         color_.isValid() ? color_ : QColor(Qt::yellow),
-        this, tr("Select marking color"));
+        this, Lang::tr("dialog.select_marking_color"));
     if (chosen.isValid())
     {
         color_ = chosen;
@@ -80,7 +81,7 @@ void MarkingDialogWindow::pickTextColor()
     const QColor initial = text_color_.isValid()
                                ? text_color_
                                : QColor(marking_colors::contrastingTextColor(color_.name()));
-    const QColor chosen = QColorDialog::getColor(initial, this, tr("Select font color"));
+    const QColor chosen = QColorDialog::getColor(initial, this, Lang::tr("dialog.select_font_color"));
     if (chosen.isValid())
     {
         text_color_ = chosen;
@@ -112,7 +113,7 @@ void MarkingDialogWindow::updateTextColorButton()
         QStringLiteral("QPushButton { background-color: %1; color: %2;"
                        " border: 1px solid palette(mid); padding: 4px; }")
             .arg(color_.name(), effective.name()));
-    text_color_button_->setText(automatic ? tr("Auto (%1)").arg(effective.name())
+    text_color_button_->setText(automatic ? Lang::tr("marking.auto_value").arg(effective.name())
                                            : effective.name());
 }
 
