@@ -6,6 +6,8 @@
 class QLineEdit;
 class QPushButton;
 class QCheckBox;
+class QCompleter;
+class QStringListModel;
 
 class GrepDialogWindow : public QDialog
 {
@@ -31,11 +33,15 @@ private slots:
     void on_pattern_textEdited(const QString &arg1);
 
 private:
+    void updateSuggestions(const QString& pattern);
+
     QLineEdit* pattern_{nullptr};
     QPushButton* button_{nullptr};
     QCheckBox* regex_check_{nullptr};
     QCheckBox* case_sensitive_check_{nullptr};
     QCheckBox* inverted_check_{nullptr};
+    QCompleter* completer_{nullptr};
+    QStringListModel* suggestions_model_{nullptr};
 
     static bool last_regex_;
     static bool last_case_sensitive_;

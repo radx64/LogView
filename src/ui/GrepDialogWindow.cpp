@@ -1,9 +1,15 @@
 #include "GrepDialogWindow.hpp"
 
+#include "Settings.hpp"
 #include "Translator.hpp"
 
+#include <algorithm>
+#include <limits>
+#include <vector>
+#include <QAbstractItemView>
 #include <QCheckBox>
 #include <QColor>
+#include <QCompleter>
 #include <QGridLayout>
 #include <QLabel>
 #include <QLineEdit>
@@ -11,6 +17,54 @@
 #include <QPushButton>
 #include <QRegularExpression>
 #include <QSize>
+#include <QStringListModel>
+
+namespace
+{
+constexpr int kSuggestionCount = 5;
+
+int fuzzyScore(const QString& pattern, const QString& candidate)
+{
+    if (pattern.isEmpty())
+        return 0;
+
+    const QString needle = pattern.toCaseFolded();
+    const QString haystack = candidate.toCaseFolded();
+
+    if (haystack.startsWith(needle))
+        return 100000 - (haystack.size() - needle.size());
+
+    const qsizetype substring_index = haystack.indexOf(needle);
+    if (substring_index >= 0)
+        return 50000 - static_cast<int>(substring_index * 100)
+               - (haystack.size() - needle.size());
+
+    qsizetype needle_index = 0;
+    qsizetype previous_match = -2;
+    int score = 10000;
+    for (qsizetype candidate_index = 0;
+         candidate_index < haystack.size() && needle_index < needle.size();
+         ++candidate_index)
+    {
+        if (haystack[candidate_index] != needle[needle_index])
+            continue;
+
+        if (needle_index == 0)
+            score -= static_cast<int>(candidate_index * 20);
+        if (candidate_index == previous_match + 1)
+            score += 100;
+        else if (previous_match >= 0)
+            score -= static_cast<int>((candidate_index - previous_match - 1) * 10);
+
+        previous_match = candidate_index;
+        ++needle_index;
+    }
+
+    return needle_index == needle.size()
+               ? score - (haystack.size() - needle.size())
+               : std::numeric_limits<int>::min();
+}
+} // namespace
 
 bool GrepDialogWindow::last_regex_ = false;
 bool GrepDialogWindow::last_case_sensitive_ = false;
@@ -30,6 +84,12 @@ GrepDialogWindow::GrepDialogWindow(QWidget *parent) :
     QLabel* label = new QLabel(Lang::tr("grep.pattern"), this);
     label->setMinimumSize(QSize(50, 0));
     pattern_ = new QLineEdit(this);
+    suggestions_model_ = new QStringListModel(this);
+    completer_ = new QCompleter(suggestions_model_, this);
+    completer_->setCaseSensitivity(Qt::CaseInsensitive);
+    completer_->setCompletionMode(QCompleter::UnfilteredPopupCompletion);
+    completer_->setMaxVisibleItems(kSuggestionCount);
+    pattern_->setCompleter(completer_);
     patternLayout->addWidget(label, 0, 0, 1, 1);
     patternLayout->addWidget(pattern_, 0, 1, 1, 1);
 
@@ -79,6 +139,7 @@ void GrepDialogWindow::on_button_clicked()
     last_regex_ = regex_check_->isChecked();
     last_case_sensitive_ = case_sensitive_check_->isChecked();
     last_inverted_ = inverted_check_->isChecked();
+    Settings::instance().addRecentGrep(pattern_->text());
     accept();
 }
 
@@ -98,6 +159,8 @@ void GrepDialogWindow::on_regex_check_clicked()
 
 void GrepDialogWindow::on_pattern_textEdited(const QString &arg1)
 {
+    updateSuggestions(arg1);
+
     if (regex_check_->isChecked())
     {
         QPalette pallete = pattern_->palette();
@@ -109,4 +172,45 @@ void GrepDialogWindow::on_pattern_textEdited(const QString &arg1)
         pallete.setColor(QPalette::Text, Qt::black);
         pattern_->setPalette(pallete);
     }
+}
+
+void GrepDialogWindow::updateSuggestions(const QString& pattern)
+{
+    struct Match
+    {
+        QString pattern;
+        int score;
+        int recency;
+    };
+
+    std::vector<Match> matches;
+    const QStringList history = Settings::instance().recentGreps();
+    matches.reserve(static_cast<std::size_t>(history.size()));
+    for (int i = 0; i < history.size(); ++i)
+    {
+        const int score = fuzzyScore(pattern, history[i]);
+        if (score != std::numeric_limits<int>::min())
+            matches.push_back({history[i], score, i});
+    }
+
+    std::stable_sort(matches.begin(), matches.end(),
+                     [](const Match& left, const Match& right)
+                     {
+                         if (left.score != right.score)
+                             return left.score > right.score;
+                         return left.recency < right.recency;
+                     });
+
+    QStringList suggestions;
+    const int count = std::min(kSuggestionCount,
+                               static_cast<int>(matches.size()));
+    for (int i = 0; i < count; ++i)
+        suggestions.append(matches[static_cast<std::size_t>(i)].pattern);
+
+    suggestions_model_->setStringList(suggestions);
+    completer_->setCompletionPrefix(QString());
+    if (suggestions.isEmpty())
+        completer_->popup()->hide();
+    else
+        completer_->complete();
 }

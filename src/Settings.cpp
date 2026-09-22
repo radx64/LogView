@@ -20,6 +20,8 @@ constexpr auto kSkippedVersionKey = "SkippedVersion";
 constexpr auto kRecentGroup = "Recent";
 constexpr auto kRecentFilesKey = "Files";
 constexpr auto kRecentProjectsKey = "Projects";
+constexpr auto kRecentGrepsGroup = "Recent greps";
+constexpr auto kRecentGrepsKey = "Patterns";
 constexpr auto kPathsGroup = "Paths";
 constexpr auto kLastFileDirKey = "LastFileDirectory";
 constexpr auto kLastProjectDirKey = "LastProjectDirectory";
@@ -178,6 +180,18 @@ void Settings::addRecentProject(const QString& path)
     emit changed();
 }
 
+void Settings::addRecentGrep(const QString& pattern)
+{
+    if (pattern.isEmpty())
+        return;
+    recent_greps_.removeAll(pattern);
+    recent_greps_.prepend(pattern);
+    while (recent_greps_.size() > kMaxRecentGreps)
+        recent_greps_.removeLast();
+    save();
+    emit changed();
+}
+
 void Settings::removeRecentFile(const QString& path)
 {
     if (recent_files_.removeAll(normalizePath(path)) > 0)
@@ -262,6 +276,10 @@ void Settings::load()
     recent_projects_ = settings.value(kRecentProjectsKey).toStringList();
     settings.endGroup();
 
+    settings.beginGroup(kRecentGrepsGroup);
+    recent_greps_ = settings.value(kRecentGrepsKey).toStringList();
+    settings.endGroup();
+
     settings.beginGroup(kPathsGroup);
     last_file_dir_ = settings.value(kLastFileDirKey).toString();
     last_project_dir_ = settings.value(kLastProjectDirKey).toString();
@@ -276,6 +294,8 @@ void Settings::load()
         recent_files_.removeLast();
     while (recent_projects_.size() > kMaxRecent)
         recent_projects_.removeLast();
+    while (recent_greps_.size() > kMaxRecentGreps)
+        recent_greps_.removeLast();
 }
 
 void Settings::save() const
@@ -313,6 +333,10 @@ void Settings::save() const
     settings.beginGroup(kRecentGroup);
     settings.setValue(kRecentFilesKey, recent_files_);
     settings.setValue(kRecentProjectsKey, recent_projects_);
+    settings.endGroup();
+
+    settings.beginGroup(kRecentGrepsGroup);
+    settings.setValue(kRecentGrepsKey, recent_greps_);
     settings.endGroup();
 
     settings.beginGroup(kPathsGroup);

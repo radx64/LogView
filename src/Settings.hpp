@@ -37,6 +37,7 @@ public:
     void setSkippedUpdateVersion(const QString& version);
 
     static constexpr int kMaxRecent = 10;
+    static constexpr int kMaxRecentGreps = 100;
 
     QString lastOpenedFileDirectory() const { return last_file_dir_; }
     void setLastOpenedFileDirectory(const QString& directory);
@@ -46,9 +47,11 @@ public:
 
     QStringList recentFiles() const { return recent_files_; }
     QStringList recentProjects() const { return recent_projects_; }
+    QStringList recentGreps() const { return recent_greps_; }
 
     void addRecentFile(const QString& path);
     void addRecentProject(const QString& path);
+    void addRecentGrep(const QString& pattern);
     void removeRecentFile(const QString& path);
     void removeRecentProject(const QString& path);
 
@@ -85,6 +88,7 @@ private:
     QString last_project_dir_{};
     QStringList recent_files_{};
     QStringList recent_projects_{};
+    QStringList recent_greps_{};
     QStringList disabled_bookmark_tags_{};
     QStringList disabled_bookmark_files_{};
 };
