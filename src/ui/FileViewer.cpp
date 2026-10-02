@@ -44,7 +44,8 @@ FileViewer::FileViewer(QWidget* parent, Logfile* logfile)
         this,
         logfile_->grep_hierarchy_.get(),
         logfile_->getLineSource(),
-        logfile_->getMarkingsModel());
+        logfile_->getMarkingsModel(),
+        logfile_->getBookmarksModel());
     logViewer_->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
 
     QWidget* bookmarks_section = new QWidget();

@@ -22,6 +22,7 @@
 #include <QtMath>
 
 #include "AutoMarkingsModel.hpp"
+#include "BookmarksModel.hpp"
 #include "LineSource.hpp"
 #include "MarkingsModel.hpp"
 #include "SearchWidget.hpp"
@@ -39,13 +40,24 @@ const QColor kDefaultSearchHighlightColor(255, 215, 0, 120);
 const QColor kDefaultSearchCurrentMatchColor(255, 140, 0, 200);
 }
 
-ChunkedTextView::ChunkedTextView(QWidget* parent, std::shared_ptr<LineSource> source, MarkingsModel* markings)
-    : QAbstractScrollArea(parent), source_(source.get()), source_ref_(source), markings_(markings)
+ChunkedTextView::ChunkedTextView(QWidget* parent, std::shared_ptr<LineSource> source,
+                                 MarkingsModel* markings, BookmarksModel* bookmarks)
+    : QAbstractScrollArea(parent), source_(source.get()), source_ref_(source),
+      markings_(markings), bookmarks_(bookmarks)
 {
     if (markings_)
     {
         connect(markings_, &MarkingsModel::changed,
                 viewport(), QOverload<>::of(&QWidget::update));
+    }
+    if (bookmarks_)
+    {
+        connect(bookmarks_, &BookmarksModel::changed, this, [this]()
+        {
+            clearBookmarkIconCache();
+            updateScrollBars();
+            viewport()->update();
+        });
     }
     connect(&AutoMarkingsModel::instance(), &AutoMarkingsModel::changed,
             viewport(), QOverload<>::of(&QWidget::update));
@@ -86,7 +98,41 @@ void ChunkedTextView::applySettings()
     horizontalScrollBar()->setSingleStep(char_width_);
 
     updateScrollBars();
+    clearBookmarkIconCache();
     viewport()->update();
+}
+
+namespace
+{
+constexpr int kBookmarkListIconSize = 16;
+} // namespace
+
+void ChunkedTextView::clearBookmarkIconCache()
+{
+    bookmark_icon_cache_.clear();
+}
+
+QPixmap ChunkedTextView::bookmarkListIcon(const QString& icon_path) const
+{
+    if (icon_path.isEmpty())
+        return {};
+
+    const auto cached = bookmark_icon_cache_.find(icon_path);
+    if (cached != bookmark_icon_cache_.end())
+        return cached.value();
+
+    const QPixmap scaled = QPixmap(icon_path).scaled(
+        kBookmarkListIconSize, kBookmarkListIconSize,
+        Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    bookmark_icon_cache_.insert(icon_path, scaled);
+    return scaled;
+}
+
+int ChunkedTextView::bookmarkMarkerWidth() const
+{
+    if (!bookmarks_ || bookmarks_->rowCount() == 0)
+        return 0;
+    return kBookmarkListIconSize + 2;
 }
 
 int ChunkedTextView::gutterWidth() const
@@ -94,7 +140,7 @@ int ChunkedTextView::gutterWidth() const
     int digits = 1;
     uint32_t max = source_ ? source_->maxLineNumber() : 0;
     while (max >= 10) { max /= 10; ++digits; }
-    return kGutterPadding * 2 + qCeil(char_width_f_ * digits);
+    return kGutterPadding * 2 + qCeil(char_width_f_ * digits) + bookmarkMarkerWidth();
 }
 
 int ChunkedTextView::visibleLineCount() const
@@ -423,11 +469,27 @@ void ChunkedTextView::paintEvent(QPaintEvent* event)
 
         painter.fillRect(0, 0, gutter, viewport()->height(), gutter_background_color);
         painter.setPen(gutter_text_color);
+        const int marker_w = bookmarkMarkerWidth();
+        const int number_right = gutter - kGutterPadding;
+        const int number_left = kGutterPadding + marker_w;
+        const int number_width = std::max(0, number_right - number_left);
         for (qint64 row = first; row < last; ++row)
         {
             const int y = static_cast<int>((row - first) * line_height_);
-            const QString number = QString::number(source_->lineNumberAt(row));
-            painter.drawText(0, y, gutter - kGutterPadding, line_height_,
+            const uint32_t file_line = source_->lineNumberAt(row);
+            const QString number = QString::number(file_line);
+            if (bookmarks_)
+            {
+                const QPixmap bookmark_icon =
+                    bookmarkListIcon(bookmarks_->bookmarkIconAtLine(file_line));
+                if (!bookmark_icon.isNull())
+                {
+                    const int icon_x = kGutterPadding + (marker_w - bookmark_icon.width()) / 2;
+                    const int icon_y = y + (line_height_ - bookmark_icon.height()) / 2;
+                    painter.drawPixmap(icon_x, icon_y, bookmark_icon);
+                }
+            }
+            painter.drawText(number_left, y, number_width, line_height_,
                 Qt::AlignRight | Qt::AlignVCenter, number);
         }
     }

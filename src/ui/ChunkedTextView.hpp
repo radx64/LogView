@@ -5,10 +5,14 @@
 
 #include <QAbstractScrollArea>
 #include <QFont>
+#include <QHash>
+#include <QPixmap>
+#include <QString>
 #include <QVector>
 
 class LineSource;
 class MarkingsModel;
+class BookmarksModel;
 class SearchWidget;
 class BackgroundTask;
 class QTimer;
@@ -17,7 +21,9 @@ class ChunkedTextView : public QAbstractScrollArea
 {
     Q_OBJECT
 public:
-    ChunkedTextView(QWidget* parent, std::shared_ptr<LineSource> source, MarkingsModel* markings = nullptr);
+    ChunkedTextView(QWidget* parent, std::shared_ptr<LineSource> source,
+                    MarkingsModel* markings = nullptr,
+                    BookmarksModel* bookmarks = nullptr);
 
     qint64 currentLine() const { return caret_line_; }
 
@@ -60,6 +66,9 @@ private:
     };
 
     int gutterWidth() const;
+    int bookmarkMarkerWidth() const;
+    void clearBookmarkIconCache();
+    QPixmap bookmarkListIcon(const QString& icon_path) const;
     int visibleLineCount() const;
     qint64 topLine() const;
     int horizontalOffset() const;
@@ -87,6 +96,8 @@ private:
     LineSource* source_;
     std::weak_ptr<LineSource> source_ref_;
     MarkingsModel* markings_ = nullptr;
+    BookmarksModel* bookmarks_ = nullptr;
+    mutable QHash<QString, QPixmap> bookmark_icon_cache_;
     QFont font_;
     int line_height_ = 1;
     int char_width_ = 1;

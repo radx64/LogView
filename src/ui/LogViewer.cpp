@@ -17,10 +17,11 @@
 #include "loader/BackgroundTask.hpp"
 
 LogViewer::LogViewer(QWidget* parent, GrepNode* grep_node, std::shared_ptr<LineSource> source,
-                     MarkingsModel* markings)
-    : source_(std::move(source)), grep_node_(grep_node), markings_(markings)
+                     MarkingsModel* markings, BookmarksModel* bookmarks)
+    : source_(std::move(source)), grep_node_(grep_node), markings_(markings),
+      bookmarks_(bookmarks)
 {
-    text_ = new ChunkedTextView(parent, source_, markings_);
+    text_ = new ChunkedTextView(parent, source_, markings_, bookmarks_);
     tabs_ = new QTabWidget();
     tabs_->addTab(text_,"Base");
     tabs_->setTabsClosable(true);
@@ -56,7 +57,7 @@ LogViewer* LogViewer::grep(GrepNode* grep, std::function<void(LogViewer*)> on_re
 
     auto filtered = std::make_shared<FilteredLineSource>(source_, grep);
 
-    LogViewer* viewer = new LogViewer(this, grep, filtered, markings_);
+    LogViewer* viewer = new LogViewer(this, grep, filtered, markings_, bookmarks_);
     const int new_index = tabs_->addTab(viewer, base_name);
     tabs_->setCurrentIndex(new_index);
 

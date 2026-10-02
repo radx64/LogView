@@ -12,13 +12,15 @@ class GrepNode;
 class LineSource;
 class FilteredLineSource;
 class MarkingsModel;
+class BookmarksModel;
 
 class LogViewer : public QWidget
 {
 Q_OBJECT
 public:
     LogViewer(QWidget* parent, GrepNode* grep_node, std::shared_ptr<LineSource> source,
-              MarkingsModel* markings = nullptr);
+              MarkingsModel* markings = nullptr,
+              BookmarksModel* bookmarks = nullptr);
     LogViewer* grep(GrepNode* grep, std::function<void(LogViewer*)> on_ready = {});
 
     void refresh();
@@ -45,4 +47,5 @@ protected:
     std::shared_ptr<LineSource> source_;
     GrepNode* grep_node_;
     MarkingsModel* markings_;
+    BookmarksModel* bookmarks_;
 };

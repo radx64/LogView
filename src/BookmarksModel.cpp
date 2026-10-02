@@ -78,6 +78,20 @@ Bookmark BookmarksModel::get_bookmark(uint32_t index)
     return Bookmark();
 }
 
+bool BookmarksModel::hasBookmarkAtLine(uint32_t line_number) const
+{
+    return !bookmarkIconAtLine(line_number).isEmpty();
+}
+
+QString BookmarksModel::bookmarkIconAtLine(uint32_t line_number) const
+{
+    const Bookmark key{line_number, QString(), QString()};
+    const auto it = std::lower_bound(bookmarks_.begin(), bookmarks_.end(), key);
+    if (it == bookmarks_.end() || it->line_number_ != line_number)
+        return {};
+    return it->icon_;
+}
+
 bool BookmarksModel::compute_auto_bookmarks(
     const LineSource& source,
     const QVector<AutoBookmark>& rules,

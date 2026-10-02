@@ -26,6 +26,9 @@ public:
     void remove_bookmark(uint32_t index);
     Bookmark get_bookmark(uint32_t index);
 
+    bool hasBookmarkAtLine(uint32_t line_number) const;
+    QString bookmarkIconAtLine(uint32_t line_number) const;
+
     static bool compute_auto_bookmarks(
         const LineSource& source,
         const QVector<AutoBookmark>& rules,
