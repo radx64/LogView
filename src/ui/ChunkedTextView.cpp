@@ -6,6 +6,7 @@
 #include <QClipboard>
 #include <QColor>
 #include <QEvent>
+#include <QFocusEvent>
 #include <QFontDatabase>
 #include <QFontMetrics>
 #include <QFontMetricsF>
@@ -17,6 +18,7 @@
 #include <QRegularExpressionMatchIterator>
 #include <QResizeEvent>
 #include <QScrollBar>
+#include <QTextBoundaryFinder>
 #include <QTimer>
 #include <QWheelEvent>
 #include <QtMath>
@@ -36,8 +38,53 @@ constexpr int kTextLeftPadding = 4;
 constexpr int kMinFontPointSize = 6;
 constexpr int kMaxFontPointSize = 72;
 constexpr int kSearchDebounceMs = 120;
+constexpr int kCaretBlinkMs = 500;
+constexpr int kCaretWidth = 2;
 const QColor kDefaultSearchHighlightColor(255, 215, 0, 120);
 const QColor kDefaultSearchCurrentMatchColor(255, 140, 0, 200);
+
+int previousWordColumn(const QString& text, int position)
+{
+    if (position <= 0)
+        return 0;
+
+    QTextBoundaryFinder finder(QTextBoundaryFinder::Word, text);
+    finder.setPosition(position);
+
+    if (finder.boundaryReasons().testFlag(QTextBoundaryFinder::StartOfItem))
+    {
+        const int previous = finder.toPreviousBoundary();
+        return std::max(0, previous);
+    }
+
+    int previous = finder.toPreviousBoundary();
+    if (previous < 0)
+        return 0;
+
+    finder.setPosition(previous);
+    previous = finder.toPreviousBoundary();
+    return previous < 0 ? 0 : previous;
+}
+
+int nextWordColumn(const QString& text, int position)
+{
+    const int length = static_cast<int>(text.length());
+    if (position >= length)
+        return length;
+
+    QTextBoundaryFinder finder(QTextBoundaryFinder::Word, text);
+    finder.setPosition(position);
+
+    int next = finder.toNextBoundary();
+    if (next < 0)
+        return length;
+
+    if (next > position)
+        return next;
+
+    next = finder.toNextBoundary();
+    return next < 0 ? length : next;
+}
 }
 
 ChunkedTextView::ChunkedTextView(QWidget* parent, std::shared_ptr<LineSource> source,
@@ -71,6 +118,14 @@ ChunkedTextView::ChunkedTextView(QWidget* parent, std::shared_ptr<LineSource> so
     setFrameStyle(QFrame::NoFrame);
 
     verticalScrollBar()->setSingleStep(1);
+
+    caret_blink_timer_ = new QTimer(this);
+    caret_blink_timer_->setInterval(kCaretBlinkMs);
+    connect(caret_blink_timer_, &QTimer::timeout, this, [this]()
+    {
+        caret_visible_ = !caret_visible_;
+        viewport()->update();
+    });
 
     applySettings();
 }
@@ -265,6 +320,57 @@ void ChunkedTextView::ensureVisible(qint64 line)
     }
 }
 
+void ChunkedTextView::resetCaretBlink()
+{
+    caret_visible_ = true;
+    if (hasFocus())
+        caret_blink_timer_->start();
+}
+
+void ChunkedTextView::moveCaretWordLeft(bool extendSelection)
+{
+    const qint64 total = source_ ? source_->count() : 0;
+    if (total <= 0)
+        return;
+
+    if (caret_col_ > 0)
+    {
+        const QString& text = source_->at(caret_line_).text;
+        moveCaret(caret_line_, previousWordColumn(text, caret_col_), extendSelection);
+        return;
+    }
+
+    if (caret_line_ > 0)
+    {
+        const qint64 previous_line = caret_line_ - 1;
+        const QString& text = source_->at(previous_line).text;
+        const int length = static_cast<int>(text.length());
+        moveCaret(previous_line, previousWordColumn(text, length), extendSelection);
+    }
+}
+
+void ChunkedTextView::moveCaretWordRight(bool extendSelection)
+{
+    const qint64 total = source_ ? source_->count() : 0;
+    if (total <= 0)
+        return;
+
+    const QString& text = source_->at(caret_line_).text;
+    const int length = static_cast<int>(text.length());
+    if (caret_col_ < length)
+    {
+        moveCaret(caret_line_, nextWordColumn(text, caret_col_), extendSelection);
+        return;
+    }
+
+    if (caret_line_ + 1 < total)
+    {
+        const qint64 next_line = caret_line_ + 1;
+        const QString& next_text = source_->at(next_line).text;
+        moveCaret(next_line, nextWordColumn(next_text, 0), extendSelection);
+    }
+}
+
 void ChunkedTextView::moveCaret(qint64 line, int col, bool extendSelection)
 {
     const qint64 total = source_ ? source_->count() : 0;
@@ -278,6 +384,21 @@ void ChunkedTextView::moveCaret(qint64 line, int col, bool extendSelection)
     if (!extendSelection) sel_anchor_ = sel_caret_;
 
     ensureVisible(caret_line_);
+    resetCaretBlink();
+    viewport()->update();
+}
+
+void ChunkedTextView::focusInEvent(QFocusEvent* event)
+{
+    QAbstractScrollArea::focusInEvent(event);
+    resetCaretBlink();
+    viewport()->update();
+}
+
+void ChunkedTextView::focusOutEvent(QFocusEvent* event)
+{
+    QAbstractScrollArea::focusOutEvent(event);
+    caret_blink_timer_->stop();
     viewport()->update();
 }
 
@@ -467,6 +588,16 @@ void ChunkedTextView::paintEvent(QPaintEvent* event)
         }
         painter.restore();
 
+        if (hasFocus() && caret_visible_ && caret_line_ >= first && caret_line_ < last)
+        {
+            const int y = static_cast<int>((caret_line_ - first) * line_height_);
+            const int cx = qRound(text_x0 + caret_col_ * char_width_f_);
+            painter.save();
+            painter.setClipRect(gutter, 0, viewport()->width() - gutter, viewport()->height());
+            painter.fillRect(cx, y + 1, kCaretWidth, line_height_ - 2, text_color);
+            painter.restore();
+        }
+
         painter.fillRect(0, 0, gutter, viewport()->height(), gutter_background_color);
         painter.setPen(gutter_text_color);
         const int marker_w = bookmarkMarkerWidth();
@@ -515,6 +646,7 @@ void ChunkedTextView::mousePressEvent(QMouseEvent* event)
     caret_line_ = pos.line;
     caret_col_ = pos.col;
     selecting_ = true;
+    resetCaretBlink();
     viewport()->update();
 }
 
@@ -626,8 +758,14 @@ void ChunkedTextView::keyPressEvent(QKeyEvent* event)
     {
         case Qt::Key_Up:    moveCaret(caret_line_ - 1, caret_col_, shift); break;
         case Qt::Key_Down:  moveCaret(caret_line_ + 1, caret_col_, shift); break;
-        case Qt::Key_Left:  moveCaret(caret_line_, caret_col_ - 1, shift); break;
-        case Qt::Key_Right: moveCaret(caret_line_, caret_col_ + 1, shift); break;
+        case Qt::Key_Left:
+            if (ctrl) moveCaretWordLeft(shift);
+            else moveCaret(caret_line_, caret_col_ - 1, shift);
+            break;
+        case Qt::Key_Right:
+            if (ctrl) moveCaretWordRight(shift);
+            else moveCaret(caret_line_, caret_col_ + 1, shift);
+            break;
         case Qt::Key_PageUp:   moveCaret(caret_line_ - visible, caret_col_, shift); break;
         case Qt::Key_PageDown: moveCaret(caret_line_ + visible, caret_col_, shift); break;
         case Qt::Key_Home:

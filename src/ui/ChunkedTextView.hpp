@@ -47,6 +47,8 @@ protected:
     void wheelEvent(QWheelEvent* event) override;
     void scrollContentsBy(int dx, int dy) override;
     void changeEvent(QEvent* event) override;
+    void focusInEvent(QFocusEvent* event) override;
+    void focusOutEvent(QFocusEvent* event) override;
 
 private:
     struct Pos
@@ -78,6 +80,9 @@ private:
     Pos posAt(const QPoint& viewportPos) const;
     void ensureVisible(qint64 line);
     void moveCaret(qint64 line, int col, bool extendSelection);
+    void moveCaretWordLeft(bool extendSelection);
+    void moveCaretWordRight(bool extendSelection);
+    void resetCaretBlink();
     bool hasSelection() const { return sel_anchor_ != sel_caret_; }
     QString selectedText() const;
     void copySelection() const;
@@ -109,6 +114,9 @@ private:
     Pos sel_anchor_;
     Pos sel_caret_;
     bool selecting_ = false;
+
+    QTimer* caret_blink_timer_ = nullptr;
+    bool caret_visible_ = true;
 
     mutable int max_line_width_chars_ = 0;
 
