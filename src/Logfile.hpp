@@ -20,8 +20,9 @@ class Logfile : public QObject
 {
 Q_OBJECT
 public:
-    Logfile(const QString& filename);
+    Logfile(const QString& filename, const QString& display_name = QString());
     const QString& getFileName() const;
+    const QString& getStoragePath() const;
     BookmarksModel* getBookmarksModel();
     MarkingsModel* getMarkingsModel();
     void reload();
@@ -37,6 +38,7 @@ public:
 protected:
     std::shared_ptr<FileLineSource> source_;
     QString filename_;
+    QString display_name_;
     BackgroundTask* auto_bookmark_task_{nullptr};
 
     void connect_events();

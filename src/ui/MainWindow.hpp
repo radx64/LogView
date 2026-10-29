@@ -75,7 +75,7 @@ private:
     void connect_signals();
     void grepCurrentView();
     void load_log_file(QString file_path);
-    FileViewer* get_active_viewer_widget();
+    FileViewer* get_active_file_viewer();
     void dropEvent(QDropEvent* event);
     void dragEnterEvent(QDragEnterEvent* event);
     void setWindowTitle(const QString& title);

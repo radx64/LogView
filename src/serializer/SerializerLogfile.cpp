@@ -6,6 +6,7 @@
 #include "../MarkingsModel.hpp"
 #include "../GrepNode.hpp"
 #include "../Logfile.hpp"
+#include "../FileLineSource.hpp"
 
 #include "SerializerGrepNode.hpp"
 #include "SerializerBookmarksModel.hpp"
@@ -16,7 +17,7 @@ namespace serializer
 
 void Logfile::serialize(const ::Logfile &lf, QJsonObject &json)
 {
-    json["filepath"] = lf.filename_;
+    json["filepath"] = lf.getStoragePath();
     QJsonObject greps;
     GrepNode::serialize(*lf.grep_hierarchy_, greps);
 
@@ -26,7 +27,11 @@ void Logfile::serialize(const ::Logfile &lf, QJsonObject &json)
 }
 void Logfile::deserialize(::Logfile &lf, const QJsonObject &json)
 {
-    lf.filename_ = json["filepath"].toString();
+    if (json.contains(QStringLiteral("filepath")))
+    {
+        lf.filename_ = json[QStringLiteral("filepath")].toString();
+        lf.source_ = std::make_shared<FileLineSource>(lf.filename_);
+    }
 
     std::unique_ptr<::GrepNode> gn = std::make_unique<::GrepNode>();
     serializer::GrepNode::deserialize(*gn, json["greps"].toObject());

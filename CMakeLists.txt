@@ -14,6 +14,26 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # Qt 6.6 is the minimum: the code uses Qt::ColorScheme (6.5+) and
 # QList::assign (6.6+).
 find_package(Qt6 6.6 REQUIRED COMPONENTS Core Gui Widgets Network)
+find_package(ZLIB REQUIRED)
+
+find_package(LibArchive QUIET)
+if(NOT LibArchive_FOUND)
+    include(FetchContent)
+    FetchContent_Declare(
+        libarchive
+        GIT_REPOSITORY https://github.com/libarchive/libarchive.git
+        GIT_TAG v3.7.7
+    )
+    set(ENABLE_TEST OFF CACHE BOOL "" FORCE)
+    set(ENABLE_EXAMPLES OFF CACHE BOOL "" FORCE)
+    set(ENABLE_TAR OFF CACHE BOOL "" FORCE)
+    set(ENABLE_CPIO OFF CACHE BOOL "" FORCE)
+    set(ENABLE_CAT OFF CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(libarchive)
+    set(LOGVIEW_LIBARCHIVE_TARGET archive_static)
+else()
+    set(LOGVIEW_LIBARCHIVE_TARGET LibArchive::LibArchive)
+endif()
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -54,6 +74,13 @@ set(SOURCES
     src/ui/SettingsDialog.cpp
     src/main.cpp
     src/ProjectModel.cpp
+    src/ArchiveDocument.cpp
+    src/archive/ArchiveCommon.cpp
+    src/archive/ArchiveCatalog.cpp
+    src/archive/ArchiveExtractionCache.cpp
+    src/archive/ZipEntryTreeModel.cpp
+    src/ui/ArchiveViewer.cpp
+    src/ui/ProjectTabHost.cpp
     src/loader/BackgroundTask.cpp
     src/loader/LoaderLogFile.cpp
     src/serializer/SerializerBookmark.cpp
@@ -62,6 +89,7 @@ set(SOURCES
     src/serializer/SerializerMarkingsModel.cpp
     src/serializer/SerializerGrepNode.cpp
     src/serializer/SerializerLogfile.cpp
+    src/serializer/SerializerArchiveDocument.cpp
     src/serializer/SerializerProjectModel.cpp
 )
 
@@ -81,7 +109,7 @@ include_directories(${Qt6Widgets_INCLUDE_DIRS} ${QtQml_INCLUDE_DIRS})
 add_definitions(${Qt6Widgets_DEFINITIONS} ${QtQml_DEFINITIONS} ${${Qt6Quick_DEFINITIONS}})
 
 add_executable(${projectName} ${RESOURCES} ${RC_FILE} ${SOURCES})
-target_link_libraries(${projectName} PUBLIC Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Network)
+target_link_libraries(${projectName} PUBLIC Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Network ${LOGVIEW_LIBARCHIVE_TARGET})
 
 # Ship the translation catalogs (lang/*.lang) next to the executable so they can
 # be loaded at runtime relative to the binary.

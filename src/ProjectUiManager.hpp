@@ -3,6 +3,7 @@
 #include <functional>
 #include <memory>
 
+#include <QHash>
 #include <QList>
 #include <QObject>
 #include <QPointer>
@@ -18,6 +19,8 @@
 #include "serializer/SerializerProjectModel.hpp"
 
 class FileViewer;
+class ArchiveDocument;
+class ArchiveViewer;
 class BackgroundTask;
 
 class ProjectUiManager : public QObject
@@ -25,8 +28,11 @@ class ProjectUiManager : public QObject
 Q_OBJECT
 public:
     ProjectUiManager(Ui::MainWindow* ui);
+    ~ProjectUiManager() override;
     void create_new();
     void load_log_file(QString file_path);
+    void beginLoadingLogfile(Logfile* lf, FileViewer* viewer, QWidget* progress_tab_host);
+    void onArchiveViewerClosing(ArchiveDocument* archive);
     void reload_file(int tab_index);
     bool is_empty();
     bool has_changed();
@@ -41,12 +47,14 @@ signals:
 
 private slots:
     void file_viewer_closed(Logfile* lf);
+    void archive_viewer_closed(ArchiveDocument* archive);
 
 private:
     struct LoadEntry
     {
         BackgroundTask* loader = nullptr;
         QPointer<FileViewer> viewer;
+        QPointer<QWidget> progress_tab;
         Logfile* lf = nullptr;
         QString name;
         QString tab_base;
@@ -60,7 +68,11 @@ private:
     void clearViews();
 
     void present_logfile(Logfile* lf);
-    void beginLoading(Logfile* lf, FileViewer* viewer);
+    void present_archive(ArchiveDocument* archive);
+    void load_archive_file(QString file_path);
+    void beginArchiveCatalog(ArchiveDocument* archive, ArchiveViewer* viewer);
+    void cancelArchiveCatalog(ArchiveDocument* archive);
+    void beginLoading(Logfile* lf, FileViewer* viewer, QWidget* progress_tab_host);
     void onLoaderFinished(BackgroundTask* loader, bool ok);
     void setTabLoading(LoadEntry& entry, bool loading);
     void emitAggregateProgress();
@@ -69,5 +81,6 @@ private:
     std::unique_ptr<ProjectModel> pm_;
     Ui::MainWindow* ui_;
     QList<LoadEntry> active_loads_;
+    QHash<ArchiveDocument*, QPointer<BackgroundTask>> catalog_tasks_;
 };
 

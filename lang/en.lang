@@ -97,6 +97,25 @@ filter.all_files=All Files (*)
 filter.text_files=Text files (*.txt);;All Files (*)
 filter.project_file=Project file (*.json)
 filter.log_files=Log files (*.log);;Text files (*.txt);;All Files (*)
+filter.log_and_archives=Log files (*.log);;Archives (*.zip *.tar.gz *.tgz *.txz *.tar.xz *.xz *.gz);;Text files (*.txt);;All Files (*)
+
+# Zip archives
+archive.tab_title=Archive
+archive.catalog_loading=Reading archive contents…
+archive.catalog_ready=%1 file(s) in archive
+archive.catalog_truncated=Listing truncated (archive is very large or deeply nested)
+archive.open_entry=Open
+archive.open_failed.title=Open archive file
+archive.open_failed=Could not open %1:\n%2
+archive.error.extract_member_missing=Could not find “%1” inside “%2”.
+archive.error.extract_full_path=Requested path: %1
+archive.error.extract_hint=The member may be missing, the archive may be corrupt, a nested zip/tar/xz/gz in the path may not have opened, or LogView may not support this file type as a text log (for example binary trace .bro files).
+archive.error.extract_nested_open=Could not open nested archive “%1”: %2
+archive.error.extract_open_root=Could not open archive “%1”: %2
+archive.error.extract_read_while_seek=Error while reading “%1” looking for a member: %2
+archive.error.extract_read_member=Error reading “%1” from “%2”: %3
+archive.error.extract_write_failed=Could not write extracted file “%1”: %2
+archive.error.extract_cache_dir=Could not create a temporary folder for extracted archive files.
 file.write_failed=Could not open %1 for writing.
 file.read_failed=Could not open %1 for reading.
 file.open_failed=Unable to open file %1

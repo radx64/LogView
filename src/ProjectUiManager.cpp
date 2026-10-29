@@ -1,10 +1,14 @@
 #include "ProjectUiManager.hpp"
 
+#include "ArchiveDocument.hpp"
+#include "ArchiveViewer.hpp"
 #include "AutoBookmarksModel.hpp"
 #include "FileViewer.hpp"
 #include "FileLineSource.hpp"
 #include "Settings.hpp"
 #include "Translator.hpp"
+#include "archive/ArchiveCatalog.hpp"
+#include "archive/ArchiveCommon.hpp"
 #include "loader/BackgroundTask.hpp"
 
 #include <QDebug>
@@ -19,6 +23,27 @@ ProjectUiManager::ProjectUiManager(Ui::MainWindow* ui)
 
     connect(&AutoBookmarksModel::instance(), &AutoBookmarksModel::changed,
             this, &ProjectUiManager::regenerateAutoBookmarks);
+}
+
+ProjectUiManager::~ProjectUiManager()
+{
+    const QList<ArchiveDocument*> archives = catalog_tasks_.keys();
+    for (ArchiveDocument* archive : archives)
+        cancelArchiveCatalog(archive);
+}
+
+void ProjectUiManager::cancelArchiveCatalog(ArchiveDocument* archive)
+{
+    if (!archive)
+        return;
+
+    QPointer<BackgroundTask> task = catalog_tasks_.take(archive);
+    if (!task)
+        return;
+
+    disconnect(task, nullptr, this, nullptr);
+    task->cancel();
+    task->deleteLater();
 }
 
 void ProjectUiManager::create_new()
@@ -47,9 +72,79 @@ void ProjectUiManager::clearViews()
 
 void ProjectUiManager::load_log_file(QString file_path)
 {
+    if (logview_archive::isArchivePath(file_path))
+    {
+        load_archive_file(std::move(file_path));
+        return;
+    }
+
     Logfile* lf = pm_->add_to_project(std::make_unique<Logfile>(file_path));
     present_logfile(lf);
     pm_->markDirty();
+}
+
+void ProjectUiManager::load_archive_file(QString file_path)
+{
+    ArchiveDocument* archive =
+        pm_->add_archive_to_project(std::make_unique<ArchiveDocument>(file_path));
+    present_archive(archive);
+    pm_->markDirty();
+}
+
+void ProjectUiManager::present_archive(ArchiveDocument* archive)
+{
+    ArchiveViewer* viewer = loader::Logfile::createArchiveView(
+        ui_,
+        archive,
+        this,
+        [](ArchiveViewer*) {});
+    beginArchiveCatalog(archive, viewer);
+}
+
+void ProjectUiManager::beginArchiveCatalog(ArchiveDocument* archive, ArchiveViewer* viewer)
+{
+    cancelArchiveCatalog(archive);
+
+    const QString archive_path = archive->archivePath();
+    auto result = std::make_shared<ArchiveCatalogResult>();
+    QPointer<ArchiveDocument> archive_guard(archive);
+    QPointer<ArchiveViewer> viewer_guard(viewer);
+
+    BackgroundTask* task = new BackgroundTask(
+        [archive_path, result](const BackgroundTask::ProgressFn& report) -> bool
+        {
+            *result = ArchiveCatalog::build(archive_path,
+                                            [&report](int count)
+                                            {
+                                                return report(count, qMax<qint64>(count, 1));
+                                            });
+            return true;
+        },
+        this);
+
+    catalog_tasks_.insert(archive, task);
+
+    connect(viewer, &QObject::destroyed, task, [task]() {
+        if (task)
+            task->cancel();
+    });
+
+    connect(task, &BackgroundTask::finished, this,
+            [this, archive_guard, viewer_guard, result](bool ok)
+            {
+                if (archive_guard)
+                    catalog_tasks_.remove(archive_guard.data());
+                if (!archive_guard || !viewer_guard || !ok)
+                    return;
+                archive_guard->setCatalog(result->entry_paths, result->truncated);
+            });
+    connect(task, &BackgroundTask::finished, task, &BackgroundTask::deleteLater);
+    task->start();
+}
+
+void ProjectUiManager::beginLoadingLogfile(Logfile* lf, FileViewer* viewer, QWidget* progress_tab_host)
+{
+    beginLoading(lf, viewer, progress_tab_host);
 }
 
 void ProjectUiManager::present_logfile(Logfile* lf)
@@ -61,14 +156,13 @@ void ProjectUiManager::present_logfile(Logfile* lf)
         {
             connect_logviewer_signal(fileviewer);
         });
-    beginLoading(lf, viewer);
+    beginLoading(lf, viewer, viewer);
 }
 
-void ProjectUiManager::beginLoading(Logfile* lf, FileViewer* viewer)
+void ProjectUiManager::beginLoading(Logfile* lf, FileViewer* viewer, QWidget* progress_tab_host)
 {
     std::shared_ptr<FileLineSource> source = lf->getFileSource();
 
-    // Nothing to index (already loaded or invalid) -> show greps right away.
     if (!source || source->isLoaded())
     {
         loader::Logfile::spawnViews(viewer->getDeepestActiveTab(), lf->grep_hierarchy_.get());
@@ -82,6 +176,7 @@ void ProjectUiManager::beginLoading(Logfile* lf, FileViewer* viewer)
         [source](const BackgroundTask::ProgressFn& report) { return source->buildIndex(report); },
         this);
     entry.viewer = viewer;
+    entry.progress_tab = progress_tab_host ? progress_tab_host : viewer;
     entry.lf = lf;
     entry.name = lf->getFileName().split(QRegularExpression("[\\/]")).last();
     entry.total = source->fileSize();
@@ -90,7 +185,6 @@ void ProjectUiManager::beginLoading(Logfile* lf, FileViewer* viewer)
 
     BackgroundTask* loader = entry.loader;
 
-    // Stop indexing if the user closes the tab before loading finishes.
     connect(viewer, &FileViewer::destroyed, loader, [loader]() { loader->cancel(); });
 
     connect(loader, &BackgroundTask::progress, this,
@@ -146,10 +240,11 @@ void ProjectUiManager::onLoaderFinished(BackgroundTask* loader, bool ok)
 
 void ProjectUiManager::setTabLoading(LoadEntry& entry, bool loading)
 {
-    if (!entry.viewer)
+    QWidget* tab_widget = entry.progress_tab ? entry.progress_tab.data() : entry.viewer.data();
+    if (!tab_widget)
         return;
 
-    const int idx = ui_->fileView->indexOf(entry.viewer);
+    const int idx = ui_->fileView->indexOf(tab_widget);
     if (idx < 0)
         return;
 
@@ -215,7 +310,7 @@ void ProjectUiManager::reload_file(int tab_index)
     ui_->fileView->setTabToolTip(tab_index, tab_tooltip);
     ui_->fileView->setCurrentIndex(tab_index);
 
-    beginLoading(lf, reloaded);
+    beginLoading(lf, reloaded, reloaded);
 }
 
 void ProjectUiManager::on_logfile_wiget_close(Logfile* lf)
@@ -229,6 +324,16 @@ void ProjectUiManager::regenerateAutoBookmarks()
     for (const std::unique_ptr<Logfile>& lf : pm_->get_log_files())
         if (lf)
             lf->generateAutoBookmarks();
+    for (const std::unique_ptr<ArchiveDocument>& archive : pm_->get_archives())
+    {
+        if (!archive)
+            continue;
+        for (const ArchiveDocument::OpenedEntry& entry : archive->openedEntries())
+        {
+            if (entry.logfile)
+                entry.logfile->generateAutoBookmarks();
+        }
+    }
 }
 
 bool ProjectUiManager::is_empty()
@@ -312,6 +417,8 @@ QString ProjectUiManager::open_project(const QString& file_path)
     serializer::ProjectModel::deserialize(*pm_, object);
     for (const auto& logfile : pm_->get_log_files())
         present_logfile(logfile.get());
+    for (const auto& archive : pm_->get_archives())
+        present_archive(archive.get());
     pm_->markClean();
     return path;
 }
@@ -325,4 +432,19 @@ void ProjectUiManager::file_viewer_closed(Logfile* lf)
 {
     qDebug() << "Closed viewer: " << lf;
     pm_->remove_file_from_project(lf);
+}
+
+void ProjectUiManager::onArchiveViewerClosing(ArchiveDocument* archive)
+{
+    archive_viewer_closed(archive);
+}
+
+void ProjectUiManager::archive_viewer_closed(ArchiveDocument* archive)
+{
+    if (!archive)
+        return;
+
+    cancelArchiveCatalog(archive);
+    archive->blockSignals(true);
+    pm_->remove_archive_from_project(archive);
 }

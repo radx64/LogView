@@ -46,6 +46,8 @@
 #include "ChunkedTextView.hpp"
 #include "LineSource.hpp"
 #include "FileViewer.hpp"
+#include "ArchiveViewer.hpp"
+#include "ProjectTabHost.hpp"
 #include "serializer/SerializerProjectModel.hpp"
 #include "ProjectUiManager.hpp"
 #include "ThemeManager.hpp"
@@ -80,11 +82,12 @@ void MainWindow::showFileTabContextMenu(const QPoint& pos)
     menu.addSeparator();
     QAction* close_action = menu.addAction(Lang::tr("tab.close"));
 
-    const QString file_path = filePathForTab(index);
+    const QString file_path = primaryPathForTab(ui->fileView->widget(index));
     const bool has_path = !file_path.isEmpty();
+    const bool is_plain_log_tab = qobject_cast<FileViewer*>(ui->fileView->widget(index)) != nullptr;
     copy_name_action->setEnabled(has_path);
     copy_path_action->setEnabled(has_path);
-    open_folder_action->setEnabled(has_path);
+    open_folder_action->setEnabled(has_path && is_plain_log_tab);
 
     QAction* chosen = menu.exec(bar->mapToGlobal(pos));
     if (chosen == reload_action)
@@ -101,10 +104,7 @@ void MainWindow::showFileTabContextMenu(const QPoint& pos)
 
 QString MainWindow::filePathForTab(const int index) const
 {
-    FileViewer* viewer = dynamic_cast<FileViewer*>(ui->fileView->widget(index));
-    if (viewer == nullptr || viewer->logfile_ == nullptr)
-        return QString();
-    return viewer->logfile_->getFileName();
+    return primaryPathForTab(ui->fileView->widget(index));
 }
 
 bool MainWindow::eventFilter(QObject* watched, QEvent* event)
@@ -136,6 +136,7 @@ void MainWindow::connect_signals()
     bar->installEventFilter(this);
 
     connect(ui->fileView, &QTabWidget::currentChanged, this, &MainWindow::refreshWindowTitle);
+    connect(ui->fileView, &QTabWidget::currentChanged, this, &MainWindow::updateMenus);
 }
 
 void MainWindow::newProject()
@@ -300,6 +301,8 @@ void MainWindow::dragEnterEvent(QDragEnterEvent* event)
 MainWindow::~MainWindow()
 {
     delete ui;
+    ui = nullptr;
+    pm_.reset();
 }
 
 void MainWindow::load_log_file(QString file_path)
@@ -334,19 +337,18 @@ void MainWindow::openCommandLinePaths(const QStringList& paths)
     updateUi();
 }
 
-FileViewer* MainWindow::get_active_viewer_widget()
+FileViewer* MainWindow::get_active_file_viewer()
 {
     const int tab_index = ui->fileView->currentIndex();
-    if(tab_index == -1) return nullptr;
-    FileViewer* viewerWidget = dynamic_cast<FileViewer*>(ui->fileView->widget(tab_index));
-    if (!viewerWidget) throw std::string("Could not find active ViewerWidget");
-    return viewerWidget;
+    if (tab_index == -1)
+        return nullptr;
+    return activeFileViewerForTab(ui->fileView->widget(tab_index));
 }
 
 void MainWindow::grepCurrentView()
 {
     //TODO make grep and bookmark active only when file is loaded
-    FileViewer* viewerWidget = get_active_viewer_widget();
+    FileViewer* viewerWidget = get_active_file_viewer();
     if (!viewerWidget) return; // can display here some message
 
     LogViewer* deepest_tab = viewerWidget->getDeepestActiveTab();
@@ -369,7 +371,7 @@ void MainWindow::grepCurrentView()
 
 void MainWindow::bookmark_current_line()
 {
-    FileViewer* viewerWidget = get_active_viewer_widget();
+    FileViewer* viewerWidget = get_active_file_viewer();
     if (!viewerWidget) return; // can display here some message
     LogViewer* deepest_tab = viewerWidget->getDeepestActiveTab();
 
@@ -396,7 +398,7 @@ void MainWindow::on_actionLoad_from_file_triggered()
     QStringList file_paths = QFileDialog::getOpenFileNames(this,
         Lang::tr("dialog.open_log_files.title"),
         Settings::instance().lastOpenedFileDirectory(),
-        Lang::tr("filter.all_files"));
+        Lang::tr("filter.log_and_archives"));
     if (file_paths.isEmpty())
         return;
 
@@ -426,7 +428,7 @@ void MainWindow::on_actionMerge_files_triggered()
 
 void MainWindow::on_actionFind_triggered()
 {
-    FileViewer* viewerWidget = get_active_viewer_widget();
+    FileViewer* viewerWidget = get_active_file_viewer();
     if (!viewerWidget) return;
 
     LogViewer* deepest_tab = viewerWidget->getDeepestActiveTab();
@@ -441,7 +443,7 @@ void MainWindow::on_actionGrep_current_view_triggered()
 
 void MainWindow::on_actionExport_grep_triggered()
 {
-    FileViewer* viewerWidget = get_active_viewer_widget();
+    FileViewer* viewerWidget = get_active_file_viewer();
     if (!viewerWidget)
     {
         QMessageBox::information(this, Lang::tr("dialog.export_grep.title"),
@@ -579,9 +581,11 @@ void MainWindow::refreshWindowTitle()
     const int tab_index = ui->fileView->currentIndex();
     if (tab_index != -1)
     {
-        FileViewer* viewer = dynamic_cast<FileViewer*>(ui->fileView->widget(tab_index));
+        FileViewer* viewer = get_active_file_viewer();
         if (viewer && viewer->logfile_)
             parts << viewer->logfile_->getFileName();
+        else if (auto* archive = qobject_cast<ArchiveViewer*>(ui->fileView->widget(tab_index)))
+            parts << QFileInfo(archive->archivePath()).fileName();
     }
 
     setWindowTitle(parts.join(" - "));
@@ -600,6 +604,12 @@ void MainWindow::on_actionSave_project_triggered()
 void MainWindow::updateMenus()
 {
     ui->actionSave_project->setEnabled(!pm_->project_name().isEmpty() && pm_->has_changed());
+
+    const bool has_log_view = get_active_file_viewer() != nullptr;
+    ui->actionFind->setEnabled(has_log_view);
+    ui->actionGrep_current_view->setEnabled(has_log_view);
+    ui->actionExport_grep->setEnabled(has_log_view);
+    ui->actionBookmark_current_line->setEnabled(has_log_view);
 }
 
 void MainWindow::updateUi()

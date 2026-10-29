@@ -14,9 +14,10 @@
 #include "FileLineSource.hpp"
 #include "loader/BackgroundTask.hpp"
 
-Logfile::Logfile(const QString& filename)
+Logfile::Logfile(const QString& filename, const QString& display_name)
 {
     filename_ = filename;
+    display_name_ = display_name;
 
     source_ = std::make_shared<FileLineSource>(filename);
 
@@ -94,6 +95,11 @@ std::shared_ptr<FileLineSource> Logfile::getFileSource() const
 }
 
 const QString& Logfile::getFileName() const
+{
+    return display_name_.isEmpty() ? filename_ : display_name_;
+}
+
+const QString& Logfile::getStoragePath() const
 {
     return filename_;
 }

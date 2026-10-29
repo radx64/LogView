@@ -6,7 +6,8 @@ RUN apt-get update \
         g++ \
         make \
         qt6-base-dev \
-        qt6-tools-dev
+        qt6-tools-dev \
+        libarchive-dev
 
 
 ENTRYPOINT ["/bin/bash"]
