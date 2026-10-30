@@ -34,6 +34,7 @@ if(NOT LibArchive_FOUND)
     set(ENABLE_CAT OFF CACHE BOOL "" FORCE)
     FetchContent_MakeAvailable(libarchive)
     set(LOGVIEW_LIBARCHIVE_TARGET archive_static)
+    set(LOGVIEW_LIBARCHIVE_STATIC TRUE)
 else()
     set(LOGVIEW_LIBARCHIVE_TARGET LibArchive::LibArchive)
 endif()
@@ -114,6 +115,11 @@ add_definitions(${Qt6Widgets_DEFINITIONS} ${QtQml_DEFINITIONS} ${${Qt6Quick_DEFI
 
 add_executable(${projectName} ${RESOURCES} ${RC_FILE} ${SOURCES})
 target_link_libraries(${projectName} PUBLIC Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Network ${LOGVIEW_LIBARCHIVE_TARGET})
+if(LOGVIEW_LIBARCHIVE_STATIC)
+    # libarchive's headers import DLL symbols on Windows unless consumers of
+    # archive_static define this too.
+    target_compile_definitions(${projectName} PRIVATE LIBARCHIVE_STATIC)
+endif()
 
 # Ship the translation catalogs (lang/*.lang) next to the executable so they can
 # be loaded at runtime relative to the binary.
