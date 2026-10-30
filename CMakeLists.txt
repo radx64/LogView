@@ -17,6 +17,10 @@ find_package(Qt6 6.6 REQUIRED COMPONENTS Core Gui Widgets Network)
 
 find_package(LibArchive QUIET)
 if(NOT LibArchive_FOUND)
+    # libarchive v3.7.7 still declares compatibility with CMake < 3.5.
+    # CMake 4 removed that compatibility unless a policy floor is supplied.
+    set(CMAKE_POLICY_VERSION_MINIMUM 3.5 CACHE STRING
+        "Minimum CMake policy version for bundled dependencies")
     include(FetchContent)
     FetchContent_Declare(
         libarchive
