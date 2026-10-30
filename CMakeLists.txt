@@ -14,7 +14,6 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # Qt 6.6 is the minimum: the code uses Qt::ColorScheme (6.5+) and
 # QList::assign (6.6+).
 find_package(Qt6 6.6 REQUIRED COMPONENTS Core Gui Widgets Network)
-find_package(ZLIB REQUIRED)
 
 find_package(LibArchive QUIET)
 if(NOT LibArchive_FOUND)
