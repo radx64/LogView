@@ -102,9 +102,12 @@ filter.log_and_archives=Log files (*.log);;Archives (*.zip *.tar.gz *.tgz *.txz 
 # Zip archives
 archive.tab_title=Archive
 archive.catalog_loading=Reading archive contents…
+archive.catalog_loading_files=Reading archive contents… %1 files
 archive.catalog_ready=%1 file(s) in archive
+archive.catalog_filtered=Showing %1 of %2 file(s)
 archive.catalog_truncated=Listing truncated (archive is very large or deeply nested)
 archive.open_entry=Open
+archive.filter_placeholder=Filter files…
 archive.open_failed.title=Open archive file
 archive.open_failed=Could not open %1:\n%2
 archive.error.extract_member_missing=Could not find “%1” inside “%2”.

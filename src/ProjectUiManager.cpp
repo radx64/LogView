@@ -11,9 +11,10 @@
 #include "archive/ArchiveCommon.hpp"
 #include "loader/BackgroundTask.hpp"
 
-#include <QDebug>
+#include <atomic>
 #include <QFileInfo>
 #include <QRegularExpression>
+#include <QTabWidget>
 
 ProjectUiManager::ProjectUiManager(Ui::MainWindow* ui)
 : ui_(ui)
@@ -106,17 +107,20 @@ void ProjectUiManager::beginArchiveCatalog(ArchiveDocument* archive, ArchiveView
     cancelArchiveCatalog(archive);
 
     const QString archive_path = archive->archivePath();
+    const qint64 file_size = QFileInfo(archive_path).size();
     auto result = std::make_shared<ArchiveCatalogResult>();
+    auto entries_found = std::make_shared<std::atomic<int>>(0);
     QPointer<ArchiveDocument> archive_guard(archive);
     QPointer<ArchiveViewer> viewer_guard(viewer);
 
     BackgroundTask* task = new BackgroundTask(
-        [archive_path, result](const BackgroundTask::ProgressFn& report) -> bool
+        [archive_path, result, entries_found, file_size](const BackgroundTask::ProgressFn& report) -> bool
         {
             *result = ArchiveCatalog::build(archive_path,
-                                            [&report](int count)
+                                            [&](int count, qint64 bytes)
                                             {
-                                                return report(count, qMax<qint64>(count, 1));
+                                                entries_found->store(count, std::memory_order_relaxed);
+                                                return report(bytes, qMax(file_size, qint64(1)));
                                             });
             return true;
         },
@@ -128,6 +132,16 @@ void ProjectUiManager::beginArchiveCatalog(ArchiveDocument* archive, ArchiveView
         if (task)
             task->cancel();
     });
+
+    connect(task, &BackgroundTask::progress, this,
+            [viewer_guard, entries_found, file_size](qint64 bytes, qint64)
+            {
+                if (viewer_guard)
+                {
+                    viewer_guard->setCatalogProgress(
+                        entries_found->load(std::memory_order_relaxed), bytes, file_size);
+                }
+            });
 
     connect(task, &BackgroundTask::finished, this,
             [this, archive_guard, viewer_guard, result](bool ok)
@@ -290,27 +304,37 @@ void ProjectUiManager::emitAggregateProgress()
 
 void ProjectUiManager::reload_file(int tab_index)
 {
-    FileViewer* viewer = dynamic_cast<FileViewer*>(ui_->fileView->widget(tab_index));
-    if (viewer == nullptr)
+    reloadViewer(ui_->fileView, tab_index, nullptr, true);
+}
+
+void ProjectUiManager::reloadViewer(QTabWidget* tabs, int index, QWidget* progress_host, bool project_file)
+{
+    if (!tabs)
+        return;
+
+    FileViewer* viewer = qobject_cast<FileViewer*>(tabs->widget(index));
+    if (viewer == nullptr || viewer->logfile_ == nullptr)
         return;
 
     Logfile* lf = viewer->logfile_;
-    const QString tab_text = ui_->fileView->tabText(tab_index);
-    const QString tab_tooltip = ui_->fileView->tabToolTip(tab_index);
+    const QString tab_text = tabs->tabText(index);
+    const QString tab_tooltip = tabs->tabToolTip(index);
 
     lf->reload();
 
-    disconnect(viewer, &FileViewer::destroyed, this, &ProjectUiManager::file_viewer_closed);
-    ui_->fileView->removeTab(tab_index);
+    if (project_file)
+        disconnect(viewer, &FileViewer::destroyed, this, &ProjectUiManager::file_viewer_closed);
+    tabs->removeTab(index);
     delete viewer;
 
-    FileViewer* reloaded = new FileViewer(ui_->fileView, lf);
-    connect_logviewer_signal(reloaded);
-    ui_->fileView->insertTab(tab_index, reloaded, tab_text);
-    ui_->fileView->setTabToolTip(tab_index, tab_tooltip);
-    ui_->fileView->setCurrentIndex(tab_index);
+    FileViewer* reloaded = new FileViewer(tabs, lf);
+    if (project_file)
+        connect_logviewer_signal(reloaded);
+    tabs->insertTab(index, reloaded, tab_text);
+    tabs->setTabToolTip(index, tab_tooltip);
+    tabs->setCurrentIndex(index);
 
-    beginLoading(lf, reloaded, reloaded);
+    beginLoading(lf, reloaded, progress_host ? progress_host : reloaded);
 }
 
 void ProjectUiManager::on_logfile_wiget_close(Logfile* lf)

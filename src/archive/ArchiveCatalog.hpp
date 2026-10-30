@@ -14,7 +14,7 @@ struct ArchiveCatalogResult
 class ArchiveCatalog
 {
 public:
-    using ProgressCallback = std::function<bool(int entries_found)>;
+    using ProgressCallback = std::function<bool(int entries_found, qint64 bytes_read)>;
 
     static ArchiveCatalogResult build(const QString& archive_path,
                                       const ProgressCallback& on_progress = {});

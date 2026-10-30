@@ -37,6 +37,7 @@ bool openArchiveFromPath(const QString& path, ArchiveHandle& handle, QString* er
     handle.reader = archive_read_new();
     archive_read_support_filter_all(handle.reader);
     archive_read_support_format_all(handle.reader);
+    archive_read_support_format_raw(handle.reader);
 
     if (archive_read_open_filename(handle.reader, path.toUtf8().constData(), 10240) != ARCHIVE_OK)
     {
@@ -53,6 +54,7 @@ bool openArchiveFromMemory(QByteArray& data, ArchiveHandle& handle, QString* err
     handle.reader = archive_read_new();
     archive_read_support_filter_all(handle.reader);
     archive_read_support_format_all(handle.reader);
+    archive_read_support_format_raw(handle.reader);
 
     if (archive_read_open_memory(handle.reader, data.data(), static_cast<size_t>(data.size())) != ARCHIVE_OK)
     {
@@ -125,7 +127,7 @@ bool locateAndReadEntry(ArchiveHandle& handle,
         if (entryIsDirectory(entry))
             continue;
 
-        if (entryPath(entry) != needle)
+        if (entryPath(entry) != needle && !entryPath(entry).isEmpty())
         {
             archive_read_data_skip(handle.reader);
             continue;
@@ -152,6 +154,69 @@ bool locateAndReadEntry(ArchiveHandle& handle,
     return false;
 }
 
+bool isSingleStreamCompressed(const QString& entry_name)
+{
+    const QString lower = entry_name.toLower();
+    if (lower.endsWith(QStringLiteral(".tar.gz"))
+        || lower.endsWith(QStringLiteral(".tar.xz"))
+        || lower.endsWith(QStringLiteral(".tgz"))
+        || lower.endsWith(QStringLiteral(".txz")))
+    {
+        return false;
+    }
+    return lower.endsWith(QStringLiteral(".xz")) || lower.endsWith(QStringLiteral(".gz"));
+}
+
+// .log.xz entries are one compressed stream with no inner path. Write the
+// decompressed bytes so the log viewer opens text. Leave real archives as they
+// are when the stream contains more than one entry.
+bool decompressSingleStreamFile(const QString& entry_name, const QString& dest_path, QString* error)
+{
+    if (!isSingleStreamCompressed(entry_name))
+        return true;
+
+    QFile compressed(dest_path);
+    if (!compressed.open(QIODevice::ReadOnly))
+    {
+        if (error)
+            *error = Lang::tr("archive.error.extract_write_failed").arg(dest_path, compressed.errorString());
+        return false;
+    }
+    QByteArray data = compressed.readAll();
+    compressed.close();
+
+    ArchiveHandle decoded;
+    if (!openArchiveFromMemory(data, decoded, nullptr))
+        return true;
+
+    archive_entry* entry = nullptr;
+    if (archive_read_next_header(decoded.reader, &entry) != ARCHIVE_OK)
+        return true;
+
+    QByteArray payload;
+    if (!readCurrentEntryToBuffer(decoded, payload, nullptr) || payload.isEmpty())
+        return true;
+
+    archive_entry* next = nullptr;
+    if (archive_read_next_header(decoded.reader, &next) == ARCHIVE_OK)
+        return true;
+
+    QFile out(dest_path);
+    if (!out.open(QIODevice::WriteOnly | QIODevice::Truncate))
+    {
+        if (error)
+            *error = Lang::tr("archive.error.extract_write_failed").arg(dest_path, out.errorString());
+        return false;
+    }
+    if (out.write(payload) != payload.size())
+    {
+        if (error)
+            *error = Lang::tr("archive.error.extract_write_failed").arg(dest_path, out.errorString());
+        return false;
+    }
+    return true;
+}
+
 bool locateAndExtractEntry(ArchiveHandle& handle,
                            const QString& entry_name,
                            const QString& dest_path,
@@ -167,7 +232,7 @@ bool locateAndExtractEntry(ArchiveHandle& handle,
         if (entryIsDirectory(entry))
             continue;
 
-        if (entryPath(entry) != needle)
+        if (entryPath(entry) != needle && !entryPath(entry).isEmpty())
         {
             archive_read_data_skip(handle.reader);
             continue;
@@ -202,7 +267,8 @@ bool locateAndExtractEntry(ArchiveHandle& handle,
                 return false;
             }
         }
-        return true;
+        out.close();
+        return decompressSingleStreamFile(needle, dest_path, error);
     }
 
     if (error)
@@ -223,12 +289,23 @@ bool locateAndExtractEntry(ArchiveHandle& handle,
     return false;
 }
 
+bool reportCatalogProgress(const ArchiveCatalog::ProgressCallback& on_progress,
+                           int entries,
+                           archive* byte_source)
+{
+    if (!on_progress)
+        return true;
+    const qint64 bytes = byte_source ? archive_filter_bytes(byte_source, 0) : 0;
+    return on_progress(entries, bytes);
+}
+
 void listFromHandle(ArchiveHandle& handle,
                     const QString& path_prefix,
                     int depth,
                     QStringList& out,
                     bool& truncated,
-                    const ArchiveCatalog::ProgressCallback& on_progress)
+                    const ArchiveCatalog::ProgressCallback& on_progress,
+                    archive* byte_source)
 {
     if (depth > logview_archive::kMaxDepth)
     {
@@ -261,26 +338,61 @@ void listFromHandle(ArchiveHandle& handle,
         const QString logical = path_prefix + rel;
         if (logview_archive::isNestedArchiveLeafName(rel))
         {
+            const int count_before = out.size();
             QByteArray nested_bytes;
-            if (!readCurrentEntryToBuffer(handle, nested_bytes, nullptr))
-                continue;
-
             ArchiveHandle nested;
-            if (!openArchiveFromMemory(nested_bytes, nested, nullptr))
-                continue;
+            bool opened = readCurrentEntryToBuffer(handle, nested_bytes, nullptr)
+                && openArchiveFromMemory(nested_bytes, nested, nullptr);
 
-            listFromHandle(nested,
-                           logical + QLatin1Char('/'),
-                           depth + 1,
-                           out,
-                           truncated,
-                           on_progress);
+            // A plain .xz/.gz stream is one payload. libarchive names that
+            // payload "data". Keep the .xz itself as the file to open.
+            if (opened && isSingleStreamCompressed(rel))
+            {
+                archive_entry* peek = nullptr;
+                bool raw_stream = true;
+                if (archive_read_next_header(nested.reader, &peek) == ARCHIVE_OK)
+                {
+                    const int format = archive_format(nested.reader);
+                    raw_stream = (format & ARCHIVE_FORMAT_BASE_MASK) == ARCHIVE_FORMAT_RAW;
+                }
+                if (raw_stream)
+                {
+                    if (out.size() < logview_archive::kMaxEntries)
+                    {
+                        out.append(logical);
+                        if (!reportCatalogProgress(on_progress, out.size(), byte_source))
+                            break;
+                    }
+                    continue;
+                }
+
+                nested.close();
+                opened = openArchiveFromMemory(nested_bytes, nested, nullptr);
+            }
+
+            if (opened)
+            {
+                listFromHandle(nested,
+                               logical + QLatin1Char('/'),
+                               depth + 1,
+                               out,
+                               truncated,
+                               on_progress,
+                               byte_source);
+            }
+
+            if (out.size() == count_before && out.size() < logview_archive::kMaxEntries)
+            {
+                out.append(logical);
+                if (!reportCatalogProgress(on_progress, out.size(), byte_source))
+                    break;
+            }
         }
         else
         {
             out.append(logical);
             archive_read_data_skip(handle.reader);
-            if (on_progress && !on_progress(out.size()))
+            if (!reportCatalogProgress(on_progress, out.size(), byte_source))
                 break;
         }
     }
@@ -347,7 +459,7 @@ bool listFromPath(const QString& archive_path,
     if (!openArchiveFromPath(QFileInfo(archive_path).absoluteFilePath(), handle, nullptr))
         return false;
 
-    listFromHandle(handle, path_prefix, depth, out, truncated, on_progress);
+    listFromHandle(handle, path_prefix, depth, out, truncated, on_progress, handle.reader);
     return true;
 }
 

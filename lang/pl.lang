@@ -95,9 +95,12 @@ filter.log_and_archives=Pliki dziennika (*.log);;Archiwa (*.zip *.tar.gz *.tgz *
 
 archive.tab_title=Archiwum
 archive.catalog_loading=Odczytywanie zawartości archiwum…
+archive.catalog_loading_files=Odczytywanie zawartości archiwum… %1 plików
 archive.catalog_ready=Liczba plików w archiwum: %1
+archive.catalog_filtered=Wyświetlanie %1 z %2 plików
 archive.catalog_truncated=Lista obcięta (archiwum jest bardzo duże lub głęboko zagnieżdżone)
 archive.open_entry=Otwórz
+archive.filter_placeholder=Filtruj pliki…
 archive.open_failed.title=Otwórz plik z archiwum
 archive.open_failed=Nie można otworzyć %1:\n%2
 archive.error.extract_member_missing=Nie znaleziono „%1” w „%2”.

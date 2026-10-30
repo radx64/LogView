@@ -79,6 +79,7 @@ set(SOURCES
     src/archive/ArchiveCatalog.cpp
     src/archive/ArchiveExtractionCache.cpp
     src/archive/ZipEntryTreeModel.cpp
+    src/archive/ArchivePathFilter.cpp
     src/ui/ArchiveViewer.cpp
     src/ui/ProjectTabHost.cpp
     src/loader/BackgroundTask.cpp

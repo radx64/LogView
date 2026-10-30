@@ -22,6 +22,7 @@ class FileViewer;
 class ArchiveDocument;
 class ArchiveViewer;
 class BackgroundTask;
+class QTabWidget;
 
 class ProjectUiManager : public QObject
 {
@@ -34,6 +35,7 @@ public:
     void beginLoadingLogfile(Logfile* lf, FileViewer* viewer, QWidget* progress_tab_host);
     void onArchiveViewerClosing(ArchiveDocument* archive);
     void reload_file(int tab_index);
+    void reloadViewer(QTabWidget* tabs, int index, QWidget* progress_host, bool project_file);
     bool is_empty();
     bool has_changed();
     const QString& project_name();
