@@ -29,6 +29,7 @@ if(NOT LibArchive_FOUND)
             GIT_TAG v1.3.1
         )
         set(ZLIB_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+        set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
         FetchContent_MakeAvailable(zlib)
         set(ZLIB_FOUND TRUE)
         set(ZLIB_INCLUDE_DIR "${zlib_SOURCE_DIR}" CACHE PATH "" FORCE)
@@ -45,6 +46,16 @@ if(NOT LibArchive_FOUND)
     set(ENABLE_TAR OFF CACHE BOOL "" FORCE)
     set(ENABLE_CPIO OFF CACHE BOOL "" FORCE)
     set(ENABLE_CAT OFF CACHE BOOL "" FORCE)
+    if(WIN32)
+        # MSVC 19.51 provides wcscpy/wcslen as intrinsics. libarchive's
+        # configure probe misses them, then archive_entry.c defines its own
+        # copies and the compiler rejects that (C2169).
+        set(HAVE_WCSCPY 1 CACHE INTERNAL "Have function wcscpy")
+        set(HAVE_WCSLEN 1 CACHE INTERNAL "Have function wcslen")
+        # LogView links archive_static. The shared target compiles the same
+        # sources and fails the same way.
+        set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+    endif()
     FetchContent_MakeAvailable(libarchive)
     set(LOGVIEW_LIBARCHIVE_TARGET archive_static)
     set(LOGVIEW_LIBARCHIVE_STATIC TRUE)
