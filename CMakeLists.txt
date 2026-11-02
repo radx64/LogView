@@ -22,6 +22,19 @@ if(NOT LibArchive_FOUND)
     set(CMAKE_POLICY_VERSION_MINIMUM 3.5 CACHE STRING
         "Minimum CMake policy version for bundled dependencies")
     include(FetchContent)
+    if(WIN32)
+        FetchContent_Declare(
+            zlib
+            GIT_REPOSITORY https://github.com/madler/zlib.git
+            GIT_TAG v1.3.1
+        )
+        set(ZLIB_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+        FetchContent_MakeAvailable(zlib)
+        set(ZLIB_FOUND TRUE)
+        set(ZLIB_INCLUDE_DIR "${zlib_SOURCE_DIR}" CACHE PATH "" FORCE)
+        set(ZLIB_LIBRARY zlibstatic CACHE STRING "" FORCE)
+        set(ZLIB_LIBRARIES zlibstatic CACHE STRING "" FORCE)
+    endif()
     FetchContent_Declare(
         libarchive
         GIT_REPOSITORY https://github.com/libarchive/libarchive.git
