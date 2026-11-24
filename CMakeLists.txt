@@ -40,6 +40,10 @@ if(NOT LibArchive_FOUND)
         # liblzma. Without it libarchive falls back to spawning an external
         # "xz" program, which does not exist on Windows, so such files fail
         # to open. Linux links the system liblzma, so only Windows needs this.
+        # xz registers its own unit tests with CTest when BUILD_TESTING is on.
+        # Those targets are not built here, so `ctest` would report them as
+        # "Not Run" next to LogViewTests. Turn them off for this dependency only.
+        set(BUILD_TESTING OFF)
         set(_logview_xz_exclude "")
         if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.28)
             # Build only liblzma, not the xz command line tools.
