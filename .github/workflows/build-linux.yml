@@ -32,6 +32,11 @@ jobs:
     - name: Build
       run: cmake --build build --config Release -j$(nproc)
 
+    - name: Build and run unit tests
+      run: |
+        cmake --build build --config Release --target LogViewTests -j$(nproc)
+        ctest --test-dir build -C Release --output-on-failure
+
     - name: Verify binary
       run: |
         [ -f build/LogView ] || exit 1

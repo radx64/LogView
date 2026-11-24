@@ -35,6 +35,31 @@ if(NOT LibArchive_FOUND)
         set(ZLIB_INCLUDE_DIR "${zlib_SOURCE_DIR}" CACHE PATH "" FORCE)
         set(ZLIB_LIBRARY zlibstatic CACHE STRING "" FORCE)
         set(ZLIB_LIBRARIES zlibstatic CACHE STRING "" FORCE)
+
+        # libarchive only decodes .xz/.tar.xz when it is built against
+        # liblzma. Without it libarchive falls back to spawning an external
+        # "xz" program, which does not exist on Windows, so such files fail
+        # to open. Linux links the system liblzma, so only Windows needs this.
+        set(_logview_xz_exclude "")
+        if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.28)
+            # Build only liblzma, not the xz command line tools.
+            set(_logview_xz_exclude EXCLUDE_FROM_ALL)
+        endif()
+        FetchContent_Declare(
+            xz
+            GIT_REPOSITORY https://github.com/tukaani-project/xz.git
+            GIT_TAG v5.6.4
+            ${_logview_xz_exclude}
+        )
+        FetchContent_MakeAvailable(xz)
+        set(LIBLZMA_INCLUDE_DIR "${xz_SOURCE_DIR}/src/liblzma/api" CACHE PATH "" FORCE)
+        set(LIBLZMA_LIBRARY liblzma CACHE STRING "" FORCE)
+        set(LIBLZMA_LIBRARY_RELEASE liblzma CACHE STRING "" FORCE)
+        # FindLibLZMA probes the library file for these symbols, which cannot
+        # work against a CMake target name. They are known to be present.
+        foreach(_v LIBLZMA_HAS_AUTO_DECODER LIBLZMA_HAS_EASY_ENCODER LIBLZMA_HAS_LZMA_PRESET)
+            set(${_v} TRUE CACHE INTERNAL "" FORCE)
+        endforeach()
     endif()
     FetchContent_Declare(
         libarchive
@@ -57,6 +82,10 @@ if(NOT LibArchive_FOUND)
         set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
     endif()
     FetchContent_MakeAvailable(libarchive)
+    if(WIN32)
+        # liblzma is linked statically; skip __declspec(dllimport) on its API.
+        target_compile_definitions(archive_static PRIVATE LZMA_API_STATIC)
+    endif()
     set(LOGVIEW_LIBARCHIVE_TARGET archive_static)
     set(LOGVIEW_LIBARCHIVE_STATIC TRUE)
 else()
@@ -209,4 +238,14 @@ endif()
 # unsigned, symbol-laden cross-compiled .exe tends to trigger.
 if(MINGW)
     target_link_options(${projectName} PRIVATE $<$<CONFIG:Release>:-s>)
+endif()
+
+# ---------------------------------------------------------------------------
+# Unit tests: `cmake --build <dir> --target LogViewTests`, then `ctest` (add
+# `-C Release` with multi-config generators such as MSVC).
+# ---------------------------------------------------------------------------
+option(LOGVIEW_BUILD_TESTS "Build the LogViewTests unit test target" ON)
+if(LOGVIEW_BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
 endif()

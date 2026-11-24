@@ -27,6 +27,12 @@ jobs:
     - name: Build
       run: cmake --build build --config Release
 
+    - name: Build and run unit tests
+      shell: pwsh
+      run: |
+        cmake --build build --config Release --target LogViewTests
+        ctest --test-dir build -C Release --output-on-failure
+
     - name: Verify binary
       shell: pwsh
       run: |
