@@ -3,7 +3,9 @@
 # libarchive (zlib + liblzma) on Windows.
 find_package(Qt6 6.6 REQUIRED COMPONENTS Test)
 
-add_executable(LogViewTests
+# EXCLUDE_FROM_ALL: regular and release builds skip the tests; build them with
+# `--target LogViewTests` (see test.sh and the build workflows).
+add_executable(LogViewTests EXCLUDE_FROM_ALL
     ArchiveFormatsTest.cpp
     ${CMAKE_SOURCE_DIR}/src/archive/ArchiveCatalog.cpp
     ${CMAKE_SOURCE_DIR}/src/archive/ArchiveCommon.cpp
